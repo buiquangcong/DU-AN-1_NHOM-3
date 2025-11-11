@@ -1,84 +1,116 @@
 <?php
-// File: /controllers/TourController.php
-// (Nằm ở thư mục /controllers/ gốc, không phải trong /admin/)
-
-// (SỬA 1) Sửa đường dẫn:
-// Vì file này nằm trong /controllers/, chúng ta cần đi lùi 1 cấp (../)
-// để thấy thư mục /models/ và /views/
-require_once './models/Tour.php';
-
+// File: /d:/laragon/www/DU-AN-1_NHOM-3/controllers/TourController.php
 class TourController
 {
-    // ==================================================
-    // CÁC HÀM CHO KHÁCH HÀNG (PUBLIC)
-    // ==================================================
+    protected string $viewsPath;
+    protected string $modelsPath;
 
-    /**
-     * Action: Hiển thị trang chủ cho khách hàng
-     * Route: /
-     */
-    public function trangChu()
+    public function __construct()
     {
-        $tourModel = new Tour();
-        $dsTourNoiBat = $tourModel->getTourNoiBat(); // Lấy 6 tour nổi bật
-
-        // (SỬA 2) Sửa đường dẫn View
-        require_once './views/public/header.php';
-        require_once './views/public/trangchu.php'; // View này sẽ dùng $dsTourNoiBat
-        require_once './views/public/footer.php';
+        // thư mục project root
+        $root = dirname(__DIR__);
+        $this->viewsPath = $root . '/views';
+        $this->modelsPath = $root . '/models';
     }
 
     /**
-     * Action: Hiển thị trang chi tiết tour
-     * Route: /tour-chi-tiet
+     * Render view: sẽ include header/footer nếu tồn tại
+     * $view là đường dẫn relative tới thư mục views, ví dụ: 'client/trangchu.php'
      */
-    public function chiTietTour()
+    protected function render(string $view, array $data = []): void
     {
-        // 1. Lấy ID từ URL (ví dụ: ?act=tour-chi-tiet&id=5)
-        $id = $_GET['id'] ?? 0;
+        extract($data);
+        $header = $this->viewsPath . '/client/header.php';
+        $footer = $this->viewsPath . '/client/footer.php';
+        $viewFile = $this->viewsPath . '/' . ltrim($view, '/');
 
-        // 2. Gọi Model
-        $tourModel = new Tour();
-        $tour = $tourModel->getTourById($id);
-
-        // 3. Tải View
-        // (SỬA 2) Sửa đường dẫn View
-        require_once './views/public/header.php';
-        require_once './views/public/chitiet.php'; // (Tôi bỏ comment file này cho bạn)
-        require_once './views/public/footer.php';
+        if (file_exists($header)) include $header;
+        if (file_exists($viewFile)) {
+            include $viewFile;
+        } else {
+            // fallback nếu view không tồn tại
+            http_response_code(500);
+            echo '<h2>View not found: ' . htmlspecialchars($view) . '</h2>';
+            if (!empty($data)) {
+                echo '<pre>' . htmlspecialchars(print_r($data, true)) . '</pre>';
+            }
+        }
+        if (file_exists($footer)) include $footer;
     }
 
-    /**
-     * (THÊM MỚI) Thêm hàm này để xử lý route 'gioi-thieu'
-     * trong file index.php của bạn
-     */
-    public function trangGioiThieu()
+    protected function loadModel(string $modelName): void
     {
-        // Trang này chỉ cần tải view, không cần model
-        require_once './views/public/header.php';
-        require_once './views/public/gioithieu.php';
-        require_once './views/public/footer.php';
+        $path = $this->modelsPath . '/' . $modelName . '.php';
+        if (file_exists($path)) {
+            require_once $path;
+        }
     }
 
-    /**
-     * (THÊM MỚI) Thêm hàm này để xử lý route 'default' (lỗi 404)
-     * trong file index.php của bạn
-     */
-    public function e404()
+    // Trang chủ: hiển thị danh sách tour (nếu có model Tour)
+    public function trangChu(): void
     {
-        require_once './views/public/header.php';
-        // (Bạn có thể tạo file e404.php hoặc chỉ echo)
-        echo '<h1 style="text-align: center; margin: 50px;">404 - Trang không tìm thấy</h1>';
-        require_once './views/public/footer.php';
+        $this->loadModel('Tour');
+        $tours = [];
+
+        if (class_exists('Tour')) {
+            // hỗ trợ vài tên hàm phổ biến trong model
+            if (method_exists('Tour', 'getAll')) {
+                $tours = Tour::getAll();
+            } elseif (method_exists('Tour', 'all')) {
+                $tours = Tour::all();
+            } elseif (method_exists('Tour', 'index')) {
+                $tours = Tour::index();
+            }
+        }
+
+        $this->render('client/trangchu.php', ['tours' => $tours]);
     }
 
+    // Chi tiết tour: expects ?id=... or ?ma_tour=...
+    public function chiTietTour(): void
+    {
+        $id = $_GET['id'] ?? $_GET['ma_tour'] ?? null;
+        if (!$id) {
+            $this->e404();
+            return;
+        }
 
-    // ==================================================
-    // CÁC HÀM CHO ADMIN
-    // (ĐÃ XÓA TOÀN BỘ)
-    // ==================================================
+        $this->loadModel('Tour');
+        $tour = null;
 
-    // (Đã xóa các hàm: adminDashboard, adminDanhSachTour, 
-    // adminThemTour, adminLuuThemTour, adminSuaTour, 
-    // adminCapNhatTour, adminXoaTour)
+        if (class_exists('Tour')) {
+            if (method_exists('Tour', 'find')) {
+                $tour = Tour::find($id);
+            } elseif (method_exists('Tour', 'getById')) {
+                $tour = Tour::getById($id);
+            } elseif (method_exists('Tour', 'detail')) {
+                $tour = Tour::detail($id);
+            }
+        }
+
+        if (!$tour) {
+            $this->e404();
+            return;
+        }
+
+        $this->render('client/tour_chi_tiet.php', ['tour' => $tour]);
+    }
+
+    // Trang giới thiệu tĩnh
+    public function trangGioiThieu(): void
+    {
+        $this->render('client/gioi_thieu.php');
+    }
+
+    // 404
+    public function e404(): void
+    {
+        http_response_code(404);
+        if (file_exists($this->viewsPath . '/client/404.php')) {
+            $this->render('client/404.php');
+            return;
+        }
+        echo '<h1>404 - Không tìm thấy trang</h1>';
+        echo '<p>Trang bạn yêu cầu không tồn tại.</p>';
+    }
 }

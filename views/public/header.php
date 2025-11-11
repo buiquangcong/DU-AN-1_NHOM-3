@@ -76,16 +76,16 @@
                         <a class="nav-link active" href="index.php">Trang Chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="./gioithieu.php">Giới Thiệu</a>
+                        <a class="nav-link" href="gioi-thieu.php">Giới Thiệu</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Tour Trong Nước</a>
+                        <a class="nav-link" href="Tour-trong-nuoc.php">Tour Trong Nước</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Tour Nước Ngoài</a>
+                        <a class="nav-link" href="Tour-nuoc-ngoai.php">Tour Nước Ngoài</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Tin Tức</a>
+                        <a class="nav-link" href="tin-tuc.php">Tin Tức</a>
                     </li>
                 </ul>
 
