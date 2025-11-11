@@ -13,7 +13,7 @@
     <style>
         .hero-banner {
             height: 500px;
-            background: url('https://nhanhtravel.vn/files/slider/113/slider-1.jpg') no-repeat center center;
+            background: url('./img/tambo.jpg') no-repeat center center;
             background-size: cover;
         }
 
@@ -59,10 +59,13 @@
 
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold fs-4" href="index.php">
-                <i class="bi bi-feather"></i> Bee Green
-            </a>
 
+            <a class="navbar-brand fw-bold fs-4 d-flex align-items-center" href="index.php" style="margin-left: -15px;">
+                <img src="./img/Logo1.png" alt="Bee Green Logo"
+                    style="height: 100px; margin-top: -25px; margin-bottom: -25px;"
+                    class="me-2">
+                Bee Green
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -73,7 +76,7 @@
                         <a class="nav-link active" href="index.php">Trang Chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Giới Thiệu</a>
+                        <a class="nav-link" href="./gioithieu.php">Giới Thiệu</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Tour Trong Nước</a>
@@ -95,4 +98,18 @@
         </div>
     </nav>
 
+    </nav>
+
+    <header class="hero-banner position-relative">
+
+        <div class="overlay position-absolute top-0 start-0 w-100 h-100"></div>
+
+        <div class="container h-100 d-flex align-items-center position-relative">
+            <h1 class="text-white display-4 fw-bold">Khám phá Việt Nam</h1>
+        </div>
+    </header>
     <main>
+    </main>
+</body>
+
+</html>

@@ -1,6 +1,5 @@
 <?php
-// Giả định controller đã include file header_public.php
-// và đã chuẩn bị 1 biến mảng $dsTourNoiBat
+
 ?>
 
 <div class="p-5 mb-4 bg-light rounded-3">
@@ -20,7 +19,7 @@
 
     <div class="col">
         <div class="card h-100 shadow-sm">
-            <img src="https://example.com/image-danang.jpg" class="card-img-top" alt="Đà Nẵng">
+            <img src="./img/danang.jpg" class="card-img-top" alt="Đà Nẵng">
             <div class="card-body">
                 <h5 class="card-title">Khám Phá Đà Nẵng - Hội An</h5>
                 <p class="card-text text-muted"><i class="bi bi-clock"></i> 3N2Đ</p>
@@ -34,7 +33,7 @@
 
     <div class="col">
         <div class="card h-100 shadow-sm">
-            <img src="https://example.com/image-hanquoc.jpg" class="card-img-top" alt="Hàn Quốc">
+            <img src="./img/hanquoc.png" class="card-img-top" alt="Hàn Quốc">
             <div class="card-body">
                 <h5 class="card-title">Du Lịch Mùa Thu Hàn Quốc</h5>
                 <p class="card-text text-muted"><i class="bi bi-clock"></i> 5N4Đ</p>
@@ -48,7 +47,7 @@
 
     <div class="col">
         <div class="card h-100 shadow-sm">
-            <img src="https://example.com/image-mientay.jpg" class="card-img-top" alt="Miền Tây">
+            <img src="./img/mientay.jpg" class="card-img-top" alt="Miền Tây">
             <div class="card-body">
                 <h5 class="card-title">Miền Tây Sông Nước</h5>
                 <p class="card-text text-muted"><i class="bi bi-clock"></i> 2N1Đ</p>

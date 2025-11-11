@@ -4,7 +4,7 @@
         <p class="float-end mb-1">
             <a href="#">Về đầu trang</a>
         </p>
-        <p class="mb-1">&copy; 2025 Công Ty Du Lịch DuLichViet</p>
+        <p class="mb-1">&copy; 2025 Công Ty Du Lịch Bee Green</p>
     </div>
 </footer>
 
