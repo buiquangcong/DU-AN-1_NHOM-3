@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 // File: /admin/controllers/AdminTourController.php
 
 /**
@@ -60,4 +60,4 @@ class AdminTourController
         require_once $VIEW_PATH . '/footer.php';
     }
 }
-?>
+?> -->

@@ -1,21 +1,6 @@
 <?php
-// File: /admin/models/AdminTour.php
+$PROJECT_ROOT_PATH = dirname(__DIR__, 2); 
 
-/**
- * (SỬA LỖI 1) Require file Pdo.php
- * File Model này cần file 'pdo.php' để kết nối DB.
- * Giả sử file 'pdo.php' nằm ở thư mục gốc: /models/pdo.php
- *
- * __DIR__ là '.../admin/models'
- * Đi lùi 2 cấp (../..) về gốc, rồi vào 'models/pdo.php'
- */
-$PROJECT_ROOT_PATH = dirname(__DIR__, 2); // Lấy thư mục gốc (lùi 2 cấp)
-
-/**
- * (SỬA LỖI 2) Khai báo Class
- * Tên class phải khớp với tên file và khớp với
- * tên gọi trong Controller (new AdminTour())
- */
 class AdminTour
 {
     /**

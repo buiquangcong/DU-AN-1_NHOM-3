@@ -99,9 +99,9 @@ class AdmindanhmucController {
     public function danhsachDanhMuc() {
         $listdanhmuc = $this->modelDanhmuc->getAllDanhMuc();
         
-    require_once __DIR__ . '/../views/header.php';          // Load header/sidebar
+    require_once __DIR__ . '/../views/layout/header.php';          // Load header/sidebar
     require_once __DIR__ . '/../views/danhmuc/listdanhmuc.php'; // Nội dung chính
-    require_once __DIR__ . '/../views/footer.php';          // Load footer
+    require_once __DIR__ . '/../views/layout/footer.php';          // Load footer
         
     }
 
@@ -124,9 +124,9 @@ class AdmindanhmucController {
         }
 
         // Chỉ include view form thêm
-        require_once __DIR__ . '/../views/header.php';    
+        require_once __DIR__ . '/../views/layout/header.php';    
         require_once __DIR__ . '/../views/danhmuc/adddanhmuc.php';
-        require_once __DIR__ . '/../views/footer.php';   
+        require_once __DIR__ . '/../views/layout/footer.php';   
         
     }
 
@@ -145,9 +145,9 @@ class AdmindanhmucController {
         }
 
         $error = [];
-        require_once __DIR__ . '/../views/header.php';    
+        require_once __DIR__ . '/../views/layout/header.php';    
         require_once __DIR__ . '/../views/danhmuc/editdanhmuc.php';
-        require_once __DIR__ . '/../views/footer.php';   
+        require_once __DIR__ . '/../views/layout/footer.php';   
     }
 
     // Sửa danh mục
@@ -174,9 +174,9 @@ class AdmindanhmucController {
             }
         }
 
-        require_once __DIR__ . '/../views/header.php';    
+        require_once __DIR__ . '/../views/layout/header.php';    
         require_once __DIR__ . '/../views/danhmuc/editdanhmuc.php';
-        require_once __DIR__ . '/../views/footer.php';   
+        require_once __DIR__ . '/../views/layout/footer.php';   
     }
 
     // Xóa danh mục
