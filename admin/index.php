@@ -3,16 +3,20 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// =======================
 
+// ===================== START SESSION =====================
 session_start();
 
+// ===================== PATH =====================
 $PROJECT_ROOT_PATH = dirname(__DIR__);
 
+// ===================== REQUIRE COMMONS =====================
 require_once $PROJECT_ROOT_PATH . '/commons/env.php';
 require_once $PROJECT_ROOT_PATH . '/commons/function.php';
 
-// ================== REQUIRE TOUR ==================
+// ===================== REQUIRE CONTROLLERS & MODELS =====================
+
+// TOUR
 require_once __DIR__ . '/controllers/AdminTourController.php';
 require_once __DIR__ . '/models/AdminTour.php';
 require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
@@ -22,21 +26,18 @@ require_once './models/AdminTaiKhoan.php';
 require_once './controllers/AdminTaiKhoanController.php';
 
 
-// ================== REQUIRE DANH MỤC ==================
+// DANH MỤC
 require_once __DIR__ . '/controllers/AdmindanhmucController.php';
 require_once __DIR__ . '/models/AdminDanhMuc.php';
 
-$act = $_GET['act'] ?? '/';
+$act = $_GET['act'] ?? 'dashboard';
 
 match ($act) {
     // --- TOUR ---
-    '/'     => (new AdminTourController())->dashboard(),
-    'list-tours'      => (new AdminQuanLyTourController())->danhSachSanPham(),
-    'add-tour'        => (new AdminQuanLyTourController())->formAddSanPham(),
-    'save-add-tour'   => (new AdminQuanLyTourController())->postAddSanPham(),
-    'edit-tour'       => (new AdminQuanLyTourController())->formEditSanPham($_GET['id'] ?? 0),
-    'save-edit-tour'  => (new AdminQuanLyTourController())->postEditSanPham(),
-    'delete-tour'     => (new AdminQuanLyTourController())->deleteSanPham($_GET['id'] ?? 0),
+    'dashboard'     => (new AdminTourController())->dashboard(),
+    'list-tours'    => (new AdminTourController())->listTours(),
+    'add-tour'      => (new AdminTourController())->showAddForm(),
+    'save-add-tour' => (new AdminTourController())->saveAdd(),
 
     // --- DANH MỤC ---
     'list-danhmuc'      => (new AdmindanhmucController())->danhsachDanhMuc(),
