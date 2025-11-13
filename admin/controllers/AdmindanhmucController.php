@@ -102,7 +102,7 @@ class AdmindanhmucController
     {
         $listdanhmuc = $this->modelDanhmuc->getAllDanhMuc();
 
-        require_once __DIR__ . '/../views/header.php';          // Load header/sidebar
+        require_once __DIR__ . '/../views/layout/header.php';          // Load header/sidebar
         require_once __DIR__ . '/../views/danhmuc/listdanhmuc.php'; // Nội dung chính
         require_once __DIR__ . '/../views/layout/footer.php';          // Load footer
 
