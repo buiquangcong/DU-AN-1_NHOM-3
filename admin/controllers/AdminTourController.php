@@ -54,9 +54,8 @@ class AdminTourController
 
     public function dashboard()
     {
-        $VIEW_PATH = dirname(__DIR__) . '/views';
-        require_once $VIEW_PATH . '/layout/header.php';
-        require_once $VIEW_PATH . '/layout/dashboard.php';
-        require_once $VIEW_PATH . '/layout/footer.php';
+        require_once './views/layout/header.php';
+        require_once './views/dashboard.php';
+        require_once './views/layout/footer.php';
     }
 }

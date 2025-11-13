@@ -38,27 +38,56 @@
     <div class="wrapper">
         <nav class="sidebar d-flex flex-column p-3 text-white">
             <a href="#" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                <span class="fs-4">Admin Panel</span>
+                <span class="fs-4">Xin Chào: <strong><?= $_SESSION['user_admin']['ho_ten'] ?></strong></span>
             </a>
             <hr>
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="#" class="nav-link text-white">
+                    <a href="<?= BASE_URL_ADMIN . '?act=dashboard'  ?>" class="nav-link active" aria-current="page">
                         <i class="bi bi-speedometer2 me-2"></i> Tổng Quan
                     </a>
                 </li>
+                <ul class="nav nav-pills flex-column mb-auto">
+
+                    <li class="nav-item">
+                        <a href="#tourSubMenu" data-bs-toggle="collapse" class="nav-link text-white" aria-expanded="false">
+                            <i class="bi bi-map me-2"></i> Quản Lý Tour
+                            <i class="bi bi-chevron-down ms-auto float-end" style="font-size: 0.8rem;"></i>
+                        </a>
+
+                        <div class="collapse" id="tourSubMenu">
+                            <ul class="nav nav-pills flex-column">
+
+                                <li class="nav-item">
+                                    <a href="<?= BASE_URL_ADMIN . '?act=tour-trong-nuoc' ?>" class="nav-link text-white ps-4">
+                                        <i class="bi bi-dot me-2"></i> Tour Trong Nước
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a href="<?= BASE_URL_ADMIN . '?act=tour-nuoc-ngoai' ?>" class="nav-link text-white ps-4">
+                                        <i class="bi bi-dot me-2"></i> Tour Nước Ngoài
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a href="<?= BASE_URL_ADMIN . '?act=tour-nuoc-ngoai' ?>" class="nav-link text-white ps-4">
+                                        <i class="bi bi-dot me-2"></i> Tour Theo Yêu Cầu
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </li>
+
+                </ul>
                 <li>
-                    <a href="#" class="nav-link active" aria-current="page">
-                        <i class="bi bi-map me-2"></i> Quản Lý Tour
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="nav-link text-white">
+                    <a href="<?= BASE_URL_ADMIN . '?act=quan-ly-booking'  ?>" class="nav-link text-white">
                         <i class="bi bi-book me-2"></i> Quản Lý Booking
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link text-white">
+                    <a href="<?= BASE_URL_ADMIN . '?act=khach-hang'  ?>" class="nav-link text-white">
                         <i class="bi bi-people me-2"></i> Khách Hàng
                     </a>
                 </li>
@@ -67,14 +96,14 @@
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-person-circle me-2"></i>
-                    <strong>Chào, Admin!</strong>
+                    Xin Chào: <strong><?= $_SESSION['user_admin']['ho_ten'] ?></strong>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
                     <li><a class="dropdown-item" href="#">Cài Đặt</a></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="#">Đăng Xuất</a></li>
+                    <li><a class="dropdown-item" href="<?= BASE_URL_ADMIN . '?act=logout-admin' ?>">Đăng Xuất</a></li>
                 </ul>
             </div>
         </nav>

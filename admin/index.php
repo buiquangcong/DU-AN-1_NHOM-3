@@ -15,6 +15,10 @@ require_once $PROJECT_ROOT_PATH . '/commons/function.php';
 // ================== REQUIRE TOUR ==================
 require_once __DIR__ . '/controllers/AdminTourController.php';
 require_once __DIR__ . '/models/AdminTour.php';
+// ================== REQUIRE TÀI KHOẢN ==================
+require_once './models/AdminTaiKhoan.php';
+require_once './controllers/AdminTaiKhoanController.php';
+
 
 // ================== REQUIRE DANH MỤC ==================
 require_once __DIR__ . '/controllers/AdmindanhmucController.php';
@@ -36,7 +40,17 @@ match ($act) {
     'edit-danhmuc'      => (new AdmindanhmucController())->formEditDanhMuc($_GET['id']),
     'post-edit-danhmuc' => (new AdmindanhmucController())->postEditDanhMuc(),
     'delete-danhmuc'    => (new AdmindanhmucController())->deleteDanhMuc($_GET['id']),
-    
+
+    // 1. Đăng nhập - Đăng xuất
+    'login-admin'       => (new AdminTaiKhoanController())->formLogin(),
+    'check-login-admin' => (new AdminTaiKhoanController())->login(),
+    'logout-admin'      => (new AdminTaiKhoanController())->logout(),
+    'signup-admin'      => (new AdminTaiKhoanController())->formSignup(),
+    'post-signup-admin' => (new AdminTaiKhoanController())->postSignup(),
+
+    // 2. Quản lý tài khoản
+    'list-tai-khoan'    => (new AdminTaiKhoanController())->danhSachTaiKhoan(),
+    'add-tai-khoan'     => (new AdminTaiKhoanController())->postAddAdmin(),
+
     default => (new AdminTourController())->dashboard(),
 };
-?>
