@@ -47,6 +47,11 @@
                         <i class="bi bi-speedometer2 me-2"></i> Tổng Quan
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="<?= BASE_URL_ADMIN . '?act=list-danhmuc' ?>" class="nav-link text-white" aria-current="page">
+                        <i class="bi bi-speedometer2 me-2"></i> Danh Mục Tour
+                    </a>
+                </li>
                 <ul class="nav nav-pills flex-column mb-auto">
 
                     <li class="nav-item">
@@ -57,6 +62,12 @@
 
                         <div class="collapse" id="tourSubMenu">
                             <ul class="nav nav-pills flex-column">
+
+                                <li class="nav-item">
+                                    <a href="<?= BASE_URL_ADMIN . '?act=list-tours' ?>" class="nav-link text-white ps-4">
+                                        <i class="bi bi-dot me-2"></i> Tour Trong Nước
+                                    </a>
+                                </li>
 
                                 <li class="nav-item">
                                     <a href="<?= BASE_URL_ADMIN . '?act=tour-trong-nuoc' ?>" class="nav-link text-white ps-4">

@@ -15,6 +15,8 @@ require_once $PROJECT_ROOT_PATH . '/commons/function.php';
 // ================== REQUIRE TOUR ==================
 require_once __DIR__ . '/controllers/AdminTourController.php';
 require_once __DIR__ . '/models/AdminTour.php';
+require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
+require_once __DIR__ . '/models/AdminQuanLyTour.php';
 // ================== REQUIRE TÀI KHOẢN ==================
 require_once './models/AdminTaiKhoan.php';
 require_once './controllers/AdminTaiKhoanController.php';
@@ -24,14 +26,17 @@ require_once './controllers/AdminTaiKhoanController.php';
 require_once __DIR__ . '/controllers/AdmindanhmucController.php';
 require_once __DIR__ . '/models/AdminDanhMuc.php';
 
-$act = $_GET['act'] ?? 'dashboard';
+$act = $_GET['act'] ?? '/';
 
 match ($act) {
     // --- TOUR ---
-    'dashboard'     => (new AdminTourController())->dashboard(),
-    'list-tours'    => (new AdminTourController())->listTours(),
-    'add-tour'      => (new AdminTourController())->showAddForm(),
-    'save-add-tour' => (new AdminTourController())->saveAdd(),
+    '/'     => (new AdminTourController())->dashboard(),
+    'list-tours'      => (new AdminQuanLyTourController())->danhSachSanPham(),
+    'add-tour'        => (new AdminQuanLyTourController())->formAddSanPham(),
+    'save-add-tour'   => (new AdminQuanLyTourController())->postAddSanPham(),
+    'edit-tour'       => (new AdminQuanLyTourController())->formEditSanPham($_GET['id'] ?? 0),
+    'save-edit-tour'  => (new AdminQuanLyTourController())->postEditSanPham(),
+    'delete-tour'     => (new AdminQuanLyTourController())->deleteSanPham($_GET['id'] ?? 0),
 
     // --- DANH MỤC ---
     'list-danhmuc'      => (new AdmindanhmucController())->danhsachDanhMuc(),
