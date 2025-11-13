@@ -1,12 +1,15 @@
 <?php
-class NhaCungCap
+class AdminNhaCungCap
 {
     private $db;
     private $table = "nha_cung_cap";
 
-    public function __construct($db)
+    // --- SỬA LỖI TẠI ĐÂY ---
+    // 1. Bỏ tham số $db trong ngoặc
+    // 2. Gọi hàm connectDB() để lấy kết nối
+    public function __construct()
     {
-        $this->db = $db;
+        $this->db = connectDB();
     }
 
     // Lấy tất cả nhà cung cấp

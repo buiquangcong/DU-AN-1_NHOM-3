@@ -5,9 +5,12 @@ class AdminQuanLyNhaCungCapController
 {
     private $model;
 
-    public function __construct($db)
+    // --- SỬA LỖI TẠI ĐÂY ---
+    // Xóa tham số $db để khớp với index.php
+    public function __construct()
     {
-        $this->model = new NhaCungCap($db);
+        // Khởi tạo Model (Lưu ý: File Model AdminNhaCungCap cũng phải sửa để không nhận tham số)
+        $this->model = new AdminNhaCungCap();
     }
 
     // ====== Danh sách nhà cung cấp ======
@@ -25,15 +28,18 @@ class AdminQuanLyNhaCungCapController
         $error = [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
-                'ten_nha_cc'   => trim($_POST['ten_nha_cc']),
-                'dia_chi'      => trim($_POST['dia_chi']),
-                'email'        => trim($_POST['email']),
-                'so_dien_thoai' => trim($_POST['so_dien_thoai'])
+                'ten_nha_cc'    => trim($_POST['ten_nha_cc'] ?? ''),
+                'dia_chi'       => trim($_POST['dia_chi'] ?? ''),
+                'email'         => trim($_POST['email'] ?? ''),
+                'so_dien_thoai' => trim($_POST['so_dien_thoai'] ?? '')
             ];
 
             if (empty($data['ten_nha_cc'])) $error['ten_nha_cc'] = "Tên nhà cung cấp không được để trống";
             if (empty($data['dia_chi'])) $error['dia_chi'] = "Địa chỉ không được để trống";
-            if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $error['email'] = "Email không hợp lệ";
+            // Validate email chỉ khi người dùng có nhập
+            if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $error['email'] = "Email không hợp lệ";
+            }
             if (empty($data['so_dien_thoai'])) $error['so_dien_thoai'] = "Số điện thoại không được để trống";
 
             if (empty($error)) {
@@ -67,15 +73,17 @@ class AdminQuanLyNhaCungCapController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
-                'ten_nha_cc'   => trim($_POST['ten_nha_cc']),
-                'dia_chi'      => trim($_POST['dia_chi']),
-                'email'        => trim($_POST['email']),
-                'so_dien_thoai' => trim($_POST['so_dien_thoai'])
+                'ten_nha_cc'    => trim($_POST['ten_nha_cc'] ?? ''),
+                'dia_chi'       => trim($_POST['dia_chi'] ?? ''),
+                'email'         => trim($_POST['email'] ?? ''),
+                'so_dien_thoai' => trim($_POST['so_dien_thoai'] ?? '')
             ];
 
             if (empty($data['ten_nha_cc'])) $error['ten_nha_cc'] = "Tên nhà cung cấp không được để trống";
             if (empty($data['dia_chi'])) $error['dia_chi'] = "Địa chỉ không được để trống";
-            if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $error['email'] = "Email không hợp lệ";
+            if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $error['email'] = "Email không hợp lệ";
+            }
             if (empty($data['so_dien_thoai'])) $error['so_dien_thoai'] = "Số điện thoại không được để trống";
 
             if (empty($error)) {

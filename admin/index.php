@@ -22,6 +22,7 @@ require_once __DIR__ . '/models/AdminTour.php';
 require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
 require_once __DIR__ . '/models/AdminQuanLyTour.php';
 
+
 require_once __DIR__ . '/controllers/AdminQuanLyNhanSuController.php';
 require_once __DIR__ . '/models/AdminQuanLyNhanSu.php';
 require_once __DIR__ . '/controllers/AdminQuanLyNhaCungCapController.php';
@@ -39,10 +40,14 @@ $act = $_GET['act'] ?? 'dashboard';
 
 match ($act) {
     // --- TOUR ---
-    'dashboard'     => (new AdminTourController())->dashboard(),
-    'list-tours'    => (new AdminTourController())->listTours(),
-    'add-tour'      => (new AdminTourController())->showAddForm(),
-    'save-add-tour' => (new AdminTourController())->saveAdd(),
+    '/'     => (new AdminTourController())->dashboard(),
+    'list-tours'      => (new AdminQuanLyTourController())->danhSachSanPham(),
+    'add-tour'        => (new AdminQuanLyTourController())->formAddSanPham(),
+    'save-add-tour'   => (new AdminQuanLyTourController())->postAddSanPham(),
+    'edit-tour'       => (new AdminQuanLyTourController())->formEditSanPham($_GET['id'] ?? 0),
+    'save-edit-tour'  => (new AdminQuanLyTourController())->postEditSanPham(),
+    'delete-tour'     => (new AdminQuanLyTourController())->deleteSanPham($_GET['id'] ?? 0),
+
 
     // --- DANH MỤC ---
     'list-danhmuc'      => (new AdmindanhmucController())->danhsachDanhMuc(),

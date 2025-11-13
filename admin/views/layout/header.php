@@ -102,6 +102,11 @@
                         <i class="bi bi-people me-2"></i> Nhân Sự
                     </a>
                 </li>
+                <li>
+                    <a href="<?= BASE_URL_ADMIN . '?act=list-nhacungcap'  ?>" class="nav-link text-white">
+                        <i class="bi bi-truck me-2"></i> Nhà Cung Cấp
+                    </a>
+                </li>
             </ul>
             <hr>
             <div class="dropdown">
