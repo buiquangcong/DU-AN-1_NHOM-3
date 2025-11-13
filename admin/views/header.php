@@ -7,6 +7,7 @@
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
         /* CSS tối thiểu để giữ sidebar cố định */
         body {
@@ -48,7 +49,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="nav-link active" aria-current="page">
+                    <a href="index.php?act=list-danhmuc" class="nav-link active" aria-current="page">
                         <i class="bi bi-map me-2"></i> Quản Lý Tour
                     </a>
                 </li>
@@ -79,4 +80,4 @@
             </div>
         </nav>
 
-        <main class="main-content p-4"></main>
+        <main class="main-content p-4">
