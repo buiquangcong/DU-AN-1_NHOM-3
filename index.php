@@ -5,6 +5,7 @@ session_start();
 // === 1. TẢI FILE CONTROLLER ===
 // Dựa trên cấu trúc của bạn, chúng ta tải các Controller ở thư mục /controllers/
 require_once './controllers/TourController.php';
+require_once './controllers/CategoryController.php';
 
 // (!!) Ghi chú: Khi nào bạn tạo thêm các Controller khác (như User, Booking)
 // trong thư mục /controllers/, bạn hãy thêm chúng vào đây.
