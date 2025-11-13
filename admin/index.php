@@ -21,6 +21,11 @@ require_once __DIR__ . '/controllers/AdminTourController.php';
 require_once __DIR__ . '/models/AdminTour.php';
 require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
 require_once __DIR__ . '/models/AdminQuanLyTour.php';
+
+require_once __DIR__ . '/controllers/AdminQuanLyNhanSuController.php';
+require_once __DIR__ . '/models/AdminQuanLyNhanSu.php';
+require_once __DIR__ . '/controllers/AdminQuanLyNhaCungCapController.php';
+require_once __DIR__ . '/models/AdminNhaCungCap.php';
 // ================== REQUIRE TÀI KHOẢN ==================
 require_once './models/AdminTaiKhoan.php';
 require_once './controllers/AdminTaiKhoanController.php';
@@ -49,22 +54,21 @@ match ($act) {
 
 
     // ===== NHÂN SỰ =====
-    'list-nhansu'     => $nhansuController->index(),
-    'add-nhansu'      => $nhansuController->add(),       // Hiển thị form
-    'post-add-nhansu' => $nhansuController->add(),       // Xử lý khi submit form
-    'edit-nhansu'     => $nhansuController->edit(),
-    'post-edit-nhansu' => $nhansuController->postEditNhanSu(),
-    'delete-nhansu'   => $nhansuController->delete(),
-    'detail-nhansu'   => $nhansuController->detail(),
+    'list-nhansu'     => (new AdminQuanLyNhanSuController())->index(),
+    'add-nhansu'      => (new AdminQuanLyNhanSuController())->add(),       // Hiển thị form
+    'post-add-nhansu' => (new AdminQuanLyNhanSuController())->add(),       // Xử lý khi submit form
+    'edit-nhansu'     => (new AdminQuanLyNhanSuController())->edit(),
+    'post-edit-nhansu' => (new AdminQuanLyNhanSuController())->postEditNhanSu(),
+    'delete-nhansu'   => (new AdminQuanLyNhanSuController())->delete(),
+    'detail-nhansu'   => (new AdminQuanLyNhanSuController())->detail(),
 
     // ===== NHÀ CUNG CẤP =====
-    'list-nhacungcap'   => $nccController->index(),
-    'add-nhacungcap'    => $nccController->add(),
-    'edit-nhacungcap'   => $nccController->edit(),
-    'post-edit-nhacungcap' => $nccController->edit(),
-    'delete-nhacungcap' => $nccController->delete(),
-    'detail-nhacungcap' => $nccController->detail(),
-
+    'list-nhacungcap'   => (new AdminQuanLyNhaCungCapController())->index(),
+    'add-nhacungcap'    => (new AdminQuanLyNhaCungCapController())->add(),
+    'edit-nhacungcap'   => (new AdminQuanLyNhaCungCapController())->edit(),
+    'post-edit-nhacungcap' => (new AdminQuanLyNhaCungCapController())->edit(),
+    'delete-nhacungcap' => (new AdminQuanLyNhaCungCapController())->delete(),
+    'detail-nhacungcap' => (new AdminQuanLyNhaCungCapController())->detail(),
 
     // 1. Đăng nhập - Đăng xuất
     'login-admin'       => (new AdminTaiKhoanController())->formLogin(),

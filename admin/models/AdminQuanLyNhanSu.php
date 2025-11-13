@@ -1,5 +1,5 @@
 <?php
-class NhanSu
+class AdminQuanLyNhanSu
 {
     private $db;
     private $table = 'dm_nhan_su';

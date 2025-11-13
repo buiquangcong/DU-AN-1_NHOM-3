@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../models/NhaCungCap.php';
+require_once __DIR__ . '/../models/AdminNhaCungCap.php';
 
 class AdminQuanLyNhaCungCapController
 {
