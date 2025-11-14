@@ -38,7 +38,7 @@ class AdminTour
         // (Code SQL INSERT INTO dm_tours... sẽ ở đây)
         // $sql = "INSERT INTO dm_tours (TenTour, ID_LoaiTour, ...) VALUES (?, ?, ...)";
         // pdo_execute($sql, $tenTour, $idLoaiTour, ...);
-        
+
         // (Tạm thời trả về 1 để mô phỏng ID tour mới)
         return 1;
     }
@@ -56,5 +56,3 @@ class AdminTour
 
     // (Các hàm khác như getAllTours, getTourById... sẽ ở đây)
 }
-
-?>

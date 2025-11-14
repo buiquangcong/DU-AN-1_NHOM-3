@@ -1,4 +1,6 @@
 <?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
 // ===== HIỂN THỊ LỖI =====
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -21,7 +23,8 @@ require_once __DIR__ . '/controllers/AdminTourController.php';
 require_once __DIR__ . '/models/AdminTour.php';
 require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
 require_once __DIR__ . '/models/AdminQuanLyTour.php';
-
+require_once __DIR__ . '/controllers/AdminBookingController.php';
+require_once __DIR__ . '/models/AdminBookingModel.php';
 
 require_once __DIR__ . '/controllers/AdminQuanLyNhanSuController.php';
 require_once __DIR__ . '/models/AdminQuanLyNhanSu.php';
@@ -36,18 +39,17 @@ require_once './controllers/AdminTaiKhoanController.php';
 require_once __DIR__ . '/controllers/AdmindanhmucController.php';
 require_once __DIR__ . '/models/AdminDanhMuc.php';
 
-$act = $_GET['act'] ?? 'dashboard';
+$act = $_GET['act'] ?? 'login-admin';
 
 match ($act) {
     // --- TOUR ---
     '/'     => (new AdminTourController())->dashboard(),
-    'list-tours'      => (new AdminQuanLyTourController())->danhSachSanPham(),
-    'add-tour'        => (new AdminQuanLyTourController())->formAddSanPham(),
-    'save-add-tour'   => (new AdminQuanLyTourController())->postAddSanPham(),
-    'edit-tour'       => (new AdminQuanLyTourController())->formEditSanPham($_GET['id'] ?? 0),
-    'save-edit-tour'  => (new AdminQuanLyTourController())->postEditSanPham(),
-    'delete-tour'     => (new AdminQuanLyTourController())->deleteSanPham($_GET['id'] ?? 0),
-
+    'list-tours'      => (new AdminQuanLyTourController())->danhSachTour(),
+    'add-tour'        => (new AdminQuanLyTourController())->formAddTour(),
+    'save-add-tour'   => (new AdminQuanLyTourController())->postAddTour(),
+    'edit-tour'       => (new AdminQuanLyTourController())->formEditTour($_GET['id'] ?? 0),
+    'save-edit-tour'  => (new AdminQuanLyTourController())->postEditTour(),
+    'delete-tour'     => (new AdminQuanLyTourController())->deleteTour($_GET['id'] ?? 0),
 
     // --- DANH MỤC ---
     'list-danhmuc'      => (new AdmindanhmucController())->danhsachDanhMuc(),
@@ -75,6 +77,37 @@ match ($act) {
     'delete-nhacungcap' => (new AdminQuanLyNhaCungCapController())->delete(),
     'detail-nhacungcap' => (new AdminQuanLyNhaCungCapController())->detail(),
 
+
+    'manage-itinerary'      => (new AdminQuanLyTourController())->manageItinerary(),
+    'add-itinerary-item'    => (new AdminQuanLyTourController())->addItineraryItem(),
+    'delete-itinerary-item' => (new AdminQuanLyTourController())->deleteItineraryItem(),
+    'edit-itinerary-item'     => (new AdminQuanLyTourController())->formEditItineraryItem(),
+    'post-edit-itinerary-item' => (new AdminQuanLyTourController())->postEditItineraryItem(),
+
+    'manage-suppliers'      => (new AdminQuanLyTourController())->manageSuppliers(),
+    'link-supplier-to-tour' => (new AdminQuanLyTourController())->linkSupplierToTour(),
+    'unlink-supplier'       => (new AdminQuanLyTourController())->unlinkSupplier(),
+
+
+    // ... (Các route tour của bạn)
+    'unlink-supplier' => (new AdminQuanLyTourController())->unlinkSupplier(),
+
+    // ===============================================
+    // THÊM CÁC ROUTE BOOKING MỚI VÀO ĐÂY
+    // ===============================================
+    'quan-ly-booking' => (new AdminBookingController())->danhSachBooking(),
+    'manage-guests'   => (new AdminBookingController())->manageGuests(),
+    'add-guest'       => (new AdminBookingController())->addGuest(),
+    'delete-guest'    => (new AdminBookingController())->deleteGuest(),
+    'update-checkin'  => (new AdminBookingController())->updateCheckinStatus(),
+    'add-guest'       => (new AdminBookingController())->addGuest(),
+    'delete-guest'    => (new AdminBookingController())->deleteGuest(),
+    'bulk-update-checkin'  => (new AdminBookingController())->bulkUpdateCheckinStatus(),
+    'import-excel-guests' => (new AdminBookingController())->importExcelGuests(),
+    // ===============================================
+
+
+    // ===== TÀI KHOẢN ADMIN =====
     // 1. Đăng nhập - Đăng xuất
     'login-admin'       => (new AdminTaiKhoanController())->formLogin(),
     'check-login-admin' => (new AdminTaiKhoanController())->login(),

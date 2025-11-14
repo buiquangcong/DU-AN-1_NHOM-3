@@ -1,14 +1,12 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-center">Danh sách Tour du lịch</h2>
 
-    <!-- Thông báo thành công hoặc lỗi -->
     <?php if (!empty($_SESSION['success'])): ?>
         <div class="alert alert-success">
             <?= $_SESSION['success'];
             unset($_SESSION['success']); ?>
         </div>
     <?php endif; ?>
-
     <?php if (!empty($_SESSION['error'])): ?>
         <div class="alert alert-danger">
             <?php
@@ -20,12 +18,27 @@
         </div>
     <?php endif; ?>
 
-    <!-- Nút thêm tour -->
     <div class="mb-3 text-end">
         <a href="?act=add-tour" class="btn btn-primary">+ Thêm tour mới</a>
     </div>
 
-    <!-- Bảng danh sách tour -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form action="" method="GET" class="d-flex">
+                <input type="hidden" name="act" value="list-tours">
+
+                <input type="text" class="form-control me-2" name="search_id"
+                    placeholder="Nhập ID Tour (ví dụ: T-9011)"
+                    value="<?= htmlspecialchars($_GET['search_id'] ?? '') ?>">
+
+                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Tìm kiếm</button>
+
+                <?php if (!empty($_GET['search_id'])): ?>
+                    <a href="?act=list-tours" class="btn btn-outline-secondary ms-2">Hủy</a>
+                <?php endif; ?>
+            </form>
+        </div>
+    </div>
     <table class="table table-bordered table-hover align-middle">
         <thead class="table-dark text-center">
             <tr>
@@ -43,6 +56,7 @@
                 <th>Hành động</th>
             </tr>
         </thead>
+
         <tbody>
             <?php if (!empty($listSanPham)): ?>
                 <?php foreach ($listSanPham as $item): ?>
@@ -65,16 +79,24 @@
                             <?php endif; ?>
                         </td>
                         <td class="text-center">
-                            <a href="?act=edit-tour&id=<?= $item['ID_Tour']; ?>" class="btn btn-warning btn-sm">Sửa</a>
+                            <a href="?act=manage-itinerary&id=<?= $item['ID_Tour']; ?>" class="btn btn-info btn-sm" title="Quản lý Lịch trình">Lịch trình</a>
+                            <a href="?act=manage-suppliers&id=<?= $item['ID_Tour']; ?>" class="btn btn-secondary btn-sm" title="Quản lý Nhà cung cấp">NCC</a>
+                            <a href="?act=edit-tour&id=<?= $item['ID_Tour']; ?>" class="btn btn-warning btn-sm" title="Sửa thông tin cơ bản">Sửa</a>
                             <a href="?act=delete-tour&id=<?= $item['ID_Tour']; ?>"
-                                class="btn btn-danger btn-sm"
+                                class="btn btn-danger btn-sm" title="Xóa tour"
                                 onclick="return confirm('Bạn có chắc chắn muốn xóa tour này không?');">Xóa</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="12" class="text-center text-muted">Chưa có tour nào được thêm.</td>
+                    <td colspan="12" class="text-center text-muted">
+                        <?php if (!empty($_GET['search_id'])): ?>
+                            Không tìm thấy tour nào khớp với ID "<?= htmlspecialchars($_GET['search_id']) ?>".
+                        <?php else: ?>
+                            Chưa có tour nào được thêm.
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endif; ?>
         </tbody>
