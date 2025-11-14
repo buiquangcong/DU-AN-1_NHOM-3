@@ -72,7 +72,7 @@ class AdminTaiKhoanController
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Lấy email làm tên đăng nhập
             $email = $_POST['email'];
-
+            $ho_ten = $_POST['ho_ten'];
             // Mật khẩu mặc định
             $passwordRaw = '123456';
             $passwordHash = password_hash($passwordRaw, PASSWORD_BCRYPT);
@@ -80,7 +80,7 @@ class AdminTaiKhoanController
             $idQuyen = $_POST['id_quyen'] ?? 2;
 
             // Gọi model insert (Lưu ý Model phải nhận tham số là email)
-            $this->modelTaiKhoan->insertTaiKhoan($email, $passwordHash, $idQuyen);
+            $this->modelTaiKhoan->insertTaiKhoan($ho_ten, $email, $passwordHash, $idQuyen);
 
             header("Location: " . BASE_URL_ADMIN . '?act=list-tai-khoan');
         }
