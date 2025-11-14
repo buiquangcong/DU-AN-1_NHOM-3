@@ -12,7 +12,7 @@
 
     <style>
         body {
-            background-image: url('../../img/nenLogin5.webp');
+            background-image: url('assets/nenLogin5.jpg');
 
             /* Các thuộc tính này giúp ảnh nền đẹp hơn */
             background-size: cover;
