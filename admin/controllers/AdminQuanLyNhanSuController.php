@@ -38,7 +38,7 @@ class AdminQuanLyNhanSuController
         $error = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Dùng ?? '' để tránh lỗi nếu không có dữ liệu gửi lên
+            
             $data = [
                 'ho_ten'        => trim($_POST['ho_ten'] ?? ''),
                 'chuc_vu'       => trim($_POST['chuc_vu'] ?? ''),
@@ -60,7 +60,7 @@ class AdminQuanLyNhanSuController
                 $error['so_dien_thoai'] = "Số điện thoại không được để trống";
             }
 
-            // Nếu không có lỗi -> Insert
+          
             if (empty($error)) {
                 // Gọi Model
                 $this->model->insert($data);

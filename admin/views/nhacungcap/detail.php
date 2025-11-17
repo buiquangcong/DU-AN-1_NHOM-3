@@ -11,6 +11,12 @@
                 <th>Tên nhà cung cấp</th>
                 <td><?= htmlspecialchars($ncc['ten_nha_cc']) ?></td>
             </tr>
+            
+            <tr>
+                <th>Dịch vụ cung cấp</th>
+                <td><?= htmlspecialchars($ncc['TenDichVu'] ?? '(Chưa có thông tin)') ?></td>
+            </tr>
+            
             <tr>
                 <th>Địa chỉ</th>
                 <td><?= htmlspecialchars($ncc['dia_chi']) ?></td>
