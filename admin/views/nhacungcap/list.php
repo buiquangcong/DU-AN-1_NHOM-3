@@ -8,6 +8,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Tên nhà cung cấp</th>
+                    <th>Dịch vụ cung cấp</th> 
                     <th>Địa chỉ</th>
                     <th>Email</th>
                     <th>Số điện thoại</th>
@@ -19,6 +20,11 @@
                     <tr>
                         <td><?= $ncc['id_nha_cc'] ?></td>
                         <td><?= htmlspecialchars($ncc['ten_nha_cc']) ?></td>
+                        
+                        <td>
+                            <?= htmlspecialchars($ncc['TenDichVu'] ?? '(Chưa chọn)') ?>
+                        </td>
+
                         <td><?= htmlspecialchars($ncc['dia_chi']) ?></td>
                         <td><?= htmlspecialchars($ncc['email']) ?></td>
                         <td><?= htmlspecialchars($ncc['so_dien_thoai']) ?></td>
