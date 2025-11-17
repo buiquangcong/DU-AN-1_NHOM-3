@@ -11,7 +11,7 @@ class AdminNhaCungCap
 
 //---
 
-    // Lấy tất cả nhà cung cấp (ĐÃ SỬA: JOIN với tên cột chính xác)
+    
     public function getAll()
     {
         $stmt = $this->db->prepare("
@@ -25,7 +25,7 @@ class AdminNhaCungCap
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Lấy nhà cung cấp theo ID
+   
    public function getById($id)
 {
     $stmt = $this->db->prepare("
@@ -40,7 +40,7 @@ class AdminNhaCungCap
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-    // Thêm nhà cung cấp (ĐÃ SỬA: BỔ SUNG id_DichVu vào cột INSERT)
+    
     public function insert($data)
     {
         $stmt = $this->db->prepare("
@@ -48,7 +48,7 @@ class AdminNhaCungCap
             VALUES (:ten_nha_cc, :id_dich_vu, :dia_chi, :email, :so_dien_thoai)
         ");
         $stmt->bindParam(':ten_nha_cc', $data['ten_nha_cc']);
-        // BIND cho cột id_DichVu
+        
         $stmt->bindParam(':id_dich_vu', $data['id_dich_vu'], PDO::PARAM_INT); 
         $stmt->bindParam(':dia_chi', $data['dia_chi']);
         $stmt->bindParam(':email', $data['email']);

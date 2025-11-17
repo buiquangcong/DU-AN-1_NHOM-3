@@ -2,7 +2,7 @@
     <h2 class="mb-3">Chỉnh sửa Nhà Cung Cấp</h2>
     
     <?php 
-    // Giả định bạn có một khối hiển thị lỗi chung từ Controller
+    
     if (isset($_SESSION['error_update'])): ?>
         <div class="alert alert-danger">
             <?= $_SESSION['error_update']; unset($_SESSION['error_update']); ?>

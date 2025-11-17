@@ -15,10 +15,10 @@
             <select name="id_dich_vu" class="form-select" required>
                 <option value="" disabled selected>-- Chọn dịch vụ --</option>
                 <?php 
-                // Lặp qua dữ liệu $listDichVu đã được truyền từ Controller
+                
                 if (isset($listDichVu) && is_array($listDichVu)):
                     foreach ($listDichVu as $dv): 
-                        // Giả định tên cột là ID_DichVu và TenDichVu
+                        
                 ?>
                     <option value="<?= $dv['ID_DichVu'] ?>">
                         <?= htmlspecialchars($dv['TenDichVu']) ?>

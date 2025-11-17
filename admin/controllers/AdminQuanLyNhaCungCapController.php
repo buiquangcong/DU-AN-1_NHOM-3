@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../models/AdminNhaCungCap.php';
-// BỔ SUNG: Require Model Dịch vụ
+
 require_once __DIR__ . '/../models/AdminDichVu.php'; 
 
 class AdminQuanLyNhaCungCapController
