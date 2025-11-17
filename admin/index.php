@@ -20,14 +20,12 @@ require_once $PROJECT_ROOT_PATH . '/commons/function.php';
 
 // TOUR
 require_once __DIR__ . '/controllers/AdminTourController.php';
-require_once __DIR__ . '/models/AdminTour.php';
+
 require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
 require_once __DIR__ . '/models/AdminQuanLyTour.php';
 require_once __DIR__ . '/controllers/AdminBookingController.php';
 require_once __DIR__ . '/models/AdminBookingModel.php';
 
-require_once __DIR__ . '/controllers/AdminQuanLyNhanSuController.php';
-require_once __DIR__ . '/models/AdminQuanLyNhanSu.php';
 require_once __DIR__ . '/controllers/AdminQuanLyNhaCungCapController.php';
 require_once __DIR__ . '/models/AdminNhaCungCap.php';
 // ================== REQUIRE TÀI KHOẢN ==================
@@ -61,13 +59,13 @@ match ($act) {
 
 
     // ===== NHÂN SỰ =====
-    'list-nhansu'     => (new AdminQuanLyNhanSuController())->index(),
-    'add-nhansu'      => (new AdminQuanLyNhanSuController())->add(),       // Hiển thị form
-    'post-add-nhansu' => (new AdminQuanLyNhanSuController())->add(),       // Xử lý khi submit form
-    'edit-nhansu'     => (new AdminQuanLyNhanSuController())->edit(),
-    'post-edit-nhansu' => (new AdminQuanLyNhanSuController())->postEditNhanSu(),
-    'delete-nhansu'   => (new AdminQuanLyNhanSuController())->delete(),
-    'detail-nhansu'   => (new AdminQuanLyNhanSuController())->detail(),
+    'list-tai-khoan'     => (new AdminTaiKhoanController())->danhSachTaiKhoan(),
+    'add-tai-khoan'      => (new AdminTaiKhoanController())->formAddTaiKhoan(),       // Hiển thị form
+    'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddTaiKhoan(),       // Xử lý khi submit form
+    'edit-tai-khoan'     => (new AdminTaiKhoanController())->formEditTaiKhoan($_GET['id'] ?? 0),
+    'post-edit-tai-khoan' => (new AdminTaiKhoanController())->postEditTaiKhoan(),
+    'delete-tai-khoan'   => (new AdminTaiKhoanController())->delete(),
+    'detail-tai-khoan'   => (new AdminTaiKhoanController())->detail(),
 
     // ===== NHÀ CUNG CẤP =====
     'list-nhacungcap'   => (new AdminQuanLyNhaCungCapController())->index(),

@@ -52,7 +52,7 @@
                     <th>Số ngày</th>
                     <th>Số đêm</th>
                     <th>Ngày khởi hành</th>
-                    <th>Điểm khởi hành</th>
+                    <th>Ảnh Bìa</th>
                     <th>Số chỗ</th>
                     <th>Trạng thái</th>
                     <th>Hành động</th>
@@ -60,8 +60,8 @@
             </thead>
 
             <tbody>
-                <?php if (!empty($listSanPham)): ?>
-                    <?php foreach ($listSanPham as $item): ?>
+                <?php if (!empty($listTours)): ?>
+                    <?php foreach ($listTours as $item): ?>
                         <tr>
                             <td class="text-center"><?= $item['ID_Tour'] ?? ''; ?></td>
                             <td><?= htmlspecialchars($item['TenTour']); ?></td>
@@ -71,7 +71,14 @@
                             <td><?= $item['SoNgay']; ?></td>
                             <td><?= $item['SoDem']; ?></td>
                             <td><?= htmlspecialchars($item['NgayKhoiHanh']); ?></td>
-                            <td><?= htmlspecialchars($item['DiemKhoiHanh']); ?></td>
+                            <td class="text-center">
+                                <?php if (!empty($item['UrlAnh'])): ?>
+                                    <img src="<?= htmlspecialchars($item['UrlAnh']); ?>" alt="Ảnh bìa Tour" style="width: 80px; height: 50px; object-fit: cover;">
+                                <?php else: ?>
+                                    <span class="text-muted">Không có ảnh</span>
+                                <?php endif; ?>
+                            </td>
+
                             <td><?= $item['SoCho']; ?></td>
                             <td>
                                 <?php if ($item['TrangThai'] == 1): ?>

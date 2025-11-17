@@ -49,8 +49,7 @@ class AdminTour
      */
     public function insertAnhTour($idTourMoi, $image_url_chinh, $is_anh_bia)
     {
-        // (Code SQL INSERT INTO dm_anh_tour... sẽ ở đây)
-        // $sql = "INSERT INTO dm_anh_tour (ID_Tour, DuongDan, LaAnhBia) VALUES (?, ?, ?)";
+        // (Code SQL INSERT INTO dm_anh_tour... sẽ ở đây)        // $sql = "INSERT INTO dm_anh_tour (ID_Tour, DuongDan, LaAnhBia) VALUES (?, ?, ?)";
         // pdo_execute($sql, $idTourMoi, $image_url_chinh, $is_anh_bia);
     }
 

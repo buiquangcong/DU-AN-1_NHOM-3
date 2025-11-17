@@ -146,8 +146,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?= BASE_URL_ADMIN . '?act=list-nhansu' ?>" class="nav-link <?= ($_GET['act'] ?? '') == 'list-nhansu' ? 'active' : 'text-white' ?>">
-                            <i class="bi bi-people me-1"></i> Nhân Sự
+                        <a href="<?= BASE_URL_ADMIN . '?act=list-tai-khoan' ?>" class="nav-link <?= ($_GET['act'] ?? '') == 'list-tai-khoan' ? 'active' : 'text-white' ?>">
+                            <i class="bi bi-people me-1"></i> Tài Khoản
                         </a>
                     </li>
                     <li class="nav-item">

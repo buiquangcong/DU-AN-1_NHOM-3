@@ -31,7 +31,7 @@
 
         <div class="mb-3">
             <label class="form-label">Hình ảnh chính (Ảnh bìa)</label>
-            <input type="file" name="HinhAnhChinh" class="form-control">
+            <input type="file" name="AnhBia" class="form-control">
         </div>
 
         <div class="row mb-3">
@@ -63,12 +63,6 @@
                 <input type="date" name="NgayKhoiHanh" class="form-control" required>
             </div>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Điểm khởi hành</label>
-            <input type="text" name="DiemKhoiHanh" class="form-control" required>
-        </div>
-
         <div class="mb-3">
             <label class="form-label">Nội dung tóm tắt</label>
             <textarea name="NoiDungTomTat" class="form-control" rows="3" required></textarea>

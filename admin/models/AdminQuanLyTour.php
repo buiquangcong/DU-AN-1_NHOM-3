@@ -19,16 +19,20 @@ class AdminQuanLyTour
     /**
      * Lấy tất cả tour (sản phẩm)
      */
-    public function getAllTours($search_id = '', $loai_tour_id = '') // Thêm tham số $loai_tour_id
+    public function getAllTours($search_id = '', $loai_tour_id = '')
     {
         try {
-            // Câu SQL cơ bản
-            $sql = 'SELECT dm_tours.*, dm_loai_tour.TenLoaiTour
+            $sql = 'SELECT 
+                        dm_tours.*, 
+                        dm_loai_tour.TenLoaiTour,
+                        a.UrlAnh -- LẤY URL ẢNH BÌA
                     FROM dm_tours
-                    LEFT JOIN dm_loai_tour ON dm_tours.ID_LoaiTour = dm_loai_tour.ID_LoaiTour';
+                    LEFT JOIN dm_loai_tour ON dm_tours.ID_LoaiTour = dm_loai_tour.ID_LoaiTour
+                    -- JOIN để lấy ảnh bìa (LoaiAnh = 0)
+                    LEFT JOIN dm_anh_tour a ON dm_tours.ID_Tour = a.ID_Tour AND a.LoaiAnh = 0';
 
-            $params = []; // Mảng chứa các tham số
-            $conditions = []; // Mảng chứa các điều kiện WHERE
+            $params = [];
+            $conditions = [];
 
             // === Xử lý điều kiện 1: TÌM KIẾM theo ID ===
             if (!empty($search_id)) {
@@ -42,34 +46,35 @@ class AdminQuanLyTour
                 $params[':loai_tour_id'] = $loai_tour_id;
             }
 
-            // Nối các điều kiện lại (nếu có)
             if (!empty($conditions)) {
                 $sql .= ' WHERE ' . implode(' AND ', $conditions);
             }
 
-            // Luôn thêm ORDER BY ở cuối
             $sql .= ' ORDER BY dm_tours.ID_Tour DESC';
 
             $stmt = $this->conn->prepare($sql);
-
-            // Thực thi với mảng tham số
             $stmt->execute($params);
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            // Ghi log lỗi thay vì echo
             // error_log("Lỗi truy vấn (getAllTours): " . $e->getMessage());
             return [];
         }
     }
 
     /**
-     * Lấy tour theo ID
+     * Lấy tour theo ID - Cần sửa để JOIN lấy UrlAnh (Cho form edit)
      */
-    public function getTourById($id) // Đổi tên
+    public function getTourById($id)
     {
         try {
-            $sql = "SELECT * FROM dm_tours WHERE ID_Tour = :id";
+            // Cần JOIN để lấy UrlAnh cho form edit
+            $sql = "SELECT 
+                        dm_tours.*, 
+                        a.UrlAnh
+                    FROM dm_tours
+                    LEFT JOIN dm_anh_tour a ON dm_tours.ID_Tour = a.ID_Tour AND a.LoaiAnh = 0
+                    WHERE dm_tours.ID_Tour = :id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':id' => $id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -80,9 +85,9 @@ class AdminQuanLyTour
     }
 
     /**
-     * Thêm tour mới (ĐÃ THÊM policy_id)
+     * Thêm tour mới (ĐÃ LOẠI BỎ DiemKhoiHanh)
      */
-    public function insertTour( // Đổi tên
+    public function insertTour(
         $ID_Tour,
         $TenTour,
         $ID_LoaiTour,
@@ -92,42 +97,39 @@ class AdminQuanLyTour
         $SoDem,
         $NoiDungTomTat,
         $NoiDungChiTiet,
-        $NgayKhoiHanh,
-        $DiemKhoiHanh,
+        $NgayKhoiHanh, // GIỮ LẠI
         $SoCho,
         $TrangThai,
-        $policy_id // Thêm $policy_id
+        $policy_id
     ) {
         try {
             $sql = 'INSERT INTO `dm_tours` (
-                        `ID_Tour`, `TenTour`, `ID_LoaiTour`, `GiaNguoiLon`, `GiaTreEm`,
-                        `SoNgay`, `SoDem`, `NoiDungTomTat`, `NoiDungChiTiet`, `NgayKhoiHanh`,
-                        `DiemKhoiHanh`, `SoCho`, `TrangThai`, `policy_id`
-                    ) VALUES (
-                        :ID_Tour, :TenTour, :ID_LoaiTour, :GiaNguoiLon, :GiaTreEm,
-                        :SoNgay, :SoDem, :NoiDungTomTat, :NoiDungChiTiet, :NgayKhoiHanh,
-                        :DiemKhoiHanh, :SoCho, :TrangThai, :policy_id
-                    )';
+                         `ID_Tour`, `TenTour`, `ID_LoaiTour`, `GiaNguoiLon`, `GiaTreEm`,
+                         `SoNgay`, `SoDem`, `NoiDungTomTat`, `NoiDungChiTiet`, `NgayKhoiHanh`,
+                         `SoCho`, `TrangThai`, `policy_id`
+                     ) VALUES (
+                         :ID_Tour, :TenTour, :ID_LoaiTour, :GiaNguoiLon, :GiaTreEm,
+                         :SoNgay, :SoDem, :NoiDungTomTat, :NoiDungChiTiet, :NgayKhoiHanh,
+                         :SoCho, :TrangThai, :policy_id
+                     )';
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
-                ':ID_Tour'        => $ID_Tour,
-                ':TenTour'        => $TenTour,
-                ':ID_LoaiTour'    => $ID_LoaiTour,
-                ':GiaNguoiLon'    => $GiaNguoiLon,
-                ':GiaTreEm'       => $GiaTreEm,
-                ':SoNgay'         => $SoNgay,
-                ':SoDem'          => $SoDem,
-                ':NoiDungTomTat'  => $NoiDungTomTat,
+                ':ID_Tour' => $ID_Tour,
+                ':TenTour' => $TenTour,
+                ':ID_LoaiTour' => $ID_LoaiTour,
+                ':GiaNguoiLon' => $GiaNguoiLon,
+                ':GiaTreEm' => $GiaTreEm,
+                ':SoNgay' => $SoNgay,
+                ':SoDem' => $SoDem,
+                ':NoiDungTomTat' => $NoiDungTomTat,
                 ':NoiDungChiTiet' => $NoiDungChiTiet,
-                ':NgayKhoiHanh'   => $NgayKhoiHanh,
-                ':DiemKhoiHanh'   => $DiemKhoiHanh,
-                ':SoCho'          => $SoCho,
-                ':TrangThai'      => $TrangThai,
-                ':policy_id'      => $policy_id // Thêm policy_id
+                ':NgayKhoiHanh' => $NgayKhoiHanh,
+                ':SoCho' => $SoCho,
+                ':TrangThai' => $TrangThai,
+                ':policy_id' => $policy_id
             ]);
-            return $ID_Tour; // Trả về ID_Tour vừa thêm
-
+            return $ID_Tour;
         } catch (Exception $e) {
             echo "Lỗi thêm tour: " . $e->getMessage();
             return false;
@@ -135,9 +137,9 @@ class AdminQuanLyTour
     }
 
     /**
-     * Cập nhật tour (ĐÃ THÊM policy_id)
+     * Cập nhật tour và Ảnh Bìa (Gộp logic)
      */
-    public function updateTour( // Đổi tên
+    public function updateTour(
         $ID_Tour,
         $TenTour,
         $ID_LoaiTour,
@@ -148,12 +150,18 @@ class AdminQuanLyTour
         $NoiDungTomTat,
         $NoiDungChiTiet,
         $NgayKhoiHanh,
-        $DiemKhoiHanh,
         $SoCho,
         $TrangThai,
-        $policy_id // Thêm $policy_id
+        $policy_id,
+        $new_image_url = null // THAM SỐ ẢNH MỚI
     ) {
         try {
+            // Debug: Hiển thị lỗi chi tiết
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            $this->conn->beginTransaction();
+
+            // 1. CẬP NHẬT THÔNG TIN CƠ BẢN CỦA TOUR (dm_tours)
             $sql = "UPDATE dm_tours SET 
                         TenTour = :TenTour,
                         ID_LoaiTour = :ID_LoaiTour,
@@ -164,32 +172,72 @@ class AdminQuanLyTour
                         NoiDungTomTat = :NoiDungTomTat,
                         NoiDungChiTiet = :NoiDungChiTiet,
                         NgayKhoiHanh = :NgayKhoiHanh,
-                        DiemKhoiHanh = :DiemKhoiHanh,
                         SoCho = :SoCho,
                         TrangThai = :TrangThai,
                         policy_id = :policy_id
-                    WHERE ID_Tour = :ID_Tour";
+                     WHERE ID_Tour = :ID_Tour";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
-                ':ID_Tour'        => $ID_Tour,
-                ':TenTour'        => $TenTour,
-                ':ID_LoaiTour'    => $ID_LoaiTour,
-                ':GiaNguoiLon'    => $GiaNguoiLon,
-                ':GiaTreEm'       => $GiaTreEm,
-                ':SoNgay'         => $SoNgay,
-                ':SoDem'          => $SoDem,
-                ':NoiDungTomTat'  => $NoiDungTomTat,
+                ':ID_Tour' => $ID_Tour,
+                ':TenTour' => $TenTour,
+                ':ID_LoaiTour' => $ID_LoaiTour,
+                ':GiaNguoiLon' => $GiaNguoiLon,
+                ':GiaTreEm' => $GiaTreEm,
+                ':SoNgay' => $SoNgay,
+                ':SoDem' => $SoDem,
+                ':NoiDungTomTat' => $NoiDungTomTat,
                 ':NoiDungChiTiet' => $NoiDungChiTiet,
-                ':NgayKhoiHanh'   => $NgayKhoiHanh,
-                ':DiemKhoiHanh'   => $DiemKhoiHanh,
-                ':SoCho'          => $SoCho,
-                ':TrangThai'      => $TrangThai,
-                ':policy_id'      => $policy_id // Thêm policy_id
+                ':NgayKhoiHanh' => $NgayKhoiHanh,
+                ':SoCho' => $SoCho,
+                ':TrangThai' => $TrangThai,
+                ':policy_id' => $policy_id
+            ]);
+
+            // 2. CẬP NHẬT ẢNH BÌA (dm_anh_tour) - CHỈ CHẠY NẾU CÓ ẢNH MỚI
+            if ($new_image_url) {
+                // Xóa bản ghi ảnh bìa cũ (LoaiAnh = 0)
+                $sql_delete = "DELETE FROM dm_anh_tour WHERE ID_Tour = :ID_Tour AND LoaiAnh = 0";
+                $stmt_delete = $this->conn->prepare($sql_delete);
+                $stmt_delete->execute([':ID_Tour' => $ID_Tour]);
+
+                // Thêm ảnh bìa mới vào DB
+                $sql_insert = "INSERT INTO dm_anh_tour (ID_Tour, UrlAnh, LoaiAnh) VALUES (:ID_Tour, :UrlAnh, 0)";
+                $stmt_insert = $this->conn->prepare($sql_insert);
+                $stmt_insert->execute([
+                    ':ID_Tour' => $ID_Tour,
+                    ':UrlAnh' => $new_image_url
+                ]);
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            // HIỂN THỊ LỖI CHI TIẾT TỪ MYSQL
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            echo "LỖI CẬP NHẬT TOUR: " . $e->getMessage();
+            exit;
+        }
+    }
+
+    /**
+     * Thêm ảnh tour (dùng cho postAddTour)
+     */
+    public function insertAnhTour($idTour, $image_url, $is_anh_bia = 0)
+    {
+        try {
+            $sql = "INSERT INTO dm_anh_tour (ID_Tour, UrlAnh, LoaiAnh) VALUES (:idTour, :image_url, :la_anh_bia)";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ':idTour' => $idTour,
+                ':image_url' => $image_url,
+                ':la_anh_bia' => $is_anh_bia
             ]);
             return true;
         } catch (Exception $e) {
-            echo "Lỗi cập nhật tour: " . $e->getMessage();
+            echo "Lỗi thêm ảnh tour: " . $e->getMessage();
             return false;
         }
     }
@@ -210,25 +258,6 @@ class AdminQuanLyTour
         }
     }
 
-    /**
-     * Thêm ảnh tour (Tách riêng)
-     */
-    public function insertAnhTour($idTour, $image_url, $is_anh_bia = 0)
-    {
-        try {
-            $sql = "INSERT INTO dm_anh_tour (tour_id, image_url, la_anh_bia) VALUES (:tour_id, :image_url, :la_anh_bia)";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([
-                ':tour_id' => $idTour,
-                ':image_url' => $image_url,
-                ':la_anh_bia' => $is_anh_bia
-            ]);
-            return true;
-        } catch (Exception $e) {
-            echo "Lỗi thêm ảnh tour: " . $e->getMessage();
-            return false;
-        }
-    }
 
 
     // ===============================================

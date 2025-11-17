@@ -38,7 +38,7 @@ class AdminQuanLyTourController
 
         // --- SỬA DÒNG NÀY ---
         // Gửi cả 2 tham số vào Model
-        $listSanPham = $this->modelTour->getAllTours($search_id, $loai_tour_id);
+        $listTours = $this->modelTour->getAllTours($search_id, $loai_tour_id);
 
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/tour/list-tour.php';
@@ -69,21 +69,51 @@ class AdminQuanLyTourController
             $SoDem          = $_POST['SoDem'] ?? 0;
             $NoiDungTomTat  = trim($_POST['NoiDungTomTat'] ?? '');
             $NoiDungChiTiet = trim($_POST['NoiDungChiTiet'] ?? '');
+
+            // GIỮ LẠI NgayKhoiHanh
             $NgayKhoiHanh   = $_POST['NgayKhoiHanh'] ?? '';
-            $DiemKhoiHanh   = trim($_POST['DiemKhoiHanh'] ?? '');
+            // Đã loại bỏ: $DiemKhoiHanh
+
             $SoCho          = $_POST['SoCho'] ?? 0;
             $TrangThai      = $_POST['TrangThai'] ?? 1;
-            $policy_id      = $_POST['policy_id'] ?? null; // THÊM MỚI
+            $policy_id      = $_POST['policy_id'] ?? null;
+
+            // === KHỞI TẠO BIẾN ẢNH ===
+            $fileAnhBia     = $_FILES['AnhBia'] ?? null;
+            $anh_bia_url    = null;
+            $target_file_fs = null; // Khởi tạo biến này để dùng cho unlink nếu lỗi
 
             $error = [];
-            // (Giữ nguyên phần validate của bạn)
+
             if (empty($TenTour)) $error['TenTour'] = "Tên tour không được để trống";
-            // ... (các validation khác) ...
+            // ... (các validation khác giữ nguyên) ...
+
+            // === VALIDATE FILE UPLOAD BAN ĐẦU ===
+            if (empty($fileAnhBia) || $fileAnhBia['error'] !== UPLOAD_ERR_OK) {
+                $error['AnhBia'] = "Vui lòng chọn ảnh bìa hợp lệ.";
+            }
 
             $_SESSION['error'] = $error;
 
             if (empty($error)) {
-                // Gọi hàm model mới: insertTour()
+
+                // --- CẤU HÌNH ĐƯỜNG DẪN UPLOAD ---
+                $upload_dir_fs = __DIR__ . '/../assets/uploads/';
+                $upload_dir_web = BASE_URL_ADMIN . '/assets/uploads/';
+
+                // --- BƯỚC 1: XỬ LÝ UPLOAD FILE ---
+                $file_name = time() . '_' . basename($fileAnhBia['name']);
+                $target_file_fs = $upload_dir_fs . $file_name;
+
+                if (move_uploaded_file($fileAnhBia['tmp_name'], $target_file_fs)) {
+                    $anh_bia_url = $upload_dir_web . $file_name; // Lưu đường dẫn web
+                } else {
+                    $error['Upload'] = "Lỗi khi di chuyển file.";
+                    $_SESSION['error'] = $error;
+                    header('Location: ' . BASE_URL_ADMIN . '?act=add-tour');
+                    exit;
+                }
+
                 $insertId = $this->modelTour->insertTour(
                     $ID_Tour,
                     $TenTour,
@@ -94,23 +124,32 @@ class AdminQuanLyTourController
                     $SoDem,
                     $NoiDungTomTat,
                     $NoiDungChiTiet,
-                    $NgayKhoiHanh,
-                    $DiemKhoiHanh,
+                    $NgayKhoiHanh, // GIỮ LẠI NgayKhoiHanh
                     $SoCho,
                     $TrangThai,
-                    $policy_id // Thêm policy_id
+                    $policy_id
                 );
 
                 if ($insertId) {
-                    // (Giả sử bạn có xử lý upload ảnh ở đây)
+                    // --- BƯỚC 3: LƯU URL ẢNH VÀO BẢNG dm_anh_tour ---
+                    if (!empty($anh_bia_url)) {
+                        $this->modelTour->insertAnhTour($ID_Tour, $anh_bia_url, 0);
+                    }
+
+                    $_SESSION['success'] = "Thêm tour thành công!";
                     header('Location: ' . BASE_URL_ADMIN . '?act=list-tours');
                     exit;
                 } else {
+                    // Nếu insert tour thất bại, xóa file vừa upload
+                    if (isset($target_file_fs) && file_exists($target_file_fs)) {
+                        unlink($target_file_fs);
+                    }
                     $_SESSION['error']['insert'] = "Thêm tour thất bại, vui lòng thử lại";
                     header('Location: ' . BASE_URL_ADMIN . '?act=add-tour');
                     exit;
                 }
             } else {
+                // Nếu có lỗi validate/upload ban đầu, chuyển hướng
                 header('Location: ' . BASE_URL_ADMIN . '?act=add-tour');
                 exit;
             }
@@ -131,58 +170,101 @@ class AdminQuanLyTourController
     }
 
     // ✅ Xử lý sửa tour (?act=post-edit-tour)
-    public function postEditTour() // Đổi tên hàm
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $ID_Tour        = $_POST['ID_Tour'] ?? '';
-            $TenTour        = trim($_POST['TenTour'] ?? '');
-            $ID_LoaiTour    = $_POST['ID_LoaiTour'] ?? '';
-            $GiaNguoiLon    = $_POST['GiaNguoiLon'] ?? 0;
-            $GiaTreEm       = $_POST['GiaTreEm'] ?? 0;
-            $SoNgay         = $_POST['SoNgay'] ?? 0;
-            $SoDem          = $_POST['SoDem'] ?? 0;
-            $NoiDungTomTat  = trim($_POST['NoiDungTomTat'] ?? '');
-            $NoiDungChiTiet = trim($_POST['NoiDungChiTiet'] ?? '');
-            $NgayKhoiHanh   = $_POST['NgayKhoiHanh'] ?? '';
-            $DiemKhoiHanh   = trim($_POST['DiemKhoiHanh'] ?? '');
-            $SoCho          = $_POST['SoCho'] ?? 0;
-            $TrangThai      = $_POST['TrangThai'] ?? 1;
-            $policy_id      = $_POST['policy_id'] ?? null; // THÊM MỚI
+    public function postEditTour()
+    { {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $ID_Tour        = $_POST['ID_Tour'] ?? '';
+                $TenTour        = trim($_POST['TenTour'] ?? '');
+                $ID_LoaiTour    = $_POST['ID_LoaiTour'] ?? '';
+                $GiaNguoiLon    = $_POST['GiaNguoiLon'] ?? 0;
+                $GiaTreEm       = $_POST['GiaTreEm'] ?? 0;
+                $SoNgay         = $_POST['SoNgay'] ?? 0;
+                $SoDem          = $_POST['SoDem'] ?? 0;
+                $NoiDungTomTat  = trim($_POST['NoiDungTomTat'] ?? '');
+                $NoiDungChiTiet = trim($_POST['NoiDungChiTiet'] ?? '');
+                $NgayKhoiHanh   = $_POST['NgayKhoiHanh'] ?? '';
+                $SoCho          = $_POST['SoCho'] ?? 0;
+                $TrangThai      = $_POST['TrangThai'] ?? 1;
 
-            $error = [];
-            // (Giữ nguyên validation của bạn)
-            if (empty($TenTour)) $error['TenTour'] = "Tên tour không được để trống";
-            // ... (các validation khác) ...
+                // === KHẮC PHỤC LỖI POLICY_ID (Vấn đề chính) ===
+                $policy_id = $_POST['policy_id'] ?? null;
+                if ($policy_id === '') {
+                    // Đặt thành NULL nếu cho phép NULL trong DB, hoặc 0 nếu không cho phép NULL.
+                    // Giả định bạn đã thiết lập DB cho phép NULL cho policy_id.
+                    $policy_id = null;
+                }
+                // ===============================================
 
-            $_SESSION['error'] = $error;
+                // === KHỞI TẠO BIẾN ẢNH ===
+                $fileAnhBia     = $_FILES['AnhBia'] ?? null;
+                $new_anh_bia_url = null;
+                $target_file_fs = null;
 
-            if (empty($error)) {
-                // Gọi hàm model mới: updateTour()
-                $this->modelTour->updateTour(
-                    $ID_Tour,
-                    $TenTour,
-                    $ID_LoaiTour,
-                    $GiaNguoiLon,
-                    $GiaTreEm,
-                    $SoNgay,
-                    $SoDem,
-                    $NoiDungTomTat,
-                    $NoiDungChiTiet,
-                    $NgayKhoiHanh,
-                    $DiemKhoiHanh,
-                    $SoCho,
-                    $TrangThai,
-                    $policy_id // Thêm policy_id
-                );
-                header("Location: index.php?act=list-tours");
-                exit;
-            } else {
-                header("Location: index.php?act=edit-tour&id=" . $ID_Tour);
-                exit;
+                $error = [];
+                if (empty($TenTour)) $error['TenTour'] = "Tên tour không được để trống";
+
+                // --- LOGIC UPLOAD FILE ---
+                if (!empty($fileAnhBia) && $fileAnhBia['error'] === UPLOAD_ERR_OK) {
+
+                    $upload_dir_fs = __DIR__ . '/../assets/uploads/';
+                    $upload_dir_web = BASE_URL_ADMIN . '/assets/uploads/';
+
+                    $file_name = time() . '_' . basename($fileAnhBia['name']);
+                    $target_file_fs = $upload_dir_fs . $file_name;
+
+                    if (move_uploaded_file($fileAnhBia['tmp_name'], $target_file_fs)) {
+                        $new_anh_bia_url = $upload_dir_web . $file_name;
+                    } else {
+                        $error['Upload'] = "Lỗi khi di chuyển file ảnh mới.";
+                    }
+                }
+
+                $_SESSION['error'] = $error;
+
+                if (empty($error)) {
+
+                    // 1. GỌI HÀM MODEL GỘP (Sử dụng policy_id đã được làm sạch)
+                    $success = $this->modelTour->updateTour(
+                        $ID_Tour,
+                        $TenTour,
+                        $ID_LoaiTour,
+                        $GiaNguoiLon,
+                        $GiaTreEm,
+                        $SoNgay,
+                        $SoDem,
+                        $NoiDungTomTat,
+                        $NoiDungChiTiet,
+                        $NgayKhoiHanh,
+                        $SoCho,
+                        $TrangThai,
+                        $policy_id, // <-- Đã được xử lý
+                        $new_anh_bia_url
+                    );
+
+                    if ($success) {
+                        $_SESSION['success'] = "Cập nhật tour thành công!";
+                        header("Location: index.php?act=list-tours");
+                        exit;
+                    } else {
+                        // Nếu Model update thất bại (do lỗi DB), xóa file vừa upload
+                        if (isset($target_file_fs) && file_exists($target_file_fs)) {
+                            unlink($target_file_fs);
+                        }
+                        $_SESSION['error']['db_fail'] = "Cập nhật tour thất bại do lỗi hệ thống.";
+                        header("Location: index.php?act=edit-tour&id=" . $ID_Tour);
+                        exit;
+                    }
+                } else {
+                    // Nếu có lỗi validate/upload ban đầu, chuyển hướng và xóa file vừa upload
+                    if (isset($target_file_fs) && file_exists($target_file_fs)) {
+                        unlink($target_file_fs);
+                    }
+                    header("Location: index.php?act=edit-tour&id=" . $ID_Tour);
+                    exit;
+                }
             }
         }
     }
-
     // ✅ Xóa tour (?act=delete-tour&id=...)
     public function deleteTour($id) // Đổi tên hàm
     {

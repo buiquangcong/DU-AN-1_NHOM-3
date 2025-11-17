@@ -12,8 +12,10 @@
         <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 
-    <form action="?act=save-edit-tour" method="POST" class="border p-4 rounded bg-light">
+    <form action="?act=save-edit-tour" method="POST" class="border p-4 rounded bg-light" enctype="multipart/form-data">
         <input type="hidden" name="ID_Tour" value="<?= $sanpham['ID_Tour'] ?>">
+
+        <input type="hidden" name="policy_id" value="<?= $sanpham['policy_id'] ?? null ?>">
 
         <div class="row mb-3">
             <div class="col-md-6">
@@ -62,10 +64,27 @@
                 <label class="form-label">Ngày khởi hành</label>
                 <input type="date" name="NgayKhoiHanh" class="form-control" value="<?= $sanpham['NgayKhoiHanh'] ?>" required>
             </div>
+
             <div class="col-md-3">
-                <label class="form-label">Điểm khởi hành</label>
-                <input type="text" name="DiemKhoiHanh" class="form-control" value="<?= htmlspecialchars($sanpham['DiemKhoiHanh']) ?>" required>
+                <label class="form-label">Ảnh Bìa mới</label>
+                <input type="file" name="AnhBia" class="form-control">
             </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ảnh Bìa hiện tại:</label>
+            <?php
+            // Sử dụng toán tử ?? để tránh lỗi nếu cột UrlAnh không được JOIN
+            $current_url = $sanpham['AnhBia'] ?? '';
+            ?>
+            <?php if (!empty($current_url)): ?>
+                <div class="border p-2 rounded text-center">
+                    <img src="<?= htmlspecialchars($current_url) ?>" alt="Ảnh bìa hiện tại" style="max-width: 100%; height: auto; max-height: 150px; object-fit: cover;">
+                    <p class="text-muted mt-2 small">Chọn file mới để thay thế.</p>
+                </div>
+            <?php else: ?>
+                <p class="text-muted">Chưa có ảnh bìa hiện tại.</p>
+            <?php endif; ?>
         </div>
 
         <div class="mb-3">
