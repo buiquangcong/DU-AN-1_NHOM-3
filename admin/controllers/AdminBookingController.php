@@ -215,4 +215,53 @@ class AdminBookingController
         header('Location: ?act=manage-guests&booking_id=' . $booking_id);
         exit;
     }
+
+    public function chiTietBooking()
+    {
+        $id = $_GET['id'] ?? 0;
+
+        // Lấy thông tin booking và khách
+        $booking = $this->modelBooking->getBookingById($id);
+        $guests  = $this->modelBooking->getGuestsByBookingId($id);
+
+        // Truyền dữ liệu ra view
+        require_once __DIR__ . '/../views/layout/header.php';
+        require_once __DIR__ . '/../views/booking/detail-booking.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
+
+
+    public function addBooking()
+    {
+        $tours = $this->modelBooking->getAllTours();
+        $customers = $this->modelBooking->getAllCustomers();
+
+        $errors = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'TourID'            => $_POST['tour_id'],
+                'TenKhachHang'      => trim($_POST['TenKhachHang']),
+                'NgayDatTour'       => $_POST['ngay_dat'],
+                'SoLuongNguoiLon'   => $_POST['so_luong_nl'],
+                'SoLuongTreEm'      => $_POST['so_luong_te'],
+                'TrangThai'         => 0
+            ];
+
+            $result = $this->modelBooking->addBookingSimple($data);
+
+            if ($result) {
+                $_SESSION['success'] = "Thêm booking thành công!";
+                header('Location: ?act=quan-ly-booking');
+                exit;
+            } else {
+                $errors[] = "Lỗi khi thêm booking";
+            }
+        }
+
+
+        require_once __DIR__ . '/../views/layout/header.php';
+        require_once __DIR__ . '/../views/booking/add-booking.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
 }

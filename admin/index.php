@@ -102,6 +102,9 @@ match ($act) {
     'delete-guest'    => (new AdminBookingController())->deleteGuest(),
     'bulk-update-checkin'  => (new AdminBookingController())->bulkUpdateCheckinStatus(),
     'import-excel-guests' => (new AdminBookingController())->importExcelGuests(),
+    'chi-tiet-booking' => (new AdminBookingController())->chiTietBooking(),
+    'add-booking' => (new AdminBookingController())->addBooking(),
+
     // ===============================================
 
 
