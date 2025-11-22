@@ -14,6 +14,23 @@
         </div>
 
         <div class="card-body">
+
+          <!-- HIỂN THỊ THÔNG BÁO DELETE / SUCCESS -->
+<?php if(isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger">
+        <?= is_array($_SESSION['error']) ? implode('<br>', $_SESSION['error']) : $_SESSION['error']; ?>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
+<?php if(isset($_SESSION['success'])): ?>
+    <div class="alert alert-success">
+        <?= is_array($_SESSION['success']) ? implode('<br>', $_SESSION['success']) : $_SESSION['success']; ?>
+    </div>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+<!-- HẾT PHẦN THÊM -->
+
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover" width="100%" cellspacing="0">
                     <thead class="table-dark">

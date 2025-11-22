@@ -1,26 +1,4 @@
-<!-- <?php
-// class AdminDanhMuc{
-//     public $conn;
-//     public function __construct(){
-//         $this->conn = pdo_get_connection();
 
-//     }
-//     public function getAllDanhMuc(){
-//         $sql="SELECT * FROM dm_loai_tour";
-//         $stmt=$this->conn->prepare($sql);
-//         $stmt->execute();
-//         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-//     }
-//     public function insertDanhMuc($id_Loai_Tour, $TenLoaiTour) {
-//         $sql = "INSERT INTO dm_loai_tour (ID_LoaiTour, TenLoaiTour) VALUES (:id_Loai_Tour, :TenLoaiTour)";
-//         $stmt = $this->conn->prepare($sql);
-//         $stmt->bindParam(':id_Loai_Tour', $id_Loai_Tour);
-//         $stmt->bindParam(':TenLoaiTour', $TenLoaiTour);
-//         return $stmt->execute();
-//     }
-
-// }
-?> -->
 
 <?php
 class AdminDanhMuc {
@@ -65,11 +43,21 @@ class AdminDanhMuc {
     }
 
     // Xóa danh mục
-    public function deleteDanhMuc($id) {
+   public function deleteDanhMuc($id) {
+    try {
         $sql = "DELETE FROM dm_loai_tour WHERE ID_LoaiTour = :id";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':id', $id);
-        return $stmt->execute();
+        $stmt->execute();
+        return true;
+
+    } catch (PDOException $e) {
+        // 23000 = lỗi ràng buộc khóa ngoại FK
+        if ($e->getCode() == 23000) {
+            return "Không thể xóa vì danh mục đang được sử dụng bởi Tour!";
+        }
+        return "Lỗi hệ thống: " . $e->getMessage();
     }
+}
 }
 ?>
