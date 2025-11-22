@@ -97,13 +97,17 @@ class AdmindanhmucController
     }
 
     // Xóa danh mục
-    public function deleteDanhMuc()
-    {
-        $id = $_GET['id'] ?? null;
-        if ($id) {
-            $this->modelDanhmuc->deleteDanhMuc($id);
-        }
-        header("Location: index.php?act=list-danhmuc");
-        exit();
+   public function deleteDanhMuc($id)
+{
+    $result = $this->modelDanhmuc->deleteDanhMuc($id);
+
+    if ($result === true) {
+        $_SESSION['success'] = "Xóa danh mục thành công!";
+    } else {
+        $_SESSION['error'] = $result; // nhận thông báo từ model
     }
+
+    header("Location: index.php?act=listDanhMuc");
+    exit;
+}
 }
