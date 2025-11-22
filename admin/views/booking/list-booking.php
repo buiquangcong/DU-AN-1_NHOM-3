@@ -1,6 +1,11 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-center">Quản lý Booking</h2>
 
+    <!-- Nút thêm Booking -->
+    <div class="mb-3">
+        <a href="?act=add-booking" class="btn btn-success">+ Thêm Booking</a>
+    </div>
+
     <?php if (!empty($_SESSION['success'])): ?>
         <div class="alert alert-success">
             <?= $_SESSION['success'];
@@ -47,6 +52,11 @@
                                 title="Quản lý danh sách khách">
                                 Quản lý Khách
                             </a>
+                            <a href="?act=chi-tiet-booking&id=<?= $item['ID_Booking'] ?>"
+                                class="btn btn-info btn-sm">
+                                Chi tiết
+                            </a>
+
                         </td>
                     </tr>
                 <?php endforeach; ?>
