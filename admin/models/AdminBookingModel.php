@@ -35,20 +35,20 @@ class AdminBookingModel
     }
 
     public function getBookingById($booking_id)
-{
-    try {
-        $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang
+    {
+        try {
+            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang
                 FROM booking b
                 LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
                 LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
                 WHERE b.ID_Booking = :id";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([':id' => $booking_id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        return false;
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id' => $booking_id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return false;
+        }
     }
-}
 
 
     /**
@@ -150,13 +150,27 @@ class AdminBookingModel
     public function calculateTotal($tour_id, $so_luong_nl, $so_luong_te)
     {
         try {
-            $sql = "SELECT GiaNL, GiaTE FROM dm_tours WHERE ID_Tour = :tour_id";
+            // Lấy giá người lớn và trẻ em từ database
+            $sql = "SELECT GiaNguoiLon, GiaTreEm FROM dm_tours WHERE ID_Tour = :tour_id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':tour_id' => $tour_id]);
             $tour = $stmt->fetch(PDO::FETCH_ASSOC);
+
             if (!$tour) return 0;
-            return ($so_luong_nl * $tour['GiaNL']) + ($so_luong_te * $tour['GiaTE']);
+
+            // Chuẩn hóa giá trị từ database sang số thực (float) để tính toán an toàn
+            $gia_nl = (float)$tour['GiaNguoiLon'];
+            $gia_te = (float)$tour['GiaTreEm'];
+
+            // Chuẩn hóa số lượng đầu vào sang số nguyên (int)
+            $so_nl = (int)$so_luong_nl;
+            $so_te = (int)$so_luong_te;
+
+            // Trả về tổng tiền
+            return ($so_nl * $gia_nl) + ($so_te * $gia_te);
         } catch (Exception $e) {
+            // Ghi log lỗi nếu cần
+            // error_log("Lỗi tính tổng tiền: " . $e->getMessage()); 
             return 0;
         }
     }
@@ -166,47 +180,95 @@ class AdminBookingModel
      */
     public function addBookingSimple($data)
     {
+        $customerID = null;
+        $params = [];
+        $stmt = null;
+
+        // Đặt mật khẩu mặc định an toàn cho khách hàng tạo qua admin
+        $default_password = '123456';
+
+        // Bắt đầu Transaction
+        $this->conn->beginTransaction();
+
         try {
-            // 1. Luôn luôn tìm theo tên khách
+            // --- 1 & 2: Xử lý Khách Hàng ---
+            // 1. Tìm theo tên khách hàng
             $stmt = $this->conn->prepare("SELECT ID_KhachHang FROM dm_khach_hang WHERE TenKhachHang = :name");
             $stmt->execute([':name' => $data['TenKhachHang']]);
             $customer = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // 2. Nếu chưa tồn tại → tạo mới khách
             if ($customer) {
-                $customerID = $customer['ID_KhachHang'];
+                $customerID = (int)$customer['ID_KhachHang'];
             } else {
-                $stmt = $this->conn->prepare("INSERT INTO dm_khach_hang (TenKhachHang) VALUES (:name)");
-                $stmt->execute([':name' => $data['TenKhachHang']]);
-                $customerID = $this->conn->lastInsertId();
+                // 2. Thêm khách hàng mới (ĐÃ SỬA: Bổ sung cột MatKhau)
+                $stmt = $this->conn->prepare("INSERT INTO dm_khach_hang (TenKhachHang, Email, MatKhau) VALUES (:name, :email, :matkhau)");
+
+                $stmt->execute([
+                    ':name' => $data['TenKhachHang'],
+                    ':email' => $data['Email'],
+                    ':matkhau' => $default_password // <--- CUNG CẤP GIÁ TRỊ MẶC ĐỊNH
+                ]);
+                $customerID = (int)$this->conn->lastInsertId();
             }
 
-            // 3. Tính tổng tiền
+            // Kiểm tra an toàn
+            if (!$customerID || $customerID <= 0) {
+                throw new Exception("ID Khách hàng không xác định.");
+            }
+
+            // --- 3: Tính tổng tiền ---
             $tong_tien = $this->calculateTotal(
                 $data['TourID'],
                 $data['SoLuongNguoiLon'],
                 $data['SoLuongTreEm']
             );
 
-            // 4. Thêm booking
-            $stmt = $this->conn->prepare("
+            // --- 4: Thêm booking ---
+            $sql_insert = "
             INSERT INTO booking (ID_Tour, ID_KhachHang, NgayDatTour, 
                                  SoLuongNguoiLon, SoLuongTreEm, TongTien, TrangThai)
             VALUES (:TourID, :CID, :NgayDat, :NL, :TE, :Total, :Status)
-        ");
+        ";
 
-            $stmt->execute([
+            $params = [
                 ':TourID'  => $data['TourID'],
                 ':CID'     => $customerID,
                 ':NgayDat' => $data['NgayDatTour'],
-                ':NL'      => $data['SoLuongNguoiLon'],
-                ':TE'      => $data['SoLuongTreEm'],
+                ':NL'      => (int)$data['SoLuongNguoiLon'],
+                ':TE'      => (int)$data['SoLuongTreEm'],
                 ':Total'   => $tong_tien,
-                ':Status'  => $data['TrangThai'],
-            ]);
+                ':Status'  => (int)$data['TrangThai'],
+            ];
 
+            $stmt = $this->conn->prepare($sql_insert);
+            $stmt->execute($params);
+
+            $this->conn->commit();
             return true;
         } catch (Exception $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+
+            // --- CƠ CHẾ BÁO LỖI SQL CHI TIẾT ---
+            $errorInfo = (isset($stmt) && $stmt instanceof PDOStatement) ? $stmt->errorInfo() : ['Không thể lấy thông tin lỗi PDO'];
+
+            echo "<h1>LỖI SQL KHI THÊM BOOKING</h1>";
+            echo "<h3>Nguyên nhân PHP: " . htmlspecialchars($e->getMessage()) . "</h3>";
+            echo "<h3>Thông tin lỗi DB:</h3>";
+            echo "<pre>";
+            print_r($errorInfo);
+            echo "</pre>";
+
+            if (!empty($params)) {
+                echo "<h3>Tham số gửi đi:</h3>";
+                echo "<pre>";
+                print_r($params);
+                echo "</pre>";
+            }
+
+            die(); // Dừng lại để xem lỗi
+
             return false;
         }
     }

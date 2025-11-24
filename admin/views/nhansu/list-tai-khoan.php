@@ -1,7 +1,7 @@
 <div class="container-fluid mt-4">
     <h2 class="mb-4">Danh sách Tài khoản Nhân sự</h2>
 
-    <a href="?act=add-taikhoan" class="btn btn-primary mb-3">➕ Thêm tài khoản</a>
+    <a href="?act=add-tai-khoan" class="btn btn-primary mb-3">➕ Thêm tài khoản</a>
 
     <table class="table table-bordered table-striped">
         <thead class="table-dark">

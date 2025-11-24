@@ -60,12 +60,12 @@ match ($act) {
 
     // ===== NHÂN SỰ =====
     'list-tai-khoan'     => (new AdminTaiKhoanController())->danhSachTaiKhoan(),
-    'add-tai-khoan'      => (new AdminTaiKhoanController())->formAddTaiKhoan(),       // Hiển thị form
-    'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddTaiKhoan(),       // Xử lý khi submit form
-    'edit-tai-khoan'     => (new AdminTaiKhoanController())->formEditTaiKhoan($_GET['id'] ?? 0),
-    'post-edit-tai-khoan' => (new AdminTaiKhoanController())->postEditTaiKhoan(),
-    'delete-tai-khoan'   => (new AdminTaiKhoanController())->delete(),
-    'detail-tai-khoan'   => (new AdminTaiKhoanController())->detail(),
+    'add-tai-khoan'      => (new AdminTaiKhoanController())->AddTaiKhoan(),       // Hiển thị form
+    // 'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddTaiKhoan(),       // Xử lý khi submit form
+    // 'edit-tai-khoan'     => (new AdminTaiKhoanController())->formEditTaiKhoan($_GET['id'] ?? 0),
+    // 'post-edit-tai-khoan' => (new AdminTaiKhoanController())->postEditTaiKhoan(),
+    // 'delete-tai-khoan'   => (new AdminTaiKhoanController())->delete(),
+    // 'detail-tai-khoan'   => (new AdminTaiKhoanController())->detail(),
 
     // ===== NHÀ CUNG CẤP =====
     'list-nhacungcap'   => (new AdminQuanLyNhaCungCapController())->index(),
@@ -102,6 +102,8 @@ match ($act) {
     'delete-guest'    => (new AdminBookingController())->deleteGuest(),
     'bulk-update-checkin'  => (new AdminBookingController())->bulkUpdateCheckinStatus(),
     'import-excel-guests' => (new AdminBookingController())->importExcelGuests(),
+
+    //Booking
     'chi-tiet-booking' => (new AdminBookingController())->chiTietBooking(),
     'add-booking' => (new AdminBookingController())->addBooking(),
 

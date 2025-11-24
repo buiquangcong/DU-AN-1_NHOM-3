@@ -233,33 +233,66 @@ class AdminBookingController
 
     public function addBooking()
     {
+        // Lấy danh sách để hiển thị form
         $tours = $this->modelBooking->getAllTours();
         $customers = $this->modelBooking->getAllCustomers();
 
         $errors = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'TourID'            => $_POST['tour_id'],
-                'TenKhachHang'      => trim($_POST['TenKhachHang']),
-                'NgayDatTour'       => $_POST['ngay_dat'],
-                'SoLuongNguoiLon'   => $_POST['so_luong_nl'],
-                'SoLuongTreEm'      => $_POST['so_luong_te'],
-                'TrangThai'         => 0
-            ];
+            // --- 1. Xác thực và Chuẩn hóa dữ liệu đầu vào ---
 
-            $result = $this->modelBooking->addBookingSimple($data);
+            // Lấy giá trị, sử dụng toán tử ?? để đảm bảo giá trị luôn tồn tại và gán mặc định
+            $tour_id = $_POST['tour_id'] ?? '';
+            $ten_kh = trim($_POST['TenKhachHang'] ?? '');
+            $email_kh = trim($_POST['Email'] ?? ''); // <--- SỬA: Lấy giá trị Email
+            $ngay_dat = $_POST['ngay_dat'] ?? '';
+            $so_nl = $_POST['so_luong_nl'] ?? 0;
+            $so_te = $_POST['so_luong_te'] ?? 0;
+            $trang_thai = $_POST['trang_thai'] ?? 0;
 
-            if ($result) {
-                $_SESSION['success'] = "Thêm booking thành công!";
-                header('Location: ?act=quan-ly-booking');
-                exit;
-            } else {
-                $errors[] = "Lỗi khi thêm booking";
+            // Kiểm tra cơ bản
+            if (empty($tour_id) || $tour_id === '-- Chọn Tour --') {
+                $errors[] = "Vui lòng chọn Tour.";
+            }
+            if (empty($ten_kh)) {
+                $errors[] = "Tên khách hàng không được để trống.";
+            }
+            if (empty($email_kh)) { // <--- SỬA: Kiểm tra Email
+                $errors[] = "Email khách hàng không được để trống.";
+            }
+            if (empty($ngay_dat)) {
+                $errors[] = "Vui lòng chọn Ngày đặt.";
+            }
+            if ((int)$so_nl + (int)$so_te <= 0) {
+                $errors[] = "Tổng số lượng người lớn và trẻ em phải lớn hơn 0.";
+            }
+
+            if (empty($errors)) {
+                $data = [
+                    'TourID'            => $tour_id,
+                    'TenKhachHang'      => $ten_kh,
+                    'Email'             => $email_kh, // <--- SỬA: Thêm Email vào mảng $data
+                    'NgayDatTour'       => $ngay_dat,
+                    // Ép kiểu về số nguyên để đảm bảo an toàn cho Model
+                    'SoLuongNguoiLon'   => (int)$so_nl,
+                    'SoLuongTreEm'      => (int)$so_te,
+                    'TrangThai'         => (int)$trang_thai
+                ];
+
+                $result = $this->modelBooking->addBookingSimple($data);
+
+                if ($result) {
+                    $_SESSION['success'] = "Thêm booking thành công!";
+                    header('Location: ?act=quan-ly-booking');
+                    exit;
+                } else {
+                    $errors[] = "Lỗi khi thêm booking (Lỗi database/logic).";
+                }
             }
         }
 
-
+        // Hiển thị form
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/add-booking.php';
         require_once __DIR__ . '/../views/layout/footer.php';
