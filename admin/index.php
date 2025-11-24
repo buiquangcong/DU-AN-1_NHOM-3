@@ -28,6 +28,7 @@ require_once __DIR__ . '/models/AdminBookingModel.php';
 
 require_once __DIR__ . '/controllers/AdminQuanLyNhaCungCapController.php';
 require_once __DIR__ . '/models/AdminNhaCungCap.php';
+require_once __DIR__ . '/models/AdminDichVu.php';
 // ================== REQUIRE TÀI KHOẢN ==================
 require_once './models/AdminTaiKhoan.php';
 require_once './controllers/AdminTaiKhoanController.php';
@@ -48,6 +49,7 @@ match ($act) {
     'edit-tour'       => (new AdminQuanLyTourController())->formEditTour($_GET['id'] ?? 0),
     'save-edit-tour'  => (new AdminQuanLyTourController())->postEditTour(),
     'delete-tour'     => (new AdminQuanLyTourController())->deleteTour($_GET['id'] ?? 0),
+    'tour-detail'       => (new AdminQuanLyTourController())->tourDetailOverview(),
 
     // --- DANH MỤC ---
     'list-danhmuc'      => (new AdmindanhmucController())->danhsachDanhMuc(),
