@@ -61,9 +61,8 @@ match ($act) {
     // ===== NHÂN SỰ =====
     'list-tai-khoan'     => (new AdminTaiKhoanController())->danhSachTaiKhoan(),
     'add-tai-khoan'      => (new AdminTaiKhoanController())->AddTaiKhoan(),       // Hiển thị form
-    // 'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddTaiKhoan(),       // Xử lý khi submit form
-    // 'edit-tai-khoan'     => (new AdminTaiKhoanController())->formEditTaiKhoan($_GET['id'] ?? 0),
-    // 'post-edit-tai-khoan' => (new AdminTaiKhoanController())->postEditTaiKhoan(),
+    'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddAdmin(),       // Xử lý khi submit form
+    'edit-tai-khoan'     => (new AdminTaiKhoanController())->editTaiKhoan($_GET['id'] ?? 0),
     // 'delete-tai-khoan'   => (new AdminTaiKhoanController())->delete(),
     // 'detail-tai-khoan'   => (new AdminTaiKhoanController())->detail(),
 

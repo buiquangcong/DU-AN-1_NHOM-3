@@ -153,6 +153,92 @@ class AdminTaiKhoanController
         }
     }
 
+
+    public function editTaiKhoan()
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) { /* ... (xử lý lỗi ID) ... */
+        }
+
+        $errors = $_SESSION['errors'] ?? [];
+        $data_old = $_SESSION['data_old'] ?? [];
+        unset($_SESSION['errors'], $_SESSION['data_old']);
+        $roles = $this->modelTaiKhoan->getAllQuyen() ?? [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // --- XỬ LÝ POST (CẬP NHẬT DỮ LIỆU) ---
+            $data = [
+                'ho_ten'          => trim($_POST['ho_ten'] ?? ''),
+                'email'           => trim($_POST['email'] ?? ''),
+                'mat_khau_moi'    => $_POST['mat_khau_moi'] ?? '',
+                'id_quyen'        => $_POST['id_quyen'] ?? '',
+                'so_dien_thoai'   => trim($_POST['so_dien_thoai'] ?? null),
+                'dia_chi'         => trim($_POST['dia_chi'] ?? null),
+                'trang_thai'      => $_POST['trang_thai'] ?? 1,
+            ];
+
+            // 2. VALIDATION
+            if (empty($data['ho_ten'])) $errors[] = "Họ tên không được để trống.";
+            if (empty($data['email'])) $errors[] = "Email không được để trống.";
+            if (empty($data['id_quyen'])) $errors[] = "Vui lòng chọn Phân quyền.";
+
+            // 3. XỬ LÝ MẬT KHẨU
+            $passwordHash = null;
+            if (!empty($data['mat_khau_moi'])) {
+                if (strlen($data['mat_khau_moi']) < 6) {
+                    $errors[] = "Mật khẩu mới phải có ít nhất 6 ký tự.";
+                } else {
+                    $passwordHash = password_hash($data['mat_khau_moi'], PASSWORD_BCRYPT);
+                }
+            }
+
+            if (empty($errors)) {
+                // GỌI MODEL CẬP NHẬT
+                $result = $this->modelTaiKhoan->updateTaiKhoan(
+                    $id,
+                    $data['ho_ten'],
+                    $data['email'],
+                    $data['id_quyen'],
+                    $data['so_dien_thoai'],
+                    $data['dia_chi'],
+                    $data['trang_thai'],
+                    $passwordHash
+                );
+
+                if ($result) {
+                    $_SESSION['success'] = "Cập nhật tài khoản thành công!";
+                    header("Location: " . BASE_URL_ADMIN . '?act=list-tai-khoan');
+                    exit();
+                } else {
+                    $errors[] = "Lỗi khi cập nhật tài khoản (Database/Model).";
+                }
+            }
+            // Xử lý lỗi sau POST (Redirect)
+            $_SESSION['errors'] = $errors;
+            $_SESSION['data_old'] = $data;
+            header("Location: " . BASE_URL_ADMIN . '?act=edit-tai-khoan&id=' . $id);
+            exit();
+        } else {
+            // --- XỬ LÝ GET (HIỂN THỊ DỮ LIỆU CŨ) ---
+            $taiKhoan = $this->modelTaiKhoan->getDetailAdmin($id);
+
+            if (!$taiKhoan) { /* ... (xử lý lỗi không tìm thấy) ... */
+            }
+
+            // Ghi đè dữ liệu nếu có lỗi từ POST redirect
+            if (!empty($data_old)) {
+                $taiKhoan = (object) array_merge($taiKhoan, $data_old);
+            }
+        }
+
+        // Tải View
+        require_once __DIR__ . '/../views/layout/header.php';
+        require_once __DIR__ . '/../views/nhansu/edit-tai-khoan.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
+
+
+
     // --- CHỨC NĂNG ĐĂNG KÝ (CLIENT) ---
 
     public function formSignup()
