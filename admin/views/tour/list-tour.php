@@ -70,7 +70,7 @@
                             <td><?= number_format($item['GiaTreEm']); ?>₫</td>
                             <td><?= $item['SoNgay']; ?></td>
                             <td><?= $item['SoDem']; ?></td>
-                            <td><?= htmlspecialchars($item['NgayKhoiHanh']); ?></td>
+                            <td><?= $item['NgayKhoiHanh']; ?></td>
                             <td class="text-center">
                                 <?php if (!empty($item['UrlAnh'])): ?>
                                     <img src="<?= htmlspecialchars($item['UrlAnh']); ?>" alt="Ảnh bìa Tour" style="width: 80px; height: 50px; object-fit: cover;">
