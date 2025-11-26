@@ -3,7 +3,8 @@
 define('BASE_URL', 'http://localhost/DU-AN-1_NHOM-3/');
 define('BASE_URL_ADMIN', 'http://localhost/DU-AN-1_NHOM-3/admin/');
 define('BASE_URL_HDV', 'http://localhost/DU-AN-1_NHOM-3/hdv/');
-define('BASE_URL_CLIENT', 'http://localhost/DU-AN-1_NHOM-3/KhachHang/');
+define('BASE_URL_NCC', 'http://localhost/DU-AN-1_NHOM-3/ncc/');
+
 
 
 
