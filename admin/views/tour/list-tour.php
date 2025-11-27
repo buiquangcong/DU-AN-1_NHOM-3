@@ -55,7 +55,7 @@
                     <th>Ảnh Bìa</th>
                     <th>Số chỗ</th>
                     <th>Trạng thái</th>
-                    <th>Hành động</th>
+                    <th>Hành động</th>           
                 </tr>
             </thead>
 
@@ -103,7 +103,7 @@
                                     <a href="?act=delete-tour&id=<?= $item['ID_Tour']; ?>"
                                         class="btn btn-danger btn-sm" title="Xóa tour"
                                         onclick="return confirm('Bạn có chắc chắn muốn xóa tour này không?');">Xóa</a>
-                                </div>
+                                       
                             </td>
                         </tr>
                     <?php endforeach; ?>
