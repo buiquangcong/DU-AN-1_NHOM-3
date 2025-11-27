@@ -74,30 +74,35 @@ class AdminNhaCungCap
     // =========================================================================
     public function update($id, $data)
     {
+        // Giả định tên cột dịch vụ chính xác là 'id_dichvu' (viết thường)
         $sql = "
-            UPDATE {$this->table} SET 
-                ten_nha_cc = :ten_nha_cc,
-                id_dich_vu = :id_dich_vu,
-                dia_chi = :dia_chi,
-                email = :email,
-                so_dien_thoai = :so_dien_thoai
-            WHERE 
-                id_nha_cc = :id
-        ";
+        UPDATE {$this->table} 
+        SET ten_nha_cc = :ten_nha_cc,
+            id_dichvu = :id_dichvu,  -- ĐÃ THÊM CỘT DỊCH VỤ VÀO TRUY VẤN
+            dia_chi = :dia_chi,
+            email = :email,
+            so_dien_thoai = :so_dien_thoai,
+            ngay_cap_nhat = CURRENT_TIMESTAMP
+        WHERE id_nha_cc = :id
+    ";
+
         $stmt = $this->db->prepare($sql);
 
-        // Bind ID (khóa chính)
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-
-        // Bind các trường dữ liệu
+        // Bind các tham số dữ liệu
         $stmt->bindParam(':ten_nha_cc', $data['ten_nha_cc'], PDO::PARAM_STR);
-        $stmt->bindParam(':id_dichvu', $data['id_dichvu'], PDO::PARAM_INT);
+
+        // BIND MỚI: ID Dịch vụ
+        $stmt->bindParam(':id_dichvu', $data['id_dichvu'], PDO::PARAM_INT); // Chắc chắn là PDO::PARAM_INT
+
         $stmt->bindParam(':dia_chi', $data['dia_chi'], PDO::PARAM_STR);
         $stmt->bindParam(':email', $data['email'], PDO::PARAM_STR);
         $stmt->bindParam(':so_dien_thoai', $data['so_dien_thoai'], PDO::PARAM_STR);
+
+        // Bind ID (WHERE clause)
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
         return $stmt->execute();
     }
-
     // =========================================================================
     // 5. DELETE: Xóa nhà cung cấp
     // =========================================================================
@@ -116,13 +121,13 @@ class AdminNhaCungCap
     {
         $stmt = $this->db->prepare("
             INSERT INTO tour_nha_cung_cap (tour_id, nha_cc_id, id_DichVu) 
-            VALUES (:tour_id, :supplier_id, :id_dich_vu)
+            VALUES (:tour_id, :supplier_id, :id_dichvu)
         ");
 
         // GIẢ ĐỊNH tour_id LÀ CHUỖI VÌ BẠN DÙNG ĐỊNH DẠNG 'T-XXXX'
         $stmt->bindParam(':tour_id', $tourId, PDO::PARAM_STR);
         $stmt->bindParam(':supplier_id', $supplierId, PDO::PARAM_INT);
-        $stmt->bindParam(':id_dich_vu', $idDichVu, PDO::PARAM_INT);
+        $stmt->bindParam(':id_dichvu', $idDichVu, PDO::PARAM_INT);
 
         return $stmt->execute();
     }
