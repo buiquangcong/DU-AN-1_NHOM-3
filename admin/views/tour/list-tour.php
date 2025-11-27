@@ -64,18 +64,18 @@
                     <?php foreach ($listTours as $item): ?>
                         <tr>
                             <td class="text-center"><?= $item['ID_Tour'] ?? ''; ?></td>
-                            
+
                             <td><?= htmlspecialchars($item['TenTour'] ?? ''); ?></td>
-                            
+
                             <td><?= htmlspecialchars($item['TenLoaiTour'] ?? ''); ?></td>
-                            
+
                             <td><?= number_format($item['GiaNguoiLon'] ?? 0); ?>₫</td>
                             <td><?= number_format($item['GiaTreEm'] ?? 0); ?>₫</td>
                             <td><?= $item['SoNgay'] ?? ''; ?></td>
                             <td><?= $item['SoDem'] ?? ''; ?></td>
-                            
+
                             <td><?= htmlspecialchars($item['NgayKhoiHanh'] ?? ''); ?></td>
-                            
+
                             <td class="text-center">
                                 <?php if (!empty($item['UrlAnh'])): ?>
                                     <img src="<?= htmlspecialchars($item['UrlAnh'] ?? ''); ?>" alt="Ảnh bìa Tour" style="width: 80px; height: 50px; object-fit: cover;">
@@ -94,9 +94,9 @@
                             </td>
                             <td class="text-center">
                                 <div class="d-grid gap-1 mx-auto" style="max-width: 120px;">
-                                    
+
                                     <a href="?act=tour-detail&id=<?= $item['ID_Tour']; ?>" class="btn btn-primary btn-sm" title="Xem chi tiết Tour, Lịch trình và NCC">Chi tiết</a>
-                                    
+
                                     <a href="?act=manage-itinerary&id=<?= $item['ID_Tour']; ?>" class="btn btn-info btn-sm" title="Quản lý Lịch trình">Lịch trình</a>
                                     <a href="?act=manage-suppliers&id=<?= $item['ID_Tour']; ?>" class="btn btn-secondary btn-sm" title="Quản lý Nhà cung cấp">NCC</a>
                                     <a href="?act=edit-tour&id=<?= $item['ID_Tour']; ?>" class="btn btn-warning btn-sm" title="Sửa thông tin cơ bản">Sửa</a>

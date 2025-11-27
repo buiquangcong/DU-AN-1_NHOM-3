@@ -46,23 +46,20 @@ if (!class_exists('AdminTaiKhoan')) {
         public function getAllTaiKhoan()
         {
             try {
-                // LƯU Ý: Dùng cột 'chuc_vu' từ Controller. Cột 'q.MoTa' được sử dụng 
-                // để lấy Tên quyền hoặc Mô tả (tùy vào cách bạn đặt DB).
                 $sql = "SELECT 
-                        tk.ID_TaiKhoan, 
-                        tk.ho_ten, 
-                        tk.chuc_vu,                     -- SỬA: Lấy cột chuc_vu từ tk
-                        tk.TenDangNhap, 
-                        tk.so_dien_thoai, 
-                        tk.dia_chi,
-                        tk.TrangThai,
-                        q.TenQuyen
-                    FROM 
-                        dm_tai_khoan tk 
-                    JOIN 
-                        dm_quyen q ON tk.ID_Quyen = q.ID_Quyen
-                    ORDER BY 
-                        tk.ID_TaiKhoan DESC";
+                    tk.ID_TaiKhoan, 
+                    tk.ho_ten, 
+                    q.TenQuyen AS chuc_vu,  -- SỬA: Lấy Tên Quyền (q.TenQuyen) và đặt tên alias là chuc_vu
+                    tk.TenDangNhap, 
+                    tk.so_dien_thoai, 
+                    tk.dia_chi,
+                    tk.TrangThai
+                FROM 
+                    dm_tai_khoan tk 
+                JOIN 
+                    dm_quyen q ON tk.ID_Quyen = q.ID_Quyen
+                ORDER BY 
+                    tk.ID_TaiKhoan DESC";
 
                 return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
             } catch (Exception $e) {
@@ -71,13 +68,7 @@ if (!class_exists('AdminTaiKhoan')) {
             }
         }
 
-    // =================================================================
-    // 3. Thêm tài khoản mới (ĐÃ SỬA: Thêm tham số Chức vụ và Trạng thái)
-    // =================================================================
-        /**
-         * @param string $chuc_vu Chức vụ/Mô tả của nhân sự.
-         * @param int $trang_thai Trạng thái (0=Khóa, 1=Hoạt động).
-         */
+        // ===============================================================
         public function insertTaiKhoan($ho_ten, $email, $passwordHash, $id_quyen, $chuc_vu, $sdt, $dia_chi, $trang_thai)
         {
             try {
@@ -108,6 +99,7 @@ if (!class_exists('AdminTaiKhoan')) {
             }
         }
 
+
         // =================================================================
         // 4. Lấy chi tiết tài khoản (ĐÃ SỬA: Lấy cột chuc_vu)
         // =================================================================
@@ -131,10 +123,10 @@ if (!class_exists('AdminTaiKhoan')) {
         // =================================================================
         // 5. Cập nhật tài khoản (ĐÃ SỬA: Thêm cột chuc_vu)
         // =================================================================
-        public function updateTaiKhoan($id, $ho_ten, $email, $id_quyen, $chuc_vu, $sdt, $dia_chi, $trang_thai)
+        public function updateTaiKhoan($id, $ho_ten, $email, $id_quyen, $sdt, $dia_chi, $trang_thai)
         {
             $sql = "UPDATE dm_tai_khoan 
-                SET ho_ten=?, TenDangNhap=?, ID_Quyen=?, chuc_vu=?, so_dien_thoai=?, dia_chi=?, TrangThai=? 
+                SET ho_ten=?, TenDangNhap=?, ID_Quyen=?, so_dien_thoai=?, dia_chi=?, TrangThai=? 
                 WHERE ID_TaiKhoan=?";
 
             $stmt = $this->db->prepare($sql);
@@ -143,7 +135,6 @@ if (!class_exists('AdminTaiKhoan')) {
                 $ho_ten,
                 $email,
                 $id_quyen,
-                $chuc_vu, // SỬA: Thêm chuc_vu
                 $sdt,
                 $dia_chi,
                 $trang_thai, // SỬA: Thêm TrangThai

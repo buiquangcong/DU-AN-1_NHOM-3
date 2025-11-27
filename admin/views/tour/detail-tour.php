@@ -27,7 +27,7 @@
             <p><strong>Tóm tắt:</strong> <?= htmlspecialchars($tourDetail['NoiDungTomTat'] ?? 'Đang cập nhật...') ?></p>
         </div>
     </div>
-    
+
     <ul class="nav nav-tabs" id="tourDetailTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="itinerary-tab" data-bs-toggle="tab" data-bs-target="#itinerary-content" type="button" role="tab" aria-controls="itinerary-content" aria-selected="true">
@@ -39,45 +39,46 @@
                 <i class="fas fa-truck"></i> Nhà Cung Cấp (<?= count($linkedSuppliers) ?>)
             </button>
         </li>
-        </ul>
+    </ul>
 
     <div class="tab-content border border-top-0 p-3" id="tourDetailTabsContent">
-        
+
         <div class="tab-pane fade show active" id="itinerary-content" role="tabpanel" aria-labelledby="itinerary-tab">
             <h4>Lịch trình chi tiết:</h4>
-            <?php if (!empty($listItinerary)): ?>
-                <?php 
-                // Sắp xếp lịch trình theo ngày (Giả định cột 'day_number' tồn tại trong dữ liệu)
-                $groupedItinerary = [];
-                foreach ($listItinerary as $item) {
-                    $groupedItinerary[$item['day_number']][] = $item;
-                }
-                ksort($groupedItinerary); // Sắp xếp theo thứ tự ngày (key)
-                ?>
-                
-                <?php foreach ($groupedItinerary as $day => $activities): ?>
-                    <div class="mb-4">
-                        <h5 class="text-info">NGÀY <?= $day ?></h5>
-                        <ul class="list-group">
-                            <?php foreach ($activities as $activity): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>[<?= htmlspecialchars($activity['time_slot'] ?? 'Cả ngày') ?>]</strong> 
-                                        <?= htmlspecialchars($activity['activity_title'] ?? 'Hoạt động') ?>
-                                        <p class="mb-0 text-muted small"><?= htmlspecialchars($activity['activity_description'] ?? '') ?></p>
-                                    </div>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endforeach; ?>
-
-                <a href="?act=manage-itinerary&id=<?= $tourDetail['ID_Tour']; ?>" class="btn btn-sm btn-outline-info mt-3">Chỉnh sửa Lịch trình</a>
-                
-            <?php else: ?>
-                <p class="text-muted">Tour này chưa có thông tin lịch trình chi tiết.</p>
-                <a href="?act=manage-itinerary&id=<?= $tourDetail['ID_Tour']; ?>" class="btn btn-sm btn-outline-info">Thêm Lịch trình</a>
-            <?php endif; ?>
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr class="text-center">
+                        <th>Ngày</th>
+                        <th>Thời gian</th>
+                        <th>Hoạt động</th>
+                        <th>Mô tả</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($listItinerary)): ?>
+                        <?php foreach ($listItinerary as $item): ?>
+                            <tr>
+                                <td class="text-center"><?= htmlspecialchars($item['ThuTu']) ?></td>
+                                <td><?= $item['KhungGio'] ?></td>
+                                <td><?= $item['TenHoatDong'] ?></td>
+                                <td><?= $item['MoTaHoatDong'] ?></td>
+                                <td class="text-center">
+                                    <a href="?act=add-itinerary-item&id=<?= $item['ID_ChiTietTour'] ?>" class="btn btn-primary btn-sm">Thêm</a>
+                                    <a href="?act=edit-itinerary-item&id=<?= $item['ID_ChiTietTour'] ?>" class="btn btn-warning btn-sm">Sửa</a>
+                                    <a href="?act=delete-itinerary-item&id=<?= $item['ID_ChiTietTour'] ?>&tour_id=<?= $tourDetail['ID_Tour'] ?>"
+                                        class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Bạn có chắc muốn xóa mục này?');">Xóa</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Chưa có mục lịch trình nào cho tour này.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <div class="tab-pane fade" id="suppliers-content" role="tabpanel" aria-labelledby="suppliers-tab">

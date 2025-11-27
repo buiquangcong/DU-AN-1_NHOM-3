@@ -12,24 +12,24 @@
 
         <div class="mb-3">
             <label class="form-label">Dịch vụ cung cấp</label>
-            <select name="id_dich_vu" class="form-select" required>
+            <select name="id_dichvu" class="form-select" required>
                 <option value="" disabled selected>-- Chọn dịch vụ --</option>
-                <?php 
-                
+                <?php
+
                 if (isset($listDichVu) && is_array($listDichVu)):
-                    foreach ($listDichVu as $dv): 
-                        
+                    foreach ($listDichVu as $dv):
+
                 ?>
-                    <option value="<?= $dv['ID_DichVu'] ?>">
-                        <?= htmlspecialchars($dv['TenDichVu']) ?>
-                    </option>
-                <?php 
+                        <option value="<?= $dv['ID_DichVu'] ?>">
+                            <?= htmlspecialchars($dv['TenDichVu']) ?>
+                        </option>
+                <?php
                     endforeach;
-                endif; 
+                endif;
                 ?>
             </select>
-            <?php if (isset($error['id_dich_vu'])): ?>
-                <div class="text-danger"><?= $error['id_dich_vu'] ?></div>
+            <?php if (isset($error['id_dichvu'])): ?>
+                <div class="text-danger"><?= $error['id_dichvu'] ?></div>
             <?php endif; ?>
         </div>
         <div class="mb-3">

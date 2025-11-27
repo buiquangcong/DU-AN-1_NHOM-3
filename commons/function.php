@@ -1,91 +1,92 @@
 <!-- <?php
 // File: commors/function.php
 
-/**
- * Include file env.php để lấy các hằng số kết nối DB
- */
-// require_once __DIR__ . '/env.php';
+        /**
+         * Include file env.php để lấy các hằng số kết nối DB
+         */
+        // require_once __DIR__ . '/env.php';
 
-// /**
-//  * Hàm tạo kết nối PDO
-//  * Chỉ khai báo nếu chưa tồn tại
-//  */
-// if (!function_exists('pdo_get_connection')) {
-//     function pdo_get_connection() {
-//         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8";
-//         $username = DB_USERNAME;
-//         $password = DB_PASSWORD;
+        // /**
+        //  * Hàm tạo kết nối PDO
+        //  * Chỉ khai báo nếu chưa tồn tại
+        //  */
+        // if (!function_exists('pdo_get_connection')) {
+        //     function pdo_get_connection() {
+        //         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8";
+        //         $username = DB_USERNAME;
+        //         $password = DB_PASSWORD;
 
-//         try {
-//             $conn = new PDO($dsn, $username, $password);
-//             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//             return $conn;
-//         } catch (PDOException $e) {
-//             throw new Exception("Lỗi kết nối cơ sở dữ liệu: " . $e->getMessage());
-//         }
-//     }
-// }
+        //         try {
+        //             $conn = new PDO($dsn, $username, $password);
+        //             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        //             return $conn;
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi kết nối cơ sở dữ liệu: " . $e->getMessage());
+        //         }
+        //     }
+        // }
 
-// /**
-//  * Thực thi INSERT, UPDATE, DELETE
-//  */
-// if (!function_exists('pdo_execute')) {
-//     function pdo_execute($sql, ...$args) {
-//         try {
-//             $conn = pdo_get_connection();
-//             $stmt = $conn->prepare($sql);
-//             $stmt->execute($args);
-//         } catch (PDOException $e) {
-//             throw new Exception("Lỗi thực thi SQL: " . $e->getMessage());
-//         } finally {
-//             $conn = null;
-//         }
-//     }
-// }
+        // /**
+        //  * Thực thi INSERT, UPDATE, DELETE
+        //  */
+        // if (!function_exists('pdo_execute')) {
+        //     function pdo_execute($sql, ...$args) {
+        //         try {
+        //             $conn = pdo_get_connection();
+        //             $stmt = $conn->prepare($sql);
+        //             $stmt->execute($args);
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi thực thi SQL: " . $e->getMessage());
+        //         } finally {
+        //             $conn = null;
+        //         }
+        //     }
+        // }
 
-// /**
-//  * SELECT nhiều dòng
-//  */
-// if (!function_exists('pdo_query')) {
-//     function pdo_query($sql, ...$args) {
-//         try {
-//             $conn = pdo_get_connection();
-//             $stmt = $conn->prepare($sql);
-//             $stmt->execute($args);
-//             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-//         } catch (PDOException $e) {
-//             throw new Exception("Lỗi truy vấn SQL: " . $e->getMessage());
-//         } finally {
-//             $conn = null;
-//         }
-//     }
-// }
+        // /**
+        //  * SELECT nhiều dòng
+        //  */
+        // if (!function_exists('pdo_query')) {
+        //     function pdo_query($sql, ...$args) {
+        //         try {
+        //             $conn = pdo_get_connection();
+        //             $stmt = $conn->prepare($sql);
+        //             $stmt->execute($args);
+        //             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi truy vấn SQL: " . $e->getMessage());
+        //         } finally {
+        //             $conn = null;
+        //         }
+        //     }
+        // }
 
-// /**
-//  * SELECT 1 dòng
-//  */
-// if (!function_exists('pdo_query_one')) {
-//     function pdo_query_one($sql, ...$args) {
-//         try {
-//             $conn = pdo_get_connection();
-//             $stmt = $conn->prepare($sql);
-//             $stmt->execute($args);
-//             return $stmt->fetch(PDO::FETCH_ASSOC);
-//         } catch (PDOException $e) {
-//             throw new Exception("Lỗi truy vấn SQL (one row): " . $e->getMessage());
-//         } finally {
-//             $conn = null;
-//         }
-//     }
-// }
-?> -->
+        // /**
+        //  * SELECT 1 dòng
+        //  */
+        // if (!function_exists('pdo_query_one')) {
+        //     function pdo_query_one($sql, ...$args) {
+        //         try {
+        //             $conn = pdo_get_connection();
+        //             $stmt = $conn->prepare($sql);
+        //             $stmt->execute($args);
+        //             return $stmt->fetch(PDO::FETCH_ASSOC);
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi truy vấn SQL (one row): " . $e->getMessage());
+        //         } finally {
+        //             $conn = null;
+        //         }
+        //     }
+        // }
+        ?> -->
 <?php
 // File: commons/functions.php
 
 /**
  * Kết nối cơ sở dữ liệu qua PDO
  */
-function connectDB(): PDO|null {
+function connectDB(): PDO|null
+{
     try {
         $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8";
         $conn = new PDO($dsn, DB_USERNAME, DB_PASSWORD);
@@ -107,7 +108,8 @@ function connectDB(): PDO|null {
  * @param string $folderUpload Thư mục lưu file (tính từ PATH_ROOT)
  * @return string|null Trả về đường dẫn file lưu thành công hoặc null
  */
-function uploadFile(array $file, string $folderUpload): ?string {
+function uploadFile(array $file, string $folderUpload): ?string
+{
     $pathStorage = $folderUpload . time() . '_' . basename($file['name']);
     $from = $file['tmp_name'];
     $to = PATH_ROOT . $pathStorage;
@@ -122,7 +124,8 @@ function uploadFile(array $file, string $folderUpload): ?string {
  * @param int $key Chỉ số của file trong mảng
  * @return string|null
  */
-function uploadFileAlbum(array $file, string $folderUpload, int $key): ?string {
+function uploadFileAlbum(array $file, string $folderUpload, int $key): ?string
+{
     $pathStorage = $folderUpload . time() . '_' . basename($file['name'][$key]);
     $from = $file['tmp_name'][$key];
     $to = PATH_ROOT . $pathStorage;
@@ -133,7 +136,8 @@ function uploadFileAlbum(array $file, string $folderUpload, int $key): ?string {
 /**
  * Xóa file
  */
-function deleteFile(string $file): void {
+function deleteFile(string $file): void
+{
     $pathDelete = PATH_ROOT . $file;
     if (file_exists($pathDelete)) {
         unlink($pathDelete);
@@ -143,7 +147,8 @@ function deleteFile(string $file): void {
 /**
  * Xóa session flash và errors sau khi load trang
  */
-function deleteSessionError(): void {
+function deleteSessionError(): void
+{
     if (isset($_SESSION['flash'])) {
         unset($_SESSION['flash'], $_SESSION['errors']);
     }
@@ -152,14 +157,16 @@ function deleteSessionError(): void {
 /**
  * Format ngày từ DB thành d-m-y
  */
-function formatDate(string $date): string {
+function formatDate(string $date): string
+{
     return date("d-m-y", strtotime($date));
 }
 
 /**
  * Kiểm tra login admin, nếu chưa login thì require form login
  */
-function checkLoginAdmin(): void {
+function checkLoginAdmin(): void
+{
     if (!isset($_SESSION['user_admin'])) {
         require_once './views/auth/formLogin.php';
         exit();

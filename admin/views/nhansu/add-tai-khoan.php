@@ -22,7 +22,7 @@
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="?act=add-tai-khoan">
+    <form method="POST" action="?act=post-add-tai-khoan">
 
         <div class="row">
 
