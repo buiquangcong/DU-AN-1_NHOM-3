@@ -8,6 +8,7 @@ class AdminQuanLyTourController
     public $modelDanhMuc;
     public $modelNhaCungCap; // Thêm model NCC
     public $modelDichVu;
+    public $model; 
 
     public function __construct()
     {
@@ -15,6 +16,7 @@ class AdminQuanLyTourController
         $this->modelDanhMuc = new AdminDanhMuc();
         $this->modelNhaCungCap = new AdminNhaCungCap(); // Khởi tạo model NCC
         $this->modelDichVu = new AdminDichVu();
+         $this->model = new AdminBookingModel();
     }
 
 
@@ -74,6 +76,38 @@ class AdminQuanLyTourController
     require_once __DIR__ . '/../views/tour/detail-tour.php'; 
     require_once __DIR__ . '/../views/layout/footer.php';
 } 
+
+public function historyTours()
+{
+    // ✅ Khởi tạo model Booking
+    $bookingModel = new AdminBookingModel();
+     $historyTours = $bookingModel->getAllHistory();
+
+    // Lấy danh sách lịch sử tour
+    
+     $historyTours = $bookingModel->getAllHistory();
+    require_once __DIR__ . '/../views/layout/header.php';
+    require_once __DIR__ . '/../views/tour/history-tours.php';
+    require_once __DIR__ . '/../views/layout/footer.php';
+}
+ public function historyDetail() {
+        if (!isset($_GET['id'])) {
+            echo "Thiếu ID booking!";
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        // Gọi model
+      $details = $this->model->historyDetailModel($id);
+
+        // Render ra view
+          require_once __DIR__ . '/../views/layout/header.php';
+        include_once __DIR__ . '/../views/tour/history-detail.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
+
+
 
     public function postAddTour() // Đổi tên hàm
     {

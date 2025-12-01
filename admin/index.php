@@ -52,6 +52,8 @@ match ($act) {
     'save-edit-tour'  => (new AdminQuanLyTourController())->postEditTour(),
     'delete-tour'     => (new AdminQuanLyTourController())->deleteTour($_GET['id'] ?? 0),
     'tour-detail'       => (new AdminQuanLyTourController())->tourDetailOverview(),
+    'history-tours' => (new AdminQuanLyTourController())->historyTours(),
+    'history-detail' => (new AdminQuanLyTourController())->historyDetail(),
 
     // --- DANH MỤC ---
     'list-danhmuc'      => (new AdmindanhmucController())->danhsachDanhMuc(),
