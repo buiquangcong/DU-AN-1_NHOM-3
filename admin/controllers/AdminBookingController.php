@@ -18,15 +18,73 @@ class AdminBookingController
      */
     public function danhSachBooking()
     {
-        // Gọi Model để lấy dữ liệu
-        $listBookings = $this->modelBooking->getAllBookings();
+        // 1. Lấy từ khóa tìm kiếm từ URL
+        $keyword = $_GET['keyword'] ?? null;
 
-        // Load view và truyền dữ liệu
+        // 2. Truyền keyword vào Model
+        $listBookings = $this->modelBooking->getAllBookings($keyword);
+
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/list-booking.php';
         require_once __DIR__ . '/../views/layout/footer.php';
     }
 
+    public function deleteBooking()
+    {
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $this->modelBooking->deleteBooking($id);
+            $_SESSION['success'] = "Đã xóa Booking thành công!";
+        }
+        header('Location: ?act=quan-ly-booking');
+        exit;
+    }
+
+    // Hàm editBooking (bạn cần tạo thêm view edit-booking.php tương tự add-booking.php nhưng có dữ liệu đổ vào)
+    public function editBooking()
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            header('Location: ?act=quan-ly-booking');
+            exit;
+        }
+
+        // Lấy dữ liệu cũ để hiển thị
+        $booking = $this->modelBooking->getBookingById($id);
+        $tours = $this->modelBooking->getAllTours();
+
+        if (!$booking) {
+            $_SESSION['error'] = "Không tìm thấy Booking này.";
+            header('Location: ?act=quan-ly-booking');
+            exit;
+        }
+
+        // Xử lý khi bấm nút "Cập nhật"
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'TourID'            => $_POST['tour_id'],
+                'TenKhachHang'      => trim($_POST['TenKhachHang']),
+                'Email'             => trim($_POST['Email']),
+                'NgayDatTour'       => $_POST['ngay_dat'],
+                'SoLuongNguoiLon'   => (int)$_POST['so_luong_nl'],
+                'SoLuongTreEm'      => (int)$_POST['so_luong_te'],
+                'TrangThai'         => (int)$_POST['trang_thai']
+            ];
+
+            if ($this->modelBooking->updateBooking($id, $data)) {
+                $_SESSION['success'] = "Cập nhật Booking #$id thành công!";
+                header('Location: ?act=quan-ly-booking');
+                exit;
+            } else {
+                $errors[] = "Lỗi khi cập nhật (Vui lòng kiểm tra lại dữ liệu).";
+            }
+        }
+
+        // Load view
+        require_once __DIR__ . '/../views/layout/header.php';
+        require_once __DIR__ . '/../views/booking/edit-booking.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
     public function manageGuests()
     {
         $booking_id = $_GET['booking_id'] ?? null;
@@ -35,11 +93,11 @@ class AdminBookingController
             exit;
         }
 
-        // Gọi Model (sẽ tạo ở bước 3)
+        // Gọi Model
         $bookingDetail = $this->modelBooking->getBookingById($booking_id);
         $listGuests = $this->modelBooking->getGuestsByBookingID($booking_id);
 
-        // Load view (sẽ tạo ở bước 4)
+        // Load view
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/manage-guests.php';
         require_once __DIR__ . '/../views/layout/footer.php';
@@ -67,7 +125,7 @@ class AdminBookingController
             'GhiChu' => $_POST['GhiChu']
         ];
 
-        // Gọi Model (sẽ tạo ở bước 3)
+        // Gọi Model
         $this->modelBooking->addGuest($data);
 
         $_SESSION['success'] = "Thêm khách vào đoàn thành công!";
@@ -84,7 +142,7 @@ class AdminBookingController
         $booking_id = $_GET['booking_id'] ?? null;
 
         if ($guest_id) {
-            // Gọi Model (sẽ tạo ở bước 3)
+            // Gọi Model
             $this->modelBooking->deleteGuest($guest_id);
             $_SESSION['success'] = "Xóa khách khỏi đoàn thành công!";
         }
@@ -92,6 +150,7 @@ class AdminBookingController
         header('Location: ?act=manage-guests&booking_id=' . $booking_id);
         exit;
     }
+
     public function updateCheckinStatus()
     {
         $guest_id = $_GET['guest_id'] ?? null;
@@ -99,15 +158,14 @@ class AdminBookingController
         $status = $_GET['status'] ?? 0; // Lấy trạng thái mới từ URL
 
         if ($guest_id && $booking_id) {
-            // Gọi Model (sẽ tạo ở Bước 3)
             $this->modelBooking->updateCheckinStatus($guest_id, $status);
             $_SESSION['success'] = "Cập nhật check-in thành công!";
         }
 
-        // Quay lại trang quản lý khách
         header('Location: ?act=manage-guests&booking_id=' . $booking_id);
         exit;
     }
+
     public function bulkUpdateCheckinStatus()
     {
         $booking_id = $_POST['booking_id'] ?? null;
@@ -116,23 +174,17 @@ class AdminBookingController
             exit;
         }
 
-        // 1. Lấy mảng dữ liệu từ form
-        // Mảng này sẽ có dạng [ guest_id => status, guest_id => status, ... ]
         $guest_statuses = $_POST['guest_status'] ?? [];
 
-        // 2. Lặp qua từng khách trong mảng để cập nhật
         foreach ($guest_statuses as $guest_id => $status) {
-            // 3. Gọi lại hàm Model CŨ (updateCheckinStatus)
-            // Chúng ta tận dụng lại hàm cập nhật 1 khách
             $this->modelBooking->updateCheckinStatus($guest_id, $status);
         }
 
         $_SESSION['success'] = "Cập nhật check-in cho cả đoàn thành công!";
-
-        // Quay lại trang quản lý khách
         header('Location: ?act=manage-guests&booking_id=' . $booking_id);
         exit;
     }
+
     public function importExcelGuests()
     {
         $booking_id = $_POST['ID_Booking'] ?? null;
@@ -147,38 +199,23 @@ class AdminBookingController
             $filePath = $_FILES['excel_file']['tmp_name'];
 
             try {
-                // 2. Dùng thư viện để load file
                 $spreadsheet = IOFactory::load($filePath);
                 $sheet = $spreadsheet->getActiveSheet();
-
                 $count = 0;
 
-                // 3. Lặp qua từng dòng (bắt đầu từ dòng 2, bỏ qua tiêu đề)
                 foreach ($sheet->getRowIterator() as $row) {
-                    if ($row->getRowIndex() == 1) {
-                        continue; // Bỏ qua dòng tiêu đề
-                    }
+                    if ($row->getRowIndex() == 1) continue;
 
-                    // 4. Đọc dữ liệu từ các ô
-                    // (Giả định A=Họ Tên, B=Giới tính, C=Ngày Sinh, D=Liên Hệ, E=CCCD, F=Ghi Chú)
                     $ten_nguoi_di = $sheet->getCell('A' . $row->getRowIndex())->getValue();
-
-                    // Nếu cột Tên trống, dừng lại (coi như hết file)
-                    if (empty($ten_nguoi_di)) {
-                        break;
-                    }
+                    if (empty($ten_nguoi_di)) break;
 
                     $gioi_tinh = $sheet->getCell('B' . $row->getRowIndex())->getValue();
-
-                    // Xử lý ngày sinh (Excel lưu ngày tháng rất phức tạp)
                     $ngay_sinh_excel = $sheet->getCell('C' . $row->getRowIndex())->getValue();
                     $ngay_sinh = null;
                     if (!empty($ngay_sinh_excel)) {
                         if (is_numeric($ngay_sinh_excel)) {
-                            // Nếu là số, chuyển từ Excel timestamp
                             $ngay_sinh = Date::excelToDateTimeObject($ngay_sinh_excel)->format('Y-m-d');
                         } else {
-                            // Nếu là chữ, cố gắng dùng
                             $ngay_sinh = date('Y-m-d', strtotime($ngay_sinh_excel));
                         }
                     }
@@ -187,7 +224,6 @@ class AdminBookingController
                     $cccd = $sheet->getCell('E' . $row->getRowIndex())->getValue();
                     $ghi_chu = $sheet->getCell('F' . $row->getRowIndex())->getValue();
 
-                    // 5. Chuẩn bị data và gọi Model (dùng lại hàm addGuest)
                     $data = [
                         'ID_Booking' => $booking_id,
                         'TenNguoiDi' => $ten_nguoi_di,
@@ -198,14 +234,12 @@ class AdminBookingController
                         'GhiChu' => $ghi_chu
                     ];
 
-                    // Dùng $this->modelBooking (theo style OOP của bạn)
                     $this->modelBooking->addGuest($data);
                     $count++;
                 }
 
                 $_SESSION['success'] = "Đã import thành công $count khách từ file Excel.";
             } catch (Exception $e) {
-                // Nếu file bị lỗi (ví dụ: không phải file Excel)
                 $_SESSION['error']['itinerary'] = "Lỗi đọc file: " . $e->getMessage();
             }
         } else {
@@ -219,12 +253,9 @@ class AdminBookingController
     public function chiTietBooking()
     {
         $id = $_GET['id'] ?? 0;
-
-        // Lấy thông tin booking và khách
         $booking = $this->modelBooking->getBookingById($id);
         $guests  = $this->modelBooking->getGuestsByBookingId($id);
 
-        // Truyền dữ liệu ra view
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/detail-booking.php';
         require_once __DIR__ . '/../views/layout/footer.php';
@@ -241,11 +272,9 @@ class AdminBookingController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // --- 1. Xác thực và Chuẩn hóa dữ liệu đầu vào ---
-
-            // Lấy giá trị, sử dụng toán tử ?? để đảm bảo giá trị luôn tồn tại và gán mặc định
             $tour_id = $_POST['tour_id'] ?? '';
             $ten_kh = trim($_POST['TenKhachHang'] ?? '');
-            $email_kh = trim($_POST['Email'] ?? ''); // <--- SỬA: Lấy giá trị Email
+            $email_kh = trim($_POST['Email'] ?? '');
             $ngay_dat = $_POST['ngay_dat'] ?? '';
             $so_nl = $_POST['so_luong_nl'] ?? 0;
             $so_te = $_POST['so_luong_te'] ?? 0;
@@ -258,7 +287,7 @@ class AdminBookingController
             if (empty($ten_kh)) {
                 $errors[] = "Tên khách hàng không được để trống.";
             }
-            if (empty($email_kh)) { // <--- SỬA: Kiểm tra Email
+            if (empty($email_kh)) {
                 $errors[] = "Email khách hàng không được để trống.";
             }
             if (empty($ngay_dat)) {
@@ -272,18 +301,97 @@ class AdminBookingController
                 $data = [
                     'TourID'            => $tour_id,
                     'TenKhachHang'      => $ten_kh,
-                    'Email'             => $email_kh, // <--- SỬA: Thêm Email vào mảng $data
+                    'Email'             => $email_kh,
                     'NgayDatTour'       => $ngay_dat,
-                    // Ép kiểu về số nguyên để đảm bảo an toàn cho Model
                     'SoLuongNguoiLon'   => (int)$so_nl,
                     'SoLuongTreEm'      => (int)$so_te,
                     'TrangThai'         => (int)$trang_thai
                 ];
 
-                $result = $this->modelBooking->addBookingSimple($data);
+                // === BẮT ĐẦU: Xử lý thêm Booking và lấy ID ===
+                $newBookingId = $this->modelBooking->addBookingSimple($data);
 
-                if ($result) {
-                    $_SESSION['success'] = "Thêm booking thành công!";
+                if ($newBookingId) {
+
+                    // 
+
+
+                    // =================================================================
+                    // [ĐÂY LÀ PHẦN TÔI ĐÃ THÊM VÀO GIÚP BẠN]
+                    // Tự động thêm người đặt tour vào danh sách khách
+                    // =================================================================
+                    $this->modelBooking->addGuest([
+                        'ID_Booking'    => $newBookingId,
+                        'TenNguoiDi'    => $ten_kh,      // Lấy tên từ người đại diện
+                        'GioiTinh'      => 'Khác',
+                        'NgaySinh'      => null,
+                        'LienHe'        => $email_kh,    // Lấy email từ người đại diện
+                        'CCCD_Passport' => '',
+                        'GhiChu'        => 'Người đặt tour (Tự động thêm)'
+                    ]);
+                    // =================================================================
+
+                    // === A. XỬ LÝ KHÁCH HÀNG TỪ FILE EXCEL (Nếu có upload) ===
+                    if (isset($_FILES['guest_file']) && $_FILES['guest_file']['error'] == 0) {
+                        try {
+                            $filePath = $_FILES['guest_file']['tmp_name'];
+                            $spreadsheet = IOFactory::load($filePath);
+                            $sheet = $spreadsheet->getActiveSheet();
+
+                            foreach ($sheet->getRowIterator() as $row) {
+                                if ($row->getRowIndex() == 1) continue;
+
+                                $ten = $sheet->getCell('A' . $row->getRowIndex())->getValue();
+                                if (empty($ten)) break;
+
+                                $gioiTinh = $sheet->getCell('B' . $row->getRowIndex())->getValue();
+                                $ngaySinhRaw = $sheet->getCell('C' . $row->getRowIndex())->getValue();
+                                $ngaySinh = null;
+                                if (!empty($ngaySinhRaw)) {
+                                    if (is_numeric($ngaySinhRaw)) {
+                                        $ngaySinh = Date::excelToDateTimeObject($ngaySinhRaw)->format('Y-m-d');
+                                    } else {
+                                        $ngaySinh = date('Y-m-d', strtotime($ngaySinhRaw));
+                                    }
+                                }
+
+                                $lienHe = $sheet->getCell('D' . $row->getRowIndex())->getValue();
+                                $cccd = $sheet->getCell('E' . $row->getRowIndex())->getValue();
+                                $ghiChu = $sheet->getCell('F' . $row->getRowIndex())->getValue();
+
+                                $this->modelBooking->addGuest([
+                                    'ID_Booking' => $newBookingId,
+                                    'TenNguoiDi' => $ten,
+                                    'GioiTinh' => $gioiTinh,
+                                    'NgaySinh' => $ngaySinh,
+                                    'LienHe' => $lienHe,
+                                    'CCCD_Passport' => $cccd,
+                                    'GhiChu' => $ghiChu
+                                ]);
+                            }
+                        } catch (Exception $e) {
+                            // Log lỗi
+                        }
+                    }
+
+                    // === B. XỬ LÝ KHÁCH HÀNG NHẬP TAY (Mảng guests) ===
+                    if (isset($_POST['guests']) && is_array($_POST['guests'])) {
+                        foreach ($_POST['guests'] as $guest) {
+                            if (!empty(trim($guest['TenNguoiDi']))) {
+                                $this->modelBooking->addGuest([
+                                    'ID_Booking' => $newBookingId,
+                                    'TenNguoiDi' => $guest['TenNguoiDi'],
+                                    'GioiTinh' => $guest['GioiTinh'] ?? 'Khác',
+                                    'NgaySinh' => $guest['NgaySinh'] ?? null,
+                                    'LienHe' => $guest['LienHe'] ?? '',
+                                    'CCCD_Passport' => $guest['CCCD_Passport'] ?? '',
+                                    'GhiChu' => ''
+                                ]);
+                            }
+                        }
+                    }
+
+                    $_SESSION['success'] = "Thêm booking và danh sách đoàn thành công!";
                     header('Location: ?act=quan-ly-booking');
                     exit;
                 } else {
@@ -292,7 +400,6 @@ class AdminBookingController
             }
         }
 
-        // Hiển thị form
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/add-booking.php';
         require_once __DIR__ . '/../views/layout/footer.php';

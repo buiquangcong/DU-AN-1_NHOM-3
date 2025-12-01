@@ -25,7 +25,9 @@ require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
 require_once __DIR__ . '/models/AdminQuanLyTour.php';
 require_once __DIR__ . '/controllers/AdminBookingController.php';
 require_once __DIR__ . '/models/AdminBookingModel.php';
-
+// --- BỔ SUNG LỊCH TRÌNH VÀ ĐIỂM DANH ---
+require_once __DIR__ . '/controllers/AdminLichTrinhController.php';
+require_once __DIR__ . '/models/AdminLichTrinhModel.php';
 require_once __DIR__ . '/controllers/AdminQuanLyNhaCungCapController.php';
 require_once __DIR__ . '/models/AdminNhaCungCap.php';
 require_once __DIR__ . '/models/AdminDichVu.php';
@@ -91,9 +93,7 @@ match ($act) {
     // ... (Các route tour của bạn)
     'unlink-supplier' => (new AdminQuanLyTourController())->unlinkSupplier(),
 
-    // ===============================================
-    // THÊM CÁC ROUTE BOOKING MỚI VÀO ĐÂY
-    // ===============================================
+
     'quan-ly-booking' => (new AdminBookingController())->danhSachBooking(),
     'manage-guests'   => (new AdminBookingController())->manageGuests(),
     'add-guest'       => (new AdminBookingController())->addGuest(),
@@ -103,11 +103,13 @@ match ($act) {
     'delete-guest'    => (new AdminBookingController())->deleteGuest(),
     'bulk-update-checkin'  => (new AdminBookingController())->bulkUpdateCheckinStatus(),
     'import-excel-guests' => (new AdminBookingController())->importExcelGuests(),
-
+    'edit-booking' => (new AdminBookingController())->editBooking(),
+    'delete-booking' => (new AdminBookingController())->deleteBooking(),
     //Booking
     'chi-tiet-booking' => (new AdminBookingController())->chiTietBooking(),
     'add-booking' => (new AdminBookingController())->addBooking(),
-
+    'list-checkin-lich-trinh' => (new AdminLichTrinhController())->listCheckinLichTrinh(),
+    'process-checkin-lich-trinh' => (new AdminLichTrinhController())->processCheckinLichTrinh(),
     // ===============================================
 
 
