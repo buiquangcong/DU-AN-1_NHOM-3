@@ -143,6 +143,55 @@ class AdminBookingModel
             return [];
         }
     }
+public function getAllHistory()
+{
+    try {
+        $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang
+                FROM booking b
+                LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
+                LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
+                WHERE b.TrangThai IN (1, 3) -- 1: Đã xác nhận, 3: Hoàn thành
+                ORDER BY b.NgayDatTour DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        return [];
+    }
+}
+ public function historyDetailModel($booking_id)
+{
+    try {
+        $sql = "
+            SELECT 
+                b.ID_Booking,
+                b.NgayDatTour AS ngay_dat,
+                t.TenTour,
+                (
+                    SELECT UrlAnh 
+                    FROM dm_anh_tour a 
+                    WHERE a.ID_Tour = t.ID_Tour AND a.ViTri = 0
+                    LIMIT 1
+                ) AS UrlAnh,
+                ncc.ten_nha_cc AS TenNCC
+            FROM booking b
+            INNER JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
+            LEFT JOIN ncc_tour_link ncc_link ON ncc_link.ID_Tour = t.ID_Tour
+            LEFT JOIN dm_nha_cung_cap ncc ON ncc.ID_Nha_CC = ncc_link.ID_Nha_CC
+            WHERE b.ID_Booking = :id
+        ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':id' => $booking_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+
+
 
     /**
      * Tính tổng tiền booking theo số lượng và giá tour

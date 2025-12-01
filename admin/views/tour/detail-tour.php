@@ -21,9 +21,13 @@
             <h5 class="mb-0">Thông tin Cơ bản</h5>
         </div>
         <div class="card-body">
+            <p><strong>Tên Tour:</strong> <?= htmlspecialchars($tourDetail['TenTour'] ?? 'Chưa xác định') ?></p>
+            <p><strong>Loại Tour:</strong> <?= htmlspecialchars($tourDetail['ID_LoaiTour'] ?? 'Chưa xác định') ?></p>
             <p><strong>Ngày khởi hành:</strong> <?= htmlspecialchars($tourDetail['NgayKhoiHanh'] ?? 'Chưa xác định') ?></p>
             <p><strong>Thời gian:</strong> <?= ($tourDetail['SoNgay'] ?? 'X') . ' Ngày / ' . ($tourDetail['SoDem'] ?? 'X') . ' Đêm' ?></p>
             <p><strong>Số chỗ tối đa:</strong> <?= $tourDetail['SoCho'] ?? 'N/A' ?></p>
+            <p><strong>Giá người lớn:</strong> <?= htmlspecialchars($tourDetail['GiaNguoiLon'] ?? 'Đang cập nhật...') ?></p>
+            <p><strong>Giá trẻ em:</strong> <?= htmlspecialchars($tourDetail['GiaTreEm'] ?? 'Đang cập nhật...') ?></p>
             <p><strong>Tóm tắt:</strong> <?= htmlspecialchars($tourDetail['NoiDungTomTat'] ?? 'Đang cập nhật...') ?></p>
         </div>
     </div>
