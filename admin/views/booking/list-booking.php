@@ -3,7 +3,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <a href="?act=add-booking" class="btn btn-success">
-            <i class="bi bi-plus-lg"></i> + Thêm Booking
+            <i class="bi bi-plus-lg"></i> Thêm Booking
         </a>
 
         <form action="" method="GET" class="d-flex">
