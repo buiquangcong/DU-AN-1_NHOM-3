@@ -48,11 +48,10 @@
                     <th>ID</th>
                     <th>Tên tour</th>
                     <th>Loại tour</th>
-                    <th>Giá người lớn</th>
-                    <th>Giá trẻ em</th>
-                    <th>Số ngày</th>
-                    <th>Số đêm</th>
-                    <th>Ngày khởi hành</th>
+                    <th>Giá (NL / TE)</th>
+
+                    <th>Thời gian</th>
+
                     <th>Ảnh Bìa</th>
                     <th>Số chỗ</th>
                     <th>Trạng thái</th>
@@ -79,20 +78,22 @@
                             
                             <td class="text-center">
                                 <?php if (!empty($item['UrlAnh'])): ?>
-                                    <img src="<?= htmlspecialchars($item['UrlAnh'] ?? ''); ?>" alt="Ảnh bìa Tour" style="width: 80px; height: 50px; object-fit: cover;">
+                                    <img src="<?= htmlspecialchars($item['UrlAnh'] ?? ''); ?>" alt="Img" style="width: 80px; height: 50px; object-fit: cover; border-radius: 4px;">
                                 <?php else: ?>
-                                    <span class="text-muted">Không có ảnh</span>
+                                    <span class="text-muted small">No Image</span>
                                 <?php endif; ?>
                             </td>
 
-                            <td><?= $item['SoCho'] ?? ''; ?></td>
-                            <td>
+                            <td class="text-center"><?= $item['SoCho'] ?? ''; ?></td>
+
+                            <td class="text-center">
                                 <?php if (($item['TrangThai'] ?? 0) == 1): ?>
                                     <span class="badge bg-success">Hoạt động</span>
                                 <?php else: ?>
                                     <span class="badge bg-secondary">Tạm dừng</span>
                                 <?php endif; ?>
                             </td>
+
                             <td class="text-center">
                                 <div class="d-grid gap-1 mx-auto" style="max-width: 120px;">
                                     
@@ -102,7 +103,7 @@
                                     <a href="?act=manage-suppliers&id=<?= $item['ID_Tour']; ?>" class="btn btn-secondary btn-sm" title="Quản lý Nhà cung cấp">NCC</a>
                                     <a href="?act=edit-tour&id=<?= $item['ID_Tour']; ?>" class="btn btn-warning btn-sm" title="Sửa thông tin cơ bản">Sửa</a>
                                     <a href="?act=delete-tour&id=<?= $item['ID_Tour']; ?>"
-                                        class="btn btn-danger btn-sm" title="Xóa tour"
+                                        class="btn btn-danger btn-sm" title="Xóa"
                                         onclick="return confirm('Bạn có chắc chắn muốn xóa tour này không?');">Xóa</a>
                                        
                             </td>
@@ -110,7 +111,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="12" class="text-center text-muted">
+                        <td colspan="9" class="text-center text-muted">
                             <?php if (!empty($_GET['search_id'])): ?>
                                 Không tìm thấy tour nào khớp với ID "<?= htmlspecialchars($_GET['search_id']) ?>".
                             <?php else: ?>
