@@ -1,5 +1,3 @@
-<!-- <?php
-// File: commors/function.php
 
         /**
          * Include file env.php để lấy các hằng số kết nối DB
