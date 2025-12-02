@@ -1,47 +1,55 @@
 <?php
-class AdminTaiKhoan
-{
-    public $db;
-
-    public function __construct()
+if (!class_exists('AdminTaiKhoan')) {
+    class AdminTaiKhoan
     {
-        // Giả định connectDB() trả về đối tượng PDO
-        $this->db = connectDB();
-    }
+        public $db;
 
-    // 1. Kiểm tra đăng nhập (Không cần sửa đổi)
-    public function checkLogin($email, $password)
-    {
-        // Sử dụng prepare/execute để bảo mật hơn, thay vì truyền biến trực tiếp vào query
-        $sql = "SELECT * FROM dm_tai_khoan WHERE TenDangNhap = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user) {
-            // Trường hợp 1: Mật khẩu trong DB đã mã hóa (Code chuẩn)
-            if (password_verify($password, $user['MatKhau'])) {
-                return $user;
-            }
-            // Trường hợp 2: Mật khẩu chưa mã hóa (Code cũ/tạm thời)
-            else if ($password == $user['MatKhau']) {
-                return $user;
-            } else {
-                return "Mật khẩu không đúng";
-            }
-        } else {
-            return "Email không tồn tại";
+        public function __construct()
+        {
+            // Giả định connectDB() trả về đối tượng PDO
+            $this->db = connectDB();
         }
-    }
 
-    // 2. Lấy danh sách tài khoản (Join dm_tai_khoan và dm_quyen + Thêm SĐT, Địa chỉ)
-    public function getAllTaiKhoan()
-    {
-        // Lấy cột MoTa (chức vụ) từ dm_quyen và các cột mới từ dm_tai_khoan
-        $sql = "SELECT 
+        // =================================================================
+        // 1. Kiểm tra đăng nhập (Giữ nguyên - Code chuẩn hóa)
+        // =================================================================
+        public function checkLogin($email, $password)
+        {
+            try {
+                $sql = "SELECT * FROM dm_tai_khoan WHERE TenDangNhap = ?";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([$email]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($user) {
+                    // Ưu tiên kiểm tra mật khẩu đã mã hóa (Tốt nhất)
+                    if (password_verify($password, $user['MatKhau'])) {
+                        return $user;
+                    }
+                    // Hỗ trợ trường hợp mật khẩu chưa mã hóa (Code tạm thời/cũ)
+                    else if ($password == $user['MatKhau']) {
+                        return $user;
+                    } else {
+                        return "Mật khẩu không đúng";
+                    }
+                } else {
+                    return "Email không tồn tại";
+                }
+            } catch (Exception $e) {
+                return "Lỗi hệ thống khi kiểm tra đăng nhập.";
+            }
+        }
+
+        // =================================================================
+        // 2. Lấy danh sách tài khoản (ĐÃ SỬA: Thêm cột Chức vụ)
+        // =================================================================
+        public function getAllTaiKhoan()
+        {
+            try {
+                $sql = "SELECT 
                     tk.ID_TaiKhoan, 
                     tk.ho_ten, 
-                    q.MoTa AS chuc_vu, 
+                    q.TenQuyen AS chuc_vu,  -- SỬA: Lấy Tên Quyền (q.TenQuyen) và đặt tên alias là chuc_vu
                     tk.TenDangNhap, 
                     tk.so_dien_thoai, 
                     tk.dia_chi,
@@ -52,75 +60,115 @@ class AdminTaiKhoan
                     dm_quyen q ON tk.ID_Quyen = q.ID_Quyen
                 ORDER BY 
                     tk.ID_TaiKhoan DESC";
-        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-    }
 
-    // 3. Thêm tài khoản mới (Thêm SĐT và Địa chỉ)
-    public function insertTaiKhoan($ho_ten, $email, $mat_khau, $id_quyen, $sdt, $dia_chi)
-    {
-        try {
-            // LƯU Ý: Nên MÃ HÓA MẬT KHẨU ở đây: $mat_khau_hash = password_hash($mat_khau, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO dm_tai_khoan 
-                (TenDangNhap, MatKhau, ID_Quyen, ho_ten, so_dien_thoai, dia_chi, TrangThai) 
-                VALUES (?, ?, ?, ?, ?, ?, 1)"; // TrangThai = 1 (Hoạt động)
+                return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                error_log("Lỗi SQL getAllTaiKhoan: " . $e->getMessage());
+                return [];
+            }
+        }
+
+        // ===============================================================
+        public function insertTaiKhoan($ho_ten, $email, $passwordHash, $id_quyen, $chuc_vu, $sdt, $dia_chi, $trang_thai)
+        {
+            try {
+                // LƯU Ý: Controller đã hash mật khẩu, nên ta truyền $passwordHash
+
+                $sql = "INSERT INTO dm_tai_khoan 
+                (ho_ten, TenDangNhap, MatKhau, ID_Quyen, chuc_vu, so_dien_thoai, dia_chi, TrangThai) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+                $stmt = $this->db->prepare($sql);
+
+                // SỬA DỮ LIỆU: Bổ sung chuc_vu và TrangThai vào execute
+                $stmt->execute([
+                    $ho_ten,
+                    $email,
+                    $passwordHash, // Mật khẩu đã Hash
+                    $id_quyen,
+                    $chuc_vu,      // Tham số mới
+                    $sdt,
+                    $dia_chi,
+                    $trang_thai    // Tham số mới
+                ]);
+
+                return true;
+            } catch (PDOException $e) {
+                error_log("Lỗi SQL insertTaiKhoan: " . $e->getMessage());
+                return false;
+            }
+        }
+
+
+        // =================================================================
+        // 4. Lấy chi tiết tài khoản (ĐÃ SỬA: Lấy cột chuc_vu)
+        // =================================================================
+        public function getDetailAdmin($id)
+        {
+            try {
+                // Lấy cột chuc_vu từ dm_tai_khoan và TenQuyen từ dm_quyen
+                $sql = "SELECT tk.*, q.TenQuyen
+                    FROM dm_tai_khoan tk 
+                    JOIN dm_quyen q ON tk.ID_Quyen = q.ID_Quyen
+                    WHERE tk.ID_TaiKhoan = ?";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([$id]);
+                return $stmt->fetch(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                error_log("Lỗi getDetailAdmin: " . $e->getMessage());
+                return null;
+            }
+        }
+
+        // =================================================================
+        // 5. Cập nhật tài khoản (ĐÃ SỬA: Thêm cột chuc_vu)
+        // =================================================================
+        public function updateTaiKhoan($id, $ho_ten, $email, $id_quyen, $sdt, $dia_chi, $trang_thai)
+        {
+            $sql = "UPDATE dm_tai_khoan 
+                SET ho_ten=?, TenDangNhap=?, ID_Quyen=?, so_dien_thoai=?, dia_chi=?, TrangThai=? 
+                WHERE ID_TaiKhoan=?";
 
             $stmt = $this->db->prepare($sql);
 
-            // Dữ liệu: Email, Mật khẩu (Chưa hash), ID Quyền, Họ tên, SĐT mới, Địa chỉ mới
-            $stmt->execute([$email, $mat_khau, $id_quyen, $ho_ten, $sdt, $dia_chi]);
-
-            return true;
-        } catch (PDOException $e) {
-            echo "Lỗi SQL: " . $e->getMessage();
-            return false;
+            return $stmt->execute([
+                $ho_ten,
+                $email,
+                $id_quyen,
+                $sdt,
+                $dia_chi,
+                $trang_thai, // SỬA: Thêm TrangThai
+                $id
+            ]);
         }
-    }
 
-    // 4. Lấy chi tiết tài khoản (Thêm thông tin quyền để hiển thị)
-    public function getDetailAdmin($id)
-    {
-        // JOIN để lấy cả MoTa (Chức vụ) và ID_Quyen
-        $sql = "SELECT tk.*, q.MoTa AS chuc_vu
-                FROM dm_tai_khoan tk 
-                JOIN dm_quyen q ON tk.ID_Quyen = q.ID_Quyen
-                WHERE tk.ID_TaiKhoan = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+        // 6. Đặt lại Mật khẩu (SỬA: Đã bỏ password_hash và để Controller xử lý)
+        public function resetPassword($id, $newPassHash)
+        {
+            $sql = "UPDATE dm_tai_khoan SET MatKhau = ? WHERE ID_TaiKhoan = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$newPassHash, $id]);
+        }
 
-    // 5. Cập nhật tài khoản (Thêm SĐT và Địa chỉ, và cập nhật ID_Quyen)
-    public function updateTaiKhoan($id, $ho_ten, $email, $id_quyen, $sdt, $dia_chi)
-    {
-        $sql = "UPDATE dm_tai_khoan 
-                SET ho_ten=?, TenDangNhap=?, ID_Quyen=?, so_dien_thoai=?, dia_chi=? 
-                WHERE ID_TaiKhoan=?";
+        // 7. Xóa tài khoản (Giữ nguyên)
+        public function deleteTaiKhoan($id)
+        {
+            $sql = "DELETE FROM dm_tai_khoan WHERE ID_TaiKhoan = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$id]);
+        }
 
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            $ho_ten,
-            $email,
-            $id_quyen,
-            $sdt,
-            $dia_chi,
-            $id
-        ]);
-    }
-
-    // 6. Đặt lại Mật khẩu (Sử dụng prepare/execute để bảo mật hơn)
-    public function resetPassword($id, $newPass)
-    {
-        // LƯU Ý: Nên MÃ HÓA MẬT KHẨU ở đây
-        $sql = "UPDATE dm_tai_khoan SET MatKhau = ? WHERE ID_TaiKhoan = ?";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$newPass, $id]);
-    }
-
-    // 7. Xóa tài khoản (Thêm nếu bạn cần)
-    public function deleteTaiKhoan($id)
-    {
-        $sql = "DELETE FROM dm_tai_khoan WHERE ID_TaiKhoan = ?";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$id]);
+        // 8. Lấy danh sách Quyền (Cần cho Controller)
+        public function getAllQuyen()
+        {
+            try {
+                $sql = "SELECT * FROM dm_quyen ORDER BY ID_Quyen ASC";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute();
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {
+                return [];
+            }
+        }
     }
 }

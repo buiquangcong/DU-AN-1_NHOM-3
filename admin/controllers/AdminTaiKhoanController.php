@@ -5,8 +5,7 @@ class AdminTaiKhoanController
 
     public function __construct()
     {
-        // Yêu cầu (require) file Model nếu cần, và khởi tạo
-        // require_once 'path/to/AdminTaiKhoan.php'; 
+        require_once 'models/AdminTaiKhoan.php'; // SỬA THÀNH require_once
         $this->modelTaiKhoan = new AdminTaiKhoan();
     }
 
@@ -64,37 +63,181 @@ class AdminTaiKhoanController
     }
 
     // --- THÊM TÀI KHOẢN (ADMIN) ---
+
+    public function addTaiKhoan()
+    {
+        // Giả định Model có method này để lấy danh sách quyền cho dropdown
+        $roles = $this->modelTaiKhoan->getAllQuyen() ?? [];
+
+        // Khởi tạo $errors và $data (dữ liệu cũ) để truyền vào View
+        $errors = $_SESSION['errors'] ?? [];
+        unset($_SESSION['errors']); // Xóa lỗi sau khi đã lấy
+        $data = [];
+
+        require_once __DIR__ . '/../views/layout/header.php';
+        require_once __DIR__ . '/../views/nhansu/add-tai-khoan.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
+
+    // 2. HÀM XỬ LÝ FORM SUBMIT (POST request)
     public function postAddAdmin()
     {
+        $errors = [];
+        $data = [];
+        $roles = $this->modelTaiKhoan->getAllQuyen() ?? [];
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-            // Lấy dữ liệu từ FORM (Bao gồm SĐT và Địa chỉ mới)
-            $ho_ten = $_POST['ho_ten'];
-            $email = $_POST['email'];
-            $idQuyen = $_POST['id_quyen'] ?? 2;
+            // Lấy dữ liệu và chuẩn hóa từ FORM
+            $data = [
+                'ho_ten'          => trim($_POST['ho_ten'] ?? ''),
+                'email'           => trim($_POST['email'] ?? ''),
+                'mat_khau_raw'    => $_POST['mat_khau'] ?? '',
+                'chuc_vu'         => trim($_POST['chuc_vu'] ?? ''),
+                'id_quyen'        => $_POST['id_quyen'] ?? '',
+                'so_dien_thoai'   => trim($_POST['so_dien_thoai'] ?? null),
+                'dia_chi'         => trim($_POST['dia_chi'] ?? null),
+                'trang_thai'      => $_POST['trang_thai'] ?? 1,
+            ];
 
-            // LẤY DỮ LIỆU MỚI TỪ FORM
-            $so_dien_thoai = $_POST['so_dien_thoai'] ?? null;
-            $dia_chi = $_POST['dia_chi'] ?? null;
+            // --- VALIDATION ---
+            if (empty($data['ho_ten'])) $errors[] = "Họ tên không được để trống.";
+            if (empty($data['email'])) $errors[] = "Email không được để trống.";
+            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $errors[] = "Email không hợp lệ.";
+            if (empty($data['mat_khau_raw'])) $errors[] = "Mật khẩu không được để trống.";
+            if (strlen($data['mat_khau_raw']) < 6) $errors[] = "Mật khẩu phải có ít nhất 6 ký tự.";
+            if (empty($data['chuc_vu'])) $errors[] = "Chức vụ không được để trống.";
+            if (empty($data['id_quyen'])) $errors[] = "Vui lòng chọn Phân quyền.";
 
-            // Mật khẩu mặc định và Hash
-            $passwordRaw = '123456';
-            $passwordHash = password_hash($passwordRaw, PASSWORD_BCRYPT);
+            // NOTE: Cần thêm logic kiểm tra Email đã tồn tại trong Model tại đây.
+            // if ($this->modelTaiKhoan->checkEmailExists($data['email'])) $errors[] = "Email này đã được sử dụng.";
 
-            // GỌI MODEL INSERT VỚI ĐỦ CÁC THAM SỐ MỚI
-            $this->modelTaiKhoan->insertTaiKhoan(
-                $ho_ten,
-                $email,
-                $passwordHash,
-                $idQuyen,
-                $so_dien_thoai, // Tham số mới
-                $dia_chi        // Tham số mới
-            );
+            if (empty($errors)) {
+                // Xử lý Hash mật khẩu
+                $passwordHash = password_hash($data['mat_khau_raw'], PASSWORD_BCRYPT);
 
-            header("Location: " . BASE_URL_ADMIN . '?act=list-tai-khoan');
-            exit();
+                // GỌI MODEL INSERT VỚI ĐỦ CÁC THAM SỐ
+                // LƯU Ý QUAN TRỌNG: Bạn cần đảm bảo Model method insertTaiKhoan
+                // được cập nhật để chấp nhận các tham số mới: $chuc_vu và $trang_thai
+                $result = $this->modelTaiKhoan->insertTaiKhoan(
+                    $data['ho_ten'],
+                    $data['email'],
+                    $passwordHash,
+                    $data['id_quyen'],
+                    $data['chuc_vu'], // Tham số mới
+                    $data['so_dien_thoai'],
+                    $data['dia_chi'],
+                    $data['trang_thai'] // Tham số mới
+                );
+
+                if ($result) {
+                    $_SESSION['success'] = "Thêm tài khoản thành công!";
+                    header("Location: " . BASE_URL_ADMIN . '?act=quan-ly-tai-khoan');
+                    exit();
+                } else {
+                    // Nếu Model trả về lỗi DB/lỗi logic
+                    $errors[] = "Lỗi khi thêm tài khoản (Lỗi Model/Database).";
+                }
+            }
+
+            // Nếu có lỗi, lưu $errors vào session và redirect về form để hiển thị
+            if (!empty($errors)) {
+                $_SESSION['errors'] = $errors;
+                // Lưu dữ liệu POST vào session để đổ lại form (tùy chọn)
+                $_SESSION['data_old'] = $data;
+
+                // Redirect về chính form để hiển thị lỗi
+                header("Location: " . BASE_URL_ADMIN . '?act=add-tai-khoan');
+                exit();
+            }
         }
     }
+
+
+    public function editTaiKhoan()
+    {
+        $id = $_GET['id'] ?? null;
+        if (!$id) { /* ... (xử lý lỗi ID) ... */
+        }
+
+        $errors = $_SESSION['errors'] ?? [];
+        $data_old = $_SESSION['data_old'] ?? [];
+        unset($_SESSION['errors'], $_SESSION['data_old']);
+        $roles = $this->modelTaiKhoan->getAllQuyen() ?? [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // --- XỬ LÝ POST (CẬP NHẬT DỮ LIỆU) ---
+            $data = [
+                'ho_ten'          => trim($_POST['ho_ten'] ?? ''),
+                'email'           => trim($_POST['email'] ?? ''),
+                'mat_khau_moi'    => $_POST['mat_khau_moi'] ?? '',
+                'id_quyen'        => $_POST['id_quyen'] ?? '',
+                'so_dien_thoai'   => trim($_POST['so_dien_thoai'] ?? null),
+                'dia_chi'         => trim($_POST['dia_chi'] ?? null),
+                'trang_thai'      => $_POST['trang_thai'] ?? 1,
+            ];
+
+            // 2. VALIDATION
+            if (empty($data['ho_ten'])) $errors[] = "Họ tên không được để trống.";
+            if (empty($data['email'])) $errors[] = "Email không được để trống.";
+            if (empty($data['id_quyen'])) $errors[] = "Vui lòng chọn Phân quyền.";
+
+            // 3. XỬ LÝ MẬT KHẨU
+            $passwordHash = null;
+            if (!empty($data['mat_khau_moi'])) {
+                if (strlen($data['mat_khau_moi']) < 6) {
+                    $errors[] = "Mật khẩu mới phải có ít nhất 6 ký tự.";
+                } else {
+                    $passwordHash = password_hash($data['mat_khau_moi'], PASSWORD_BCRYPT);
+                }
+            }
+
+            if (empty($errors)) {
+                // GỌI MODEL CẬP NHẬT
+                $result = $this->modelTaiKhoan->updateTaiKhoan(
+                    $id,
+                    $data['ho_ten'],
+                    $data['email'],
+                    $data['id_quyen'],
+                    $data['so_dien_thoai'],
+                    $data['dia_chi'],
+                    $data['trang_thai'],
+                    $passwordHash
+                );
+
+                if ($result) {
+                    $_SESSION['success'] = "Cập nhật tài khoản thành công!";
+                    header("Location: " . BASE_URL_ADMIN . '?act=list-tai-khoan');
+                    exit();
+                } else {
+                    $errors[] = "Lỗi khi cập nhật tài khoản (Database/Model).";
+                }
+            }
+            // Xử lý lỗi sau POST (Redirect)
+            $_SESSION['errors'] = $errors;
+            $_SESSION['data_old'] = $data;
+            header("Location: " . BASE_URL_ADMIN . '?act=edit-tai-khoan&id=' . $id);
+            exit();
+        } else {
+            // --- XỬ LÝ GET (HIỂN THỊ DỮ LIỆU CŨ) ---
+            $taiKhoan = $this->modelTaiKhoan->getDetailAdmin($id);
+
+            if (!$taiKhoan) { /* ... (xử lý lỗi không tìm thấy) ... */
+            }
+
+            // Ghi đè dữ liệu nếu có lỗi từ POST redirect
+            if (!empty($data_old)) {
+                $taiKhoan = (object) array_merge($taiKhoan, $data_old);
+            }
+        }
+
+        // Tải View
+        require_once __DIR__ . '/../views/layout/header.php';
+        require_once __DIR__ . '/../views/nhansu/edit-tai-khoan.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
+
+
 
     // --- CHỨC NĂNG ĐĂNG KÝ (CLIENT) ---
 
@@ -130,16 +273,21 @@ class AdminTaiKhoanController
             $passwordHash = password_hash($password, PASSWORD_BCRYPT);
             $idQuyen = 4; // Mặc định đăng ký mới là Khách hàng (Giả định ID_Quyen=4)
 
-            // GỌI MODEL INSERT VỚI ĐỦ CÁC THAM SỐ MỚI
-            // Vì form đăng ký Client thường không có SĐT/Địa chỉ, 
-            // ta truyền NULL hoặc chuỗi rỗng cho hai tham số này.
+            $chuc_vu = 'Khách hàng'; // Khách hàng không có chức vụ cụ thể
+            $trang_thai = 1;          // Mặc định tài khoản mới là Hoạt động
+            $so_dien_thoai = null;    // Lấy từ form (nếu có) hoặc đặt mặc định NULL
+            $dia_chi = null;          // Lấy từ form (nếu có) hoặc đặt mặc định NULL
+            // --- Kết thúc định nghĩa ---
+
             $this->modelTaiKhoan->insertTaiKhoan(
                 $ho_ten,
                 $email,
                 $passwordHash,
                 $idQuyen,
-                null, // SĐT mặc định là NULL
-                null  // Địa chỉ mặc định là NULL
+                $chuc_vu,           // THAM SỐ 5 (MỚI)
+                $so_dien_thoai,     // THAM SỐ 6
+                $dia_chi,           // THAM SỐ 7
+                $trang_thai         // THAM SỐ 8 (MỚI)
             );
 
             $_SESSION['success'] = "Đăng ký thành công! Vui lòng đăng nhập.";

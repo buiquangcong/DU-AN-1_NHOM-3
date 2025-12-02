@@ -73,9 +73,9 @@
                 <?php foreach ($listItinerary as $item): ?>
                     <tr>
                         <td class="text-center"><?= htmlspecialchars($item['ThuTu']) ?></td>
-                        <td><?= htmlspecialchars($item['KhungGio']) ?></td>
-                        <td><?= htmlspecialchars($item['TenHoatDong']) ?></td>
-                        <td><?= nl2br(htmlspecialchars($item['MoTaHoatDong'])) ?></td>
+                        <td><?= $item['KhungGio'] ?></td>
+                        <td><?= $item['TenHoatDong'] ?></td>
+                        <td><?= $item['MoTaHoatDong'] ?></td>
                         <td class="text-center">
 
                             <a href="?act=edit-itinerary-item&id=<?= $item['ID_ChiTietTour'] ?>" class="btn btn-warning btn-sm">Sửa</a>

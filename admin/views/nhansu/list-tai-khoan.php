@@ -1,7 +1,7 @@
 <div class="container-fluid mt-4">
     <h2 class="mb-4">Danh sách Tài khoản Nhân sự</h2>
 
-    <a href="?act=add-taikhoan" class="btn btn-primary mb-3">➕ Thêm tài khoản</a>
+    <a href="?act=add-tai-khoan" class="btn btn-primary mb-3">➕ Thêm tài khoản</a>
 
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
@@ -27,7 +27,7 @@
                         <td><?= htmlspecialchars($taikhoan['dia_chi'] ?? '') ?></td>
                         <td>
                             <a href="?act=detail-taikhoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-info btn-sm">Chi tiết</a>
-                            <a href="?act=edit-taikhoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-warning btn-sm">Sửa</a>
+                            <a href="?act=edit-tai-khoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-warning btn-sm">Sửa</a>
                             <a href="?act=delete-taikhoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa tài khoản này?')">Xóa</a>
                         </td>
                     </tr>

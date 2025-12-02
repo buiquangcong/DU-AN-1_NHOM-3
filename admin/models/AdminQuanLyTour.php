@@ -84,6 +84,7 @@ class AdminQuanLyTour
         }
     }
 
+
     /**
      * Thêm tour mới (ĐÃ LOẠI BỎ DiemKhoiHanh)
      */
@@ -318,13 +319,6 @@ class AdminQuanLyTour
             return false;
         }
     }
-    // ===============================================
-    // CÁC HÀM QUẢN LÝ NHÀ CUNG CẤP (MỚI THÊM)
-    // ===============================================
-
-    /**
-     * Lấy danh sách NCC đã liên kết với 1 tour
-     */
     public function getLinkedSuppliersByTourID($tour_id)
     {
         try {

@@ -1,8 +1,84 @@
 
-<?php
-// File: commons/function.php
-// require_once __DIR__ . '/env.php';
+        /**
+         * Include file env.php để lấy các hằng số kết nối DB
+         */
+        // require_once __DIR__ . '/env.php';
 
+        // /**
+        //  * Hàm tạo kết nối PDO
+        //  * Chỉ khai báo nếu chưa tồn tại
+        //  */
+        // if (!function_exists('pdo_get_connection')) {
+        //     function pdo_get_connection() {
+        //         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8";
+        //         $username = DB_USERNAME;
+        //         $password = DB_PASSWORD;
+
+        //         try {
+        //             $conn = new PDO($dsn, $username, $password);
+        //             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        //             return $conn;
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi kết nối cơ sở dữ liệu: " . $e->getMessage());
+        //         }
+        //     }
+        // }
+
+        // /**
+        //  * Thực thi INSERT, UPDATE, DELETE
+        //  */
+        // if (!function_exists('pdo_execute')) {
+        //     function pdo_execute($sql, ...$args) {
+        //         try {
+        //             $conn = pdo_get_connection();
+        //             $stmt = $conn->prepare($sql);
+        //             $stmt->execute($args);
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi thực thi SQL: " . $e->getMessage());
+        //         } finally {
+        //             $conn = null;
+        //         }
+        //     }
+        // }
+
+        // /**
+        //  * SELECT nhiều dòng
+        //  */
+        // if (!function_exists('pdo_query')) {
+        //     function pdo_query($sql, ...$args) {
+        //         try {
+        //             $conn = pdo_get_connection();
+        //             $stmt = $conn->prepare($sql);
+        //             $stmt->execute($args);
+        //             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi truy vấn SQL: " . $e->getMessage());
+        //         } finally {
+        //             $conn = null;
+        //         }
+        //     }
+        // }
+
+        // /**
+        //  * SELECT 1 dòng
+        //  */
+        // if (!function_exists('pdo_query_one')) {
+        //     function pdo_query_one($sql, ...$args) {
+        //         try {
+        //             $conn = pdo_get_connection();
+        //             $stmt = $conn->prepare($sql);
+        //             $stmt->execute($args);
+        //             return $stmt->fetch(PDO::FETCH_ASSOC);
+        //         } catch (PDOException $e) {
+        //             throw new Exception("Lỗi truy vấn SQL (one row): " . $e->getMessage());
+        //         } finally {
+        //             $conn = null;
+        //         }
+        //     }
+        // }
+        ?> -->
+<?php
+// File: commons/functions.php
 
 /**
  * Kết nối cơ sở dữ liệu qua PDO
