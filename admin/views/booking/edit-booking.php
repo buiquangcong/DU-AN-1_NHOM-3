@@ -86,6 +86,7 @@
                         <option value="0" <?= ($booking['TrangThai'] == 0) ? 'selected' : '' ?>>Chờ xác nhận</option>
                         <option value="1" <?= ($booking['TrangThai'] == 1) ? 'selected' : '' ?>>Đã xác nhận</option>
                         <option value="2" <?= ($booking['TrangThai'] == 2) ? 'selected' : '' ?>>Đã hủy</option>
+                        <option value="3" <?= ($booking['TrangThai'] == 3) ? 'selected' : '' ?>>Đã Hoàn Thành</option>
                     </select>
                 </div>
 

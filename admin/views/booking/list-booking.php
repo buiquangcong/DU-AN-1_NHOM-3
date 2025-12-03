@@ -93,6 +93,8 @@
                                     <span class="badge bg-success">Đã xác nhận</span>
                                 <?php elseif ($item['TrangThai'] == 2): ?>
                                     <span class="badge bg-danger">Đã hủy</span>
+                                <?php elseif ($item['TrangThai'] == 3): ?>
+                                    <span class="badge bg-secondary text-white">Đã Hoàn Thành</span>
                                 <?php else: ?>
                                     <span class="badge bg-warning text-dark">Chờ xác nhận</span>
                                 <?php endif; ?>

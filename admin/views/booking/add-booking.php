@@ -76,6 +76,7 @@
 
                         <option value="1" disabled style="color: #ccc;">Đã xác nhận</option>
                         <option value="2" disabled style="color: #ccc;">Đã hủy</option>
+                        <option value="3" disabled style="color: #ccc;">Đã Hoàn Thành</option>
 
                     </select>
 

@@ -365,22 +365,23 @@ class AdminBookingModel
     }
 
 
-    public function deleteBooking()
-
+    public function deleteBooking($id)
     {
+        try {
+            // 1. Xóa chi tiết khách trước
+            $sqlDetail = "DELETE FROM chi_tiet_khach WHERE ID_Booking = :id";
+            $stmtDetail = $this->conn->prepare($sqlDetail);
+            $stmtDetail->execute([':id' => $id]);
 
-        $id = $_GET['id'] ?? null;
+            // 2. Xóa Booking
+            $sql = "DELETE FROM booking WHERE ID_Booking = :id";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id' => $id]);
 
-        if ($id) {
-
-            $this->modelBooking->deleteBooking($id);
-
-            $_SESSION['success'] = "Đã xóa Booking thành công!";
+            return true;
+        } catch (Exception $e) {
+            return false;
         }
-
-        header('Location: ?act=quan-ly-booking');
-
-        exit;
     }
 
     public function updateBooking($id, $data)
