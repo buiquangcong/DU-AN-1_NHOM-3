@@ -21,12 +21,41 @@ class AdminBookingController
         // 1. Lấy từ khóa tìm kiếm từ URL
         $keyword = $_GET['keyword'] ?? null;
 
-        // 2. Truyền keyword vào Model
+        // 2. Truyền keyword vào Model lấy danh sách booking
         $listBookings = $this->modelBooking->getAllBookings($keyword);
+
+        // [MỚI] 3. Lấy danh sách Hướng dẫn viên để đổ vào Modal chọn HDV
+        // Hàm này vừa được thêm vào Model ở bước trước
+        $listHDV = $this->modelBooking->load_all_hdv();
 
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/list-booking.php';
         require_once __DIR__ . '/../views/layout/footer.php';
+    }
+
+    /**
+     * [MỚI] Action: Xử lý phân công HDV (?act=cap-nhat-hdv)
+     */
+    public function assignGuide()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id_booking = $_POST['id_booking'] ?? null;
+            $id_hdv = $_POST['id_hdv'] ?? null;
+
+            if ($id_booking && $id_hdv) {
+                // Gọi model để update cột id_huong_dan_vien
+                $result = $this->modelBooking->updateGuide($id_booking, $id_hdv);
+
+                if ($result) {
+                    $_SESSION['success'] = "Đã phân công Hướng dẫn viên thành công!";
+                } else {
+                    $_SESSION['error'] = "Có lỗi xảy ra khi cập nhật.";
+                }
+            }
+        }
+        // Quay lại trang danh sách
+        header('Location: ?act=quan-ly-booking');
+        exit;
     }
 
     public function deleteBooking()
@@ -40,7 +69,7 @@ class AdminBookingController
         exit;
     }
 
-    // Hàm editBooking (bạn cần tạo thêm view edit-booking.php tương tự add-booking.php nhưng có dữ liệu đổ vào)
+    // Hàm editBooking
     public function editBooking()
     {
         $id = $_GET['id'] ?? null;
@@ -49,9 +78,12 @@ class AdminBookingController
             exit;
         }
 
-        // Lấy dữ liệu cũ để hiển thị
+        // 1. Lấy dữ liệu cũ để hiển thị
         $booking = $this->modelBooking->getBookingById($id);
         $tours = $this->modelBooking->getAllTours();
+
+        // [MỚI] Lấy danh sách HDV để truyền sang View (cho ô chọn Select)
+        $listHDV = $this->modelBooking->load_all_hdv();
 
         if (!$booking) {
             $_SESSION['error'] = "Không tìm thấy Booking này.";
@@ -59,7 +91,7 @@ class AdminBookingController
             exit;
         }
 
-        // Xử lý khi bấm nút "Cập nhật"
+        // 2. Xử lý khi bấm nút "Cập nhật"
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [
                 'TourID'            => $_POST['tour_id'],
@@ -68,7 +100,11 @@ class AdminBookingController
                 'NgayDatTour'       => $_POST['ngay_dat'],
                 'SoLuongNguoiLon'   => (int)$_POST['so_luong_nl'],
                 'SoLuongTreEm'      => (int)$_POST['so_luong_te'],
-                'TrangThai'         => (int)$_POST['trang_thai']
+                'TrangThai'         => (int)$_POST['trang_thai'],
+
+                // [MỚI] Lấy ID Hướng dẫn viên từ form
+                // Nếu người dùng chọn "-- Chưa phân công --" (giá trị rỗng) thì lưu là NULL
+                'id_huong_dan_vien' => !empty($_POST['id_hdv']) ? $_POST['id_hdv'] : null
             ];
 
             if ($this->modelBooking->updateBooking($id, $data)) {
@@ -85,6 +121,7 @@ class AdminBookingController
         require_once __DIR__ . '/../views/booking/edit-booking.php';
         require_once __DIR__ . '/../views/layout/footer.php';
     }
+
     public function manageGuests()
     {
         $booking_id = $_GET['booking_id'] ?? null;
@@ -313,11 +350,7 @@ class AdminBookingController
 
                 if ($newBookingId) {
 
-                    // 
-
-
                     // =================================================================
-                    // [ĐÂY LÀ PHẦN TÔI ĐÃ THÊM VÀO GIÚP BẠN]
                     // Tự động thêm người đặt tour vào danh sách khách
                     // =================================================================
                     $this->modelBooking->addGuest([

@@ -66,6 +66,21 @@
                 </div>
 
                 <div class="mb-3">
+                    <label class="form-label fw-bold">Hướng Dẫn Viên Phụ Trách</label>
+                    <select class="form-select" name="id_hdv">
+                        <option value="">-- Chưa phân công --</option>
+                        <?php if (isset($listHDV) && is_array($listHDV)): ?>
+                            <?php foreach ($listHDV as $hdv): ?>
+                                <option value="<?= $hdv['ID_TaiKhoan'] ?>"
+                                    <?= (isset($booking['id_huong_dan_vien']) && $booking['id_huong_dan_vien'] == $hdv['ID_TaiKhoan']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($hdv['ho_ten']) ?> (SĐT: <?= $hdv['so_dien_thoai'] ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label fw-bold">Trạng thái Booking</label>
                     <select class="form-select w-auto" name="trang_thai">
                         <option value="0" <?= ($booking['TrangThai'] == 0) ? 'selected' : '' ?>>Chờ xác nhận</option>

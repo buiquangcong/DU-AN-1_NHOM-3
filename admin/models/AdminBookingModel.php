@@ -4,7 +4,7 @@
 class AdminBookingModel
 {
     public $conn;
-
+    public $modelBooking;
     public function __construct()
     {
         $this->conn = connectDB(); // Giả định hàm connectDB()
@@ -19,18 +19,19 @@ class AdminBookingModel
     public function getAllBookings($keyword = null)
     {
         try {
-            // Thêm cột Email vào câu SQL để hiển thị và tìm kiếm
-            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang, kh.Email
-                      FROM booking b
-                      LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
-                      LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang";
+            // [CẬP NHẬT] Thêm hdv.ho_ten as TenHDV
+            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang, kh.Email,
+                       hdv.ho_ten as TenHDV 
+                  FROM booking b
+                  LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
+                  LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
+                  -- [MỚI] Join để lấy tên HDV dựa trên id_huong_dan_vien vừa thêm
+                  LEFT JOIN dm_tai_khoan hdv ON b.id_huong_dan_vien = hdv.ID_TaiKhoan";
 
-            // Xử lý tìm kiếm
             if ($keyword) {
-                // Tìm theo Email hoặc ID Booking hoặc Tên Khách
                 $sql .= " WHERE kh.Email LIKE :keyword 
-                          OR b.ID_Booking LIKE :keyword 
-                          OR kh.TenKhachHang LIKE :keyword";
+                      OR b.ID_Booking LIKE :keyword 
+                      OR kh.TenKhachHang LIKE :keyword";
             }
 
             $sql .= " ORDER BY b.NgayDatTour DESC";
@@ -46,26 +47,6 @@ class AdminBookingModel
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             return [];
-        }
-    }
-
-    // THÊM: Hàm xóa booking
-    public function deleteBooking($id)
-    {
-        try {
-            // Xóa khách trong chi_tiet_khach trước (nếu chưa có ràng buộc CASCADE khóa ngoại)
-            $sqlDetail = "DELETE FROM chi_tiet_khach WHERE ID_Booking = :id";
-            $stmtDetail = $this->conn->prepare($sqlDetail);
-            $stmtDetail->execute([':id' => $id]);
-
-            // Sau đó xóa Booking chính
-            $sql = "DELETE FROM booking WHERE ID_Booking = :id";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':id' => $id]);
-
-            return true;
-        } catch (Exception $e) {
-            return false;
         }
     }
     public function getBookingById($booking_id)
@@ -337,27 +318,27 @@ class AdminBookingModel
             return [];
         }
     }
-public function getAllHistory()
-{
-    try {
-        $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang
+    public function getAllHistory()
+    {
+        try {
+            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang
                 FROM booking b
                 LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
                 LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
                 WHERE b.TrangThai IN (1, 3) -- 1: Đã xác nhận, 3: Hoàn thành
                 ORDER BY b.NgayDatTour DESC";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        return [];
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
     }
-}
- public function historyDetailModel($booking_id)
-{
-    try {
-        $sql = "
+    public function historyDetailModel($booking_id)
+    {
+        try {
+            $sql = "
             SELECT 
                 b.ID_Booking,
                 b.NgayDatTour AS ngay_dat,
@@ -375,17 +356,32 @@ public function getAllHistory()
             LEFT JOIN dm_nha_cung_cap ncc ON ncc.ID_Nha_CC = ncc_link.ID_Nha_CC
             WHERE b.ID_Booking = :id
         ";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([':id' => $booking_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    } catch (Exception $e) {
-        return [];
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id' => $booking_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
     }
-}
 
 
+    public function deleteBooking()
 
+    {
+
+        $id = $_GET['id'] ?? null;
+
+        if ($id) {
+
+            $this->modelBooking->deleteBooking($id);
+
+            $_SESSION['success'] = "Đã xóa Booking thành công!";
+        }
+
+        header('Location: ?act=quan-ly-booking');
+
+        exit;
+    }
 
     public function updateBooking($id, $data)
     {
@@ -415,25 +411,27 @@ public function getAllHistory()
                 $data['SoLuongTreEm']
             );
 
-            // 3. Cập nhật Booking
+            // 3. Cập nhật Booking (Đã thêm cập nhật HDV)
             $sql = "UPDATE booking SET 
-                        ID_Tour = :tour_id,
-                        NgayDatTour = :ngay_dat,
-                        SoLuongNguoiLon = :sl_nl,
-                        SoLuongTreEm = :sl_te,
-                        TongTien = :tong_tien,
-                        TrangThai = :trang_thai
-                    WHERE ID_Booking = :id";
+                    ID_Tour = :tour_id,
+                    NgayDatTour = :ngay_dat,
+                    SoLuongNguoiLon = :sl_nl,
+                    SoLuongTreEm = :sl_te,
+                    TongTien = :tong_tien,
+                    TrangThai = :trang_thai,
+                    id_huong_dan_vien = :id_hdv   -- [MỚI] Cập nhật cột HDV
+                WHERE ID_Booking = :id";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
-                ':tour_id' => $data['TourID'],
-                ':ngay_dat' => $data['NgayDatTour'],
-                ':sl_nl' => $data['SoLuongNguoiLon'],
-                ':sl_te' => $data['SoLuongTreEm'],
-                ':tong_tien' => $tong_tien,
+                ':tour_id'    => $data['TourID'],
+                ':ngay_dat'   => $data['NgayDatTour'],
+                ':sl_nl'      => $data['SoLuongNguoiLon'],
+                ':sl_te'      => $data['SoLuongTreEm'],
+                ':tong_tien'  => $tong_tien,
                 ':trang_thai' => $data['TrangThai'],
-                ':id' => $id
+                ':id_hdv'     => $data['id_huong_dan_vien'], // [MỚI] Nhận dữ liệu HDV từ Controller
+                ':id'         => $id
             ]);
 
             $this->conn->commit();
@@ -443,6 +441,33 @@ public function getAllHistory()
                 $this->conn->rollBack();
             }
             // echo $e->getMessage(); die(); // Bật lên nếu muốn debug
+            return false;
+        }
+    }
+    public function load_all_hdv()
+    {
+        try {
+            $sql = "SELECT * FROM dm_tai_khoan WHERE ID_Quyen = 2";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    // 2. Cập nhật ID HDV vào bảng booking
+    public function updateGuide($id_booking, $id_hdv)
+    {
+        try {
+            $sql = "UPDATE booking SET id_huong_dan_vien = :id_hdv WHERE ID_Booking = :id";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ':id_hdv' => $id_hdv,
+                ':id' => $id_booking
+            ]);
+            return true;
+        } catch (Exception $e) {
             return false;
         }
     }

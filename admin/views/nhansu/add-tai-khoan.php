@@ -47,13 +47,6 @@
                 <input type="password" class="form-control" id="mat_khau" name="mat_khau"
                     placeholder="Nhập mật khẩu" required>
             </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="chuc_vu" class="form-label">Chức Vụ *</label>
-                <input type="text" class="form-control" id="chuc_vu" name="chuc_vu"
-                    value="<?= htmlspecialchars($data['chuc_vu'] ?? '') ?>"
-                    placeholder="Nhập chức vụ (VD: Nhân viên Sale)" required>
-            </div>
         </div>
 
         <div class="row">

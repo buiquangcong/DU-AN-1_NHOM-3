@@ -28,6 +28,14 @@
         </div>
     <?php endif; ?>
 
+    <?php if (!empty($_SESSION['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= $_SESSION['error'];
+            unset($_SESSION['error']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle shadow-sm">
             <thead class="table-dark text-center">
@@ -38,6 +46,9 @@
                     <th>Ngày Đặt</th>
                     <th>Số Lượng (NL/TE)</th>
                     <th>Tổng Tiền</th>
+
+                    <th style="min-width: 150px;">Hướng Dẫn Viên</th>
+
                     <th>Trạng Thái</th>
                     <th style="width: 200px;">Hành động</th>
                 </tr>
@@ -55,6 +66,28 @@
                             <td class="text-center"><?= date('d/m/Y', strtotime($item['NgayDatTour'])) ?></td>
                             <td class="text-center"><?= $item['SoLuongNguoiLon'] ?> / <?= $item['SoLuongTreEm'] ?></td>
                             <td class="text-end fw-bold text-danger"><?= number_format($item['TongTien']) ?>₫</td>
+
+                            <td class="text-center">
+                                <?php if (!empty($item['TenHDV'])): ?>
+                                    <span class="badge bg-info text-dark border border-info">
+                                        <i class="bi bi-person-badge"></i>
+                                        <?= htmlspecialchars($item['TenHDV']) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <?php if ($item['TrangThai'] == 1): ?>
+                                        <button type="button"
+                                            class="btn btn-outline-primary btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalChonHDV"
+                                            onclick="ganIdBooking(<?= $item['ID_Booking'] ?>)">
+                                            <i class="bi bi-plus-circle"></i> Chọn HDV
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="text-muted small">--</span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </td>
+
                             <td class="text-center">
                                 <?php if ($item['TrangThai'] == 1): ?>
                                     <span class="badge bg-success">Đã xác nhận</span>
@@ -92,8 +125,7 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
-                            <i class="bi bi-inbox fs-1"></i><br>
+                        <td colspan="9" class="text-center text-muted py-4"> <i class="bi bi-inbox fs-1"></i><br>
                             Không tìm thấy kết quả nào.
                         </td>
                     </tr>
@@ -102,3 +134,48 @@
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="modalChonHDV" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="?act=cap-nhat-hdv" method="POST">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-person-plus-fill"></i> Phân công HDV</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Vui lòng chọn hướng dẫn viên phụ trách cho Booking này:</p>
+
+                    <input type="hidden" name="id_booking" id="id_booking_input">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Danh sách HDV khả dụng:</label>
+                        <select name="id_hdv" class="form-select" required>
+                            <option value="">-- Chọn Hướng Dẫn Viên --</option>
+
+                            <?php if (isset($listHDV) && is_array($listHDV)): ?>
+                                <?php foreach ($listHDV as $hdv): ?>
+                                    <option value="<?= $hdv['ID_TaiKhoan'] ?>">
+                                        <?= $hdv['ho_ten'] ?> (SĐT: <?= $hdv['so_dien_thoai'] ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function ganIdBooking(id) {
+        document.getElementById('id_booking_input').value = id;
+    }
+</script>

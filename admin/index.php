@@ -109,6 +109,7 @@ match ($act) {
     'delete-booking' => (new AdminBookingController())->deleteBooking(),
     //Booking
     'chi-tiet-booking' => (new AdminBookingController())->chiTietBooking(),
+    'cap-nhat-hdv' => (new AdminBookingController())->assignGuide(),
     'add-booking' => (new AdminBookingController())->addBooking(),
     'list-checkin-lich-trinh' => (new AdminLichTrinhController())->listCheckinLichTrinh(),
     'process-checkin-lich-trinh' => (new AdminLichTrinhController())->processCheckinLichTrinh(),

@@ -22,8 +22,8 @@ require_once __DIR__ . '/controllers/ClientTourController.php';
 require_once __DIR__ . '/models/ClientTour.php'; // Model để lấy dữ liệu tour cho khách hàng
 
 // 2. TÀI KHOẢN (Đăng nhập, Đăng ký, Hồ sơ)
-require_once __DIR__ . '/controllers/ClientUserController.php';
-require_once __DIR__ . '/models/ClientUser.php';
+require_once __DIR__ . '/controllers/ClientTaiKhoanController.php';
+require_once __DIR__ . '/models/ClientTaiKhoan.php';
 
 // 3. BOOKING/ĐẶT CHỖ (Đặt tour, Xem lịch trình, Theo dõi chuyến đi)
 require_once __DIR__ . '/controllers/ClientBookingController.php';
@@ -40,12 +40,12 @@ match ($act) {
     'tour-detail'       => (new ClientTourController())->tourDetail($_GET['id'] ?? ''), // Xem chi tiết tour
 
     // --- 2. TÀI KHOẢN & XÁC THỰC (Đăng kí, Đăng nhập, Đăng xuất) ---
-    'login'             => (new ClientUserController())->formLogin(),
-    'check-login'       => (new ClientUserController())->login(),
-    'register'          => (new ClientUserController())->formRegister(), // Yêu cầu bạn có chức năng 'đăng kí'
-    'post-register'     => (new ClientUserController())->register(),
-    'logout'            => (new ClientUserController())->logout(),
-    'profile'           => (new ClientUserController())->userProfile(), // Trang quản lý hồ sơ
+    'login'             => (new ClientTaiKhoanController())->formLogin(),
+    'check-login'       => (new ClientTaiKhoanController())->login(),
+    'register'          => (new ClientTaiKhoanController())->formRegister(), // Yêu cầu bạn có chức năng 'đăng kí'
+    'post-register'     => (new ClientTaiKhoanController())->register(),
+    'logout'            => (new ClientTaiKhoanController())->logout(),
+    'profile'           => (new ClientTaiKhoanController())->userProfile(), // Trang quản lý hồ sơ
 
     // --- 3. CHỨC NĂNG ĐẶT TOUR (Booking) ---
     'book-tour'         => (new ClientBookingController())->formBooking($_GET['tour_id'] ?? 0), // Form điền thông tin khách hàng

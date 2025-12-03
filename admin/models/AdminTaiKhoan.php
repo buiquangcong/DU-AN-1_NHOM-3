@@ -9,10 +9,6 @@ if (!class_exists('AdminTaiKhoan')) {
             // Giả định connectDB() trả về đối tượng PDO
             $this->db = connectDB();
         }
-
-        // =================================================================
-        // 1. Kiểm tra đăng nhập (Giữ nguyên - Code chuẩn hóa)
-        // =================================================================
         public function checkLogin($email, $password)
         {
             try {
@@ -39,10 +35,6 @@ if (!class_exists('AdminTaiKhoan')) {
                 return "Lỗi hệ thống khi kiểm tra đăng nhập.";
             }
         }
-
-        // =================================================================
-        // 2. Lấy danh sách tài khoản (ĐÃ SỬA: Thêm cột Chức vụ)
-        // =================================================================
         public function getAllTaiKhoan()
         {
             try {
@@ -69,14 +61,14 @@ if (!class_exists('AdminTaiKhoan')) {
         }
 
         // ===============================================================
-        public function insertTaiKhoan($ho_ten, $email, $passwordHash, $id_quyen, $chuc_vu, $sdt, $dia_chi, $trang_thai)
+        public function insertTaiKhoan($ho_ten, $email, $passwordHash, $id_quyen, $sdt, $dia_chi, $trang_thai)
         {
             try {
                 // LƯU Ý: Controller đã hash mật khẩu, nên ta truyền $passwordHash
 
                 $sql = "INSERT INTO dm_tai_khoan 
-                (ho_ten, TenDangNhap, MatKhau, ID_Quyen, chuc_vu, so_dien_thoai, dia_chi, TrangThai) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                (ho_ten, TenDangNhap, MatKhau, ID_Quyen, so_dien_thoai, dia_chi, TrangThai) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
 
                 $stmt = $this->db->prepare($sql);
 
@@ -86,7 +78,6 @@ if (!class_exists('AdminTaiKhoan')) {
                     $email,
                     $passwordHash, // Mật khẩu đã Hash
                     $id_quyen,
-                    $chuc_vu,      // Tham số mới
                     $sdt,
                     $dia_chi,
                     $trang_thai    // Tham số mới
@@ -98,11 +89,6 @@ if (!class_exists('AdminTaiKhoan')) {
                 return false;
             }
         }
-
-
-        // =================================================================
-        // 4. Lấy chi tiết tài khoản (ĐÃ SỬA: Lấy cột chuc_vu)
-        // =================================================================
         public function getDetailAdmin($id)
         {
             try {
@@ -120,9 +106,6 @@ if (!class_exists('AdminTaiKhoan')) {
             }
         }
 
-        // =================================================================
-        // 5. Cập nhật tài khoản (ĐÃ SỬA: Thêm cột chuc_vu)
-        // =================================================================
         public function updateTaiKhoan($id, $ho_ten, $email, $id_quyen, $sdt, $dia_chi, $trang_thai)
         {
             $sql = "UPDATE dm_tai_khoan 

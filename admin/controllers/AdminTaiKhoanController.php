@@ -93,7 +93,6 @@ class AdminTaiKhoanController
                 'ho_ten'          => trim($_POST['ho_ten'] ?? ''),
                 'email'           => trim($_POST['email'] ?? ''),
                 'mat_khau_raw'    => $_POST['mat_khau'] ?? '',
-                'chuc_vu'         => trim($_POST['chuc_vu'] ?? ''),
                 'id_quyen'        => $_POST['id_quyen'] ?? '',
                 'so_dien_thoai'   => trim($_POST['so_dien_thoai'] ?? null),
                 'dia_chi'         => trim($_POST['dia_chi'] ?? null),
@@ -106,25 +105,18 @@ class AdminTaiKhoanController
             if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $errors[] = "Email không hợp lệ.";
             if (empty($data['mat_khau_raw'])) $errors[] = "Mật khẩu không được để trống.";
             if (strlen($data['mat_khau_raw']) < 6) $errors[] = "Mật khẩu phải có ít nhất 6 ký tự.";
-            if (empty($data['chuc_vu'])) $errors[] = "Chức vụ không được để trống.";
             if (empty($data['id_quyen'])) $errors[] = "Vui lòng chọn Phân quyền.";
 
-            // NOTE: Cần thêm logic kiểm tra Email đã tồn tại trong Model tại đây.
-            // if ($this->modelTaiKhoan->checkEmailExists($data['email'])) $errors[] = "Email này đã được sử dụng.";
 
             if (empty($errors)) {
                 // Xử lý Hash mật khẩu
                 $passwordHash = password_hash($data['mat_khau_raw'], PASSWORD_BCRYPT);
 
-                // GỌI MODEL INSERT VỚI ĐỦ CÁC THAM SỐ
-                // LƯU Ý QUAN TRỌNG: Bạn cần đảm bảo Model method insertTaiKhoan
-                // được cập nhật để chấp nhận các tham số mới: $chuc_vu và $trang_thai
                 $result = $this->modelTaiKhoan->insertTaiKhoan(
                     $data['ho_ten'],
                     $data['email'],
                     $passwordHash,
                     $data['id_quyen'],
-                    $data['chuc_vu'], // Tham số mới
                     $data['so_dien_thoai'],
                     $data['dia_chi'],
                     $data['trang_thai'] // Tham số mới
@@ -132,7 +124,7 @@ class AdminTaiKhoanController
 
                 if ($result) {
                     $_SESSION['success'] = "Thêm tài khoản thành công!";
-                    header("Location: " . BASE_URL_ADMIN . '?act=quan-ly-tai-khoan');
+                    header("Location: " . BASE_URL_ADMIN . '?act=list-tai-khoan');
                     exit();
                 } else {
                     // Nếu Model trả về lỗi DB/lỗi logic
@@ -140,7 +132,6 @@ class AdminTaiKhoanController
                 }
             }
 
-            // Nếu có lỗi, lưu $errors vào session và redirect về form để hiển thị
             if (!empty($errors)) {
                 $_SESSION['errors'] = $errors;
                 // Lưu dữ liệu POST vào session để đổ lại form (tùy chọn)

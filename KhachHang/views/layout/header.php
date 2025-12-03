@@ -141,8 +141,8 @@ $currentPage = $currentPage ?? 'home';
 
                     <div class="d-flex auth-buttons">
                         <?php if (!isset($_SESSION['user_logged_in'])): ?>
-                            <a class="btn btn-sm btn-login me-2" href="/login">Đăng nhập</a>
-                            <a class="btn btn-sm btn-register" href="/register">Đăng ký</a>
+                            <a class="btn btn-sm btn-login me-2" href="<?= BASE_URL . '?act=login' ?>">Đăng nhập</a>
+                            <a class="btn btn-sm btn-register" href="<?= BASE_URL . '?act=register' ?>">Đăng ký</a>
                         <?php else: ?>
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -154,7 +154,7 @@ $currentPage = $currentPage ?? 'home';
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
-                                    <li><a class="dropdown-item" href="/logout"><i class="fa fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                                    <li><a class="dropdown-item" href="<?= BASE_URL . '?act=logout' ?>"><i class="fa fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                                 </ul>
                             </div>
                         <?php endif; ?>
