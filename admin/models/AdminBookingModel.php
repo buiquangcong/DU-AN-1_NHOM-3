@@ -321,11 +321,12 @@ class AdminBookingModel
     public function getAllHistory()
     {
         try {
-            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang
+            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang 
                 FROM booking b
                 LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
                 LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
-                WHERE b.TrangThai IN (1, 3) -- 1: Đã xác nhận, 3: Hoàn thành
+                
+                WHERE b.TrangThai IN ( 3) 
                 ORDER BY b.NgayDatTour DESC";
 
             $stmt = $this->conn->prepare($sql);
