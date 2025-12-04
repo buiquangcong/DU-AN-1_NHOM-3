@@ -45,10 +45,12 @@
                     <th>Khách Hàng / Email</th>
                     <th>Ngày Đặt</th>
                     <th>Số Lượng (NL/TE)</th>
+
                     <th>Tổng Tiền</th>
+                    <th>Đã Cọc</th>
+                    <th>Còn Lại</th>
 
                     <th style="min-width: 150px;">Hướng Dẫn Viên</th>
-
                     <th>Trạng Thái</th>
                     <th style="width: 200px;">Hành động</th>
                 </tr>
@@ -56,6 +58,14 @@
             <tbody>
                 <?php if (!empty($listBookings)): ?>
                     <?php foreach ($listBookings as $item): ?>
+                        <?php
+                        // --- LOGIC TÍNH TIỀN ---
+                        // 1. Lấy tiền cọc (Nếu DB chưa có thì mặc định là 0)
+                        $tien_coc = isset($item['tien_coc']) ? $item['tien_coc'] : 0;
+
+                        // 2. Tính còn lại
+                        $con_lai = $item['TongTien'] - $tien_coc;
+                        ?>
                         <tr>
                             <td class="text-center fw-bold">#<?= htmlspecialchars($item['ID_Booking']) ?></td>
                             <td><?= htmlspecialchars($item['TenTour']) ?></td>
@@ -65,7 +75,22 @@
                             </td>
                             <td class="text-center"><?= date('d/m/Y', strtotime($item['NgayDatTour'])) ?></td>
                             <td class="text-center"><?= $item['SoLuongNguoiLon'] ?> / <?= $item['SoLuongTreEm'] ?></td>
-                            <td class="text-end fw-bold text-danger"><?= number_format($item['TongTien']) ?>₫</td>
+
+                            <td class="text-end fw-bold text-primary">
+                                <?= number_format($item['TongTien']) ?>₫
+                            </td>
+
+                            <td class="text-end fw-bold text-success">
+                                <?= number_format($tien_coc) ?>₫
+                            </td>
+
+                            <td class="text-end fw-bold text-danger">
+                                <?php if ($con_lai <= 0): ?>
+                                    <span class="badge bg-success">Đã thanh toán đủ</span>
+                                <?php else: ?>
+                                    <?= number_format($con_lai) ?>₫
+                                <?php endif; ?>
+                            </td>
 
                             <td class="text-center">
                                 <?php if (!empty($item['TenHDV'])): ?>
@@ -127,7 +152,8 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-4"> <i class="bi bi-inbox fs-1"></i><br>
+                        <td colspan="11" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1"></i><br>
                             Không tìm thấy kết quả nào.
                         </td>
                     </tr>

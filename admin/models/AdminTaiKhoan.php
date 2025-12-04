@@ -154,4 +154,11 @@ if (!class_exists('AdminTaiKhoan')) {
             }
         }
     }
+    function getDetailTaiKhoan($id)
+    {
+        $sql = "SELECT * FROM dm_tai_khoan WHERE ID_TaiKhoan = ?";
+
+        // LƯU Ý: Phải có dấu ngoặc vuông [] bao quanh biến $id
+        return pdo_query_one($sql, [$id]);
+    }
 }

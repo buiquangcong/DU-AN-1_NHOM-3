@@ -25,10 +25,13 @@
                 <div class="mb-3">
                     <label for="tour_id" class="form-label">Chọn Tour <span class="text-danger">*</span></label>
                     <select class="form-select" id="tour_id" name="tour_id" required>
-                        <option value="">-- Chọn Tour --</option>
+                        <option value="" data-gia-nl="0" data-gia-te="0">-- Chọn Tour --</option>
                         <?php foreach ($tours as $tour): ?>
                             <option value="<?= htmlspecialchars($tour['ID_Tour']) ?>"
+                                data-gia-nl="<?= $tour['GiaNguoiLon'] ?>"
+                                data-gia-te="<?= $tour['GiaTreEm'] ?>"
                                 <?= (isset($_POST['tour_id']) && $_POST['tour_id'] == $tour['ID_Tour']) ? 'selected' : '' ?>>
+
                                 <?= htmlspecialchars($tour['TenTour']) ?>
                             </option>
                         <?php endforeach; ?>
@@ -68,22 +71,40 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="trang_thai" class="form-label">Trạng thái</label>
-                    <select class="form-select w-auto" id="trang_thai" name="trang_thai">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="tien_coc" class="form-label fw-bold text-success">Tiền đặt cọc (VNĐ)</label>
+                        <div class="input-group">
+                            <input type="number" min="0" class="form-control" id="tien_coc" name="tien_coc"
+                                value="<?= isset($_POST['tien_coc']) ? $_POST['tien_coc'] : 0 ?>"
+                                placeholder="Nhập số tiền khách cọc">
+                            <span class="input-group-text">VNĐ</span>
+                        </div>
 
-                        <option value="0" selected class="fw-bold text-primary">Chờ xác nhận</option>
+                        <div class="mt-2 p-2 bg-light border rounded small">
+                            <div class="d-flex justify-content-between">
+                                <span>Tổng tiền tour dự kiến:</span>
+                                <span id="hien_thi_tong_tien" class="fw-bold text-danger">0 đ</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted">
+                                <span>Cọc tối thiểu (20%):</span>
+                                <span id="hien_thi_coc_toithieu" class="fw-bold">0 đ</span>
+                            </div>
+                        </div>
+                    </div>
 
-                        <option value="1" disabled style="color: #ccc;">Đã xác nhận</option>
-                        <option value="2" disabled style="color: #ccc;">Đã hủy</option>
-                        <option value="3" disabled style="color: #ccc;">Đã Hoàn Thành</option>
-
-                    </select>
-
-                    <div class="form-text text-muted">
-                        <i class="bi bi-info-circle"></i> Booking mới tạo mặc định là "Chờ xác nhận".
+                    <div class="col-md-6">
+                        <label for="trang_thai" class="form-label">Trạng thái Booking</label>
+                        <select class="form-select" id="trang_thai" name="trang_thai">
+                            <option value="0" selected class="fw-bold text-primary">Chờ xác nhận</option>
+                            <option value="1" disabled style="color: #ccc;">Đã xác nhận</option>
+                            <option value="2" disabled style="color: #ccc;">Đã hủy</option>
+                            <option value="3" disabled style="color: #ccc;">Đã Hoàn Thành</option>
+                        </select>
+                        <div class="form-text text-muted">Booking mới tạo mặc định là "Chờ xác nhận".</div>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -107,7 +128,6 @@
                 </ul>
 
                 <div class="tab-content pt-3" id="guestTabContent">
-
                     <div class="tab-pane fade show active" id="manual" role="tabpanel">
                         <div class="text-end mb-2">
                             <button type="button" class="btn btn-warning btn-sm" id="btnAddGuest">
@@ -171,7 +191,53 @@
 </div>
 
 <script>
+    // --- PHẦN 1: TÍNH TOÁN TIỀN TỰ ĐỘNG ---
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
+    function tinhTongTien() {
+        // Lấy các phần tử DOM
+        const tourSelect = document.getElementById('tour_id');
+        const slNlInput = document.getElementById('so_luong_nl');
+        const slTeInput = document.getElementById('so_luong_te');
+
+        const hienThiTong = document.getElementById('hien_thi_tong_tien');
+        const hienThiCoc = document.getElementById('hien_thi_coc_toithieu');
+
+        // Lấy giá từ data attribute của option đang chọn
+        const optionSelected = tourSelect.options[tourSelect.selectedIndex];
+        const giaNl = parseFloat(optionSelected.getAttribute('data-gia-nl')) || 0;
+        const giaTe = parseFloat(optionSelected.getAttribute('data-gia-te')) || 0;
+
+        // Lấy số lượng nhập vào
+        const slNl = parseFloat(slNlInput.value) || 0;
+        const slTe = parseFloat(slTeInput.value) || 0;
+
+        // Tính toán
+        const tongTien = (giaNl * slNl) + (giaTe * slTe);
+        const cocToiThieu = tongTien * 0.2; // 20%
+
+        // Hiển thị ra màn hình
+        hienThiTong.innerText = formatCurrency(tongTien);
+        hienThiCoc.innerText = formatCurrency(cocToiThieu);
+    }
+
+    // --- PHẦN 2: QUẢN LÝ DÒNG KHÁCH (Javascript cũ của bạn) ---
     document.addEventListener('DOMContentLoaded', function() {
+
+        // Kích hoạt tính tiền ngay khi load trang (phòng trường hợp form giữ lại dữ liệu cũ)
+        tinhTongTien();
+
+        // Gắn sự kiện để tính lại tiền khi thay đổi Tour hoặc Số lượng
+        document.getElementById('tour_id').addEventListener('change', tinhTongTien);
+        document.getElementById('so_luong_nl').addEventListener('input', tinhTongTien);
+        document.getElementById('so_luong_te').addEventListener('input', tinhTongTien);
+
+        // Code thêm dòng khách cũ
         let guestIndex = 1;
         document.getElementById('btnAddGuest').addEventListener('click', function() {
             const container = document.getElementById('guestContainer');

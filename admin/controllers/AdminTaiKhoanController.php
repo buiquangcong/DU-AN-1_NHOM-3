@@ -286,4 +286,42 @@ class AdminTaiKhoanController
             exit();
         }
     }
+
+    function chiTietTaiKhoan()
+    {
+        // 1. Kiểm tra tham số trên URL
+        // QUAN TRỌNG: Phải bắt đúng tên 'ID_Taikhoan' như trong thẻ <a> của bạn
+        if (isset($_GET['ID_Taikhoan']) && $_GET['ID_Taikhoan'] > 0) {
+            $id = $_GET['ID_Taikhoan'];
+
+            // 2. Gọi Model lấy dữ liệu
+            $taikhoan = getDetailTaiKhoan($id);
+
+            // 3. Kiểm tra xem có dữ liệu không
+            if (is_array($taikhoan)) {
+                // Xử lý hiển thị chức vụ cho đẹp (nếu cần)
+                $chuc_vu = '';
+                if ($taikhoan['ID_Quyen'] == 1) $chuc_vu = 'Quản trị viên';
+                elseif ($taikhoan['ID_Quyen'] == 2) $chuc_vu = 'Hướng Dẫn Viên (HDV)';
+                elseif ($taikhoan['ID_Quyen'] == 3) $chuc_vu = 'Nhà Cung Cấp (NCC)';
+                else $chuc_vu = 'Khách hàng';
+
+                // Gán thêm key 'ten_chuc_vu' vào mảng để View dùng luôn
+                $taikhoan['ten_chuc_vu'] = $chuc_vu;
+
+                // 4. Gọi View chi tiết
+                // Lưu ý: Biến $taikhoan sẽ được dùng bên file view
+                require_once __DIR__ . '/../views/layout/header.php';
+                require_once __DIR__ . '/../views/nhansu/detail-tai-khoan.php';
+                require_once __DIR__ . '/../views/layout/footer.php';
+            } else {
+                // Nếu ID không tồn tại trong DB
+                echo "Không tìm thấy tài khoản này.";
+            }
+        } else {
+            // Nếu URL không có ID_Taikhoan -> Quay về danh sách
+            header("Location: ?act=list-tai-khoan");
+            exit();
+        }
+    }
 }

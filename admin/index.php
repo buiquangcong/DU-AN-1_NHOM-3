@@ -127,6 +127,10 @@ match ($act) {
     // 2. Quản lý tài khoản
     'list-tai-khoan'    => (new AdminTaiKhoanController())->danhSachTaiKhoan(),
     'add-tai-khoan'     => (new AdminTaiKhoanController())->postAddAdmin(),
+    'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddAdmin(),
+    'edit-tai-khoan'    => (new AdminTaiKhoanController())->editTaiKhoan($_GET['id'] ?? 0),
+    // 'delete-tai-khoan'  => (new AdminTaiKhoanController())->delete(),
+    'detail-taikhoan'  => (new AdminTaiKhoanController())->chiTietTaiKhoan(),
 
     default => (new AdminTourController())->dashboard(),
 };
