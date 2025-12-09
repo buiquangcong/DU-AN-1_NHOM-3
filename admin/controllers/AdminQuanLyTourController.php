@@ -4,17 +4,17 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 class AdminQuanLyTourController
 {
-    public $modelTour;      // Đổi tên biến
+    public $modelTour;      
     public $modelDanhMuc;
-    public $modelNhaCungCap; // Thêm model NCC
+    public $modelNhaCungCap; 
     public $modelDichVu;
     public $model; 
 
     public function __construct()
     {
-        $this->modelTour = new AdminQuanLyTour(); // Khởi tạo model Tour
+        $this->modelTour = new AdminQuanLyTour(); 
         $this->modelDanhMuc = new AdminDanhMuc();
-        $this->modelNhaCungCap = new AdminNhaCungCap(); // Khởi tạo model NCC
+        $this->modelNhaCungCap = new AdminNhaCungCap(); 
         $this->modelDichVu = new AdminDichVu();
          $this->model = new AdminBookingModel();
     }
@@ -33,7 +33,7 @@ class AdminQuanLyTourController
     }
 
 
-    public function formAddTour() // Đổi tên hàm
+    public function formAddTour() 
     {
         $listDanhmuc = $this->modelDanhMuc->getAllDanhMuc();
         require_once __DIR__ . '/../views/layout/header.php';
@@ -52,7 +52,7 @@ class AdminQuanLyTourController
         exit;
     }
 
-    // 2. LẤY DỮ LIỆU TỪ CÁC MODEL KHÁC NHAU
+ 
     
     // a. Lấy chi tiết Tour (Model: AdminQuanLyTour)
     $tourDetail = $this->modelTour->getTourById($tour_id);
@@ -72,19 +72,17 @@ class AdminQuanLyTourController
 
     // 4. LOAD VIEW
     require_once __DIR__ . '/../views/layout/header.php';
-    // ✅ GỌI ĐÚNG TÊN FILE VIEW BẠN CUNG CẤP
+ 
     require_once __DIR__ . '/../views/tour/detail-tour.php'; 
     require_once __DIR__ . '/../views/layout/footer.php';
 } 
 
 public function historyTours()
 {
-    // ✅ Khởi tạo model Booking
+   
     $bookingModel = new AdminBookingModel();
      $historyTours = $bookingModel->getAllHistory();
 
-    // Lấy danh sách lịch sử tour
-    
      $historyTours = $bookingModel->getAllHistory();
     require_once __DIR__ . '/../views/layout/header.php';
     require_once __DIR__ . '/../views/tour/history-tours.php';
@@ -151,16 +149,16 @@ public function historyTours()
 
             if (empty($error)) {
 
-                // --- CẤU HÌNH ĐƯỜNG DẪN UPLOAD ---
+    
                 $upload_dir_fs = __DIR__ . '/../assets/uploads/';
                 $upload_dir_web = BASE_URL_ADMIN . '/assets/uploads/';
 
-                // --- BƯỚC 1: XỬ LÝ UPLOAD FILE ---
+                
                 $file_name = time() . '_' . basename($fileAnhBia['name']);
                 $target_file_fs = $upload_dir_fs . $file_name;
 
                 if (move_uploaded_file($fileAnhBia['tmp_name'], $target_file_fs)) {
-                    $anh_bia_url = $upload_dir_web . $file_name; // Lưu đường dẫn web
+                    $anh_bia_url = $upload_dir_web . $file_name; 
                 } else {
                     $error['Upload'] = "Lỗi khi di chuyển file.";
                     $_SESSION['error'] = $error;
@@ -178,7 +176,7 @@ public function historyTours()
                     $SoDem,
                     $NoiDungTomTat,
                     $NoiDungChiTiet,
-                    $NgayKhoiHanh, // GIỮ LẠI NgayKhoiHanh
+                    $NgayKhoiHanh, 
                     $SoCho,
                     $TrangThai,
                     $policy_id
@@ -210,11 +208,10 @@ public function historyTours()
         }
     }
 
-    // ✅ Form sửa tour (?act=edit-tour&id=...)
+   
     public function formEditTour($id) // Đổi tên hàm
     {
-        // Gọi hàm model mới: getTourById()
-        // Giữ tên biến $sanpham vì view 'edit-tour.php' đang dùng nó
+        
         $sanpham = $this->modelTour->getTourById($id);
         $listDanhmuc = $this->modelDanhMuc->getAllDanhMuc();
 
