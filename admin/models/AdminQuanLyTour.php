@@ -1,6 +1,5 @@
 <?php
-// File: /admin/models/AdminQuanLyTour.php
-// (Đã đổi tên class AdminSanPham -> AdminQuanLyTour cho khớp)
+
 
 class AdminQuanLyTour
 {
@@ -8,39 +7,29 @@ class AdminQuanLyTour
 
     public function __construct()
     {
-        // Giả định connectDB() trả về một đối tượng PDO
         $this->conn = connectDB();
     }
-
-    // ===============================================
-    // CÁC HÀM QUẢN LÝ TOUR (CỦA BẠN - ĐÃ SỬA TÊN)
-    // ===============================================
-
-    /**
-     * Lấy tất cả tour (sản phẩm)
-     */
     public function getAllTours($search_id = '', $loai_tour_id = '')
     {
         try {
             $sql = 'SELECT 
                         dm_tours.*, 
                         dm_loai_tour.TenLoaiTour,
-                        a.UrlAnh -- LẤY URL ẢNH BÌA
+                        a.UrlAnh 
                     FROM dm_tours
                     LEFT JOIN dm_loai_tour ON dm_tours.ID_LoaiTour = dm_loai_tour.ID_LoaiTour
-                    -- JOIN để lấy ảnh bìa (LoaiAnh = 0)
                     LEFT JOIN dm_anh_tour a ON dm_tours.ID_Tour = a.ID_Tour AND a.LoaiAnh = 0';
 
             $params = [];
             $conditions = [];
 
-            // === Xử lý điều kiện 1: TÌM KIẾM theo ID ===
+            
             if (!empty($search_id)) {
                 $conditions[] = 'dm_tours.ID_Tour LIKE :search_id';
                 $params[':search_id'] = '%' . $search_id . '%';
             }
 
-            // === Xử lý điều kiện 2: LỌC theo Loại Tour ===
+           
             if (!empty($loai_tour_id)) {
                 $conditions[] = 'dm_tours.ID_LoaiTour = :loai_tour_id';
                 $params[':loai_tour_id'] = $loai_tour_id;

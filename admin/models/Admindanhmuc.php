@@ -5,7 +5,7 @@ class AdminDanhMuc {
     public $conn;
 
     public function __construct() {
-        $this->conn = connectDB(); // đúng với function của bạn
+        $this->conn = connectDB(); 
     }
 
     // Lấy tất cả danh mục
@@ -16,7 +16,7 @@ class AdminDanhMuc {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Thêm danh mục (ID tự tăng, chỉ cần tên)
+    // Thêm danh mục 
     public function insertDanhMuc($TenLoaiTour) {
         $sql = "INSERT INTO dm_loai_tour (TenLoaiTour) VALUES (:TenLoaiTour)";
         $stmt = $this->conn->prepare($sql);
@@ -52,7 +52,7 @@ class AdminDanhMuc {
         return true;
 
     } catch (PDOException $e) {
-        // 23000 = lỗi ràng buộc khóa ngoại FK
+    
         if ($e->getCode() == 23000) {
             return "Không thể xóa vì danh mục đang được sử dụng bởi Tour!";
         }

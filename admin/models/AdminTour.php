@@ -1,15 +1,6 @@
 <?php
-// File: /admin/models/AdminTour.php
 
-/**
- * (SỬA LỖI 1) Require file Pdo.php
- * File Model này cần file 'pdo.php' để kết nối DB.
- * Giả sử file 'pdo.php' nằm ở thư mục gốc: /models/pdo.php
- *
- * __DIR__ là '.../admin/models'
- * Đi lùi 2 cấp (../..) về gốc, rồi vào 'models/pdo.php'
- */
-$PROJECT_ROOT_PATH = dirname(__DIR__, 2); // Lấy thư mục gốc (lùi 2 cấp)
+$PROJECT_ROOT_PATH = dirname(__DIR__, 2); 
 
 /**
  * (SỬA LỖI 2) Khai báo Class
@@ -35,18 +26,10 @@ class AdminTour
         $noiDungChiTiet,
         $trangThai
     ) {
-        // (Code SQL INSERT INTO dm_tours... sẽ ở đây)
-        // $sql = "INSERT INTO dm_tours (TenTour, ID_LoaiTour, ...) VALUES (?, ?, ...)";
-        // pdo_execute($sql, $tenTour, $idLoaiTour, ...);
-
-        // (Tạm thời trả về 1 để mô phỏng ID tour mới)
         return 1;
     }
 
-    /**
-     * Hàm này sẽ được gọi để lưu ảnh
-     * (Chúng ta sẽ viết code SQL ở đây sau)
-     */
+  
     public function insertAnhTour($idTourMoi, $image_url_chinh, $is_anh_bia)
     {
         // (Code SQL INSERT INTO dm_anh_tour... sẽ ở đây)        // $sql = "INSERT INTO dm_anh_tour (ID_Tour, DuongDan, LaAnhBia) VALUES (?, ?, ?)";

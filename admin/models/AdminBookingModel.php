@@ -172,18 +172,18 @@ class AdminBookingModel
     // II. QUẢN LÝ KHÁCH HÀNG CHI TIẾT (Guest CRUD)
     // =========================================================================
 
-    // public function getGuestsByBookingID($booking_id)
-    // {
-    //     try {
-    //         // Lưu ý: Tên bảng là chi_tiet_khach (như code bạn gửi)
-    //         $sql = "SELECT * FROM chi_tiet_khach WHERE ID_Booking = :id";
-    //         $stmt = $this->conn->prepare($sql);
-    //         $stmt->execute([':id' => $booking_id]);
-    //         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    //     } catch (Exception $e) {
-    //         return [];
-    //     }
-    // }
+    public function getGuestsByBookingID($booking_id)
+    {
+        try {
+            // Lưu ý: Tên bảng là chi_tiet_khach (như code bạn gửi)
+            $sql = "SELECT * FROM chi_tiet_khach WHERE ID_Booking = :id";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id' => $booking_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
 
     public function getGuestDetail($guest_id)
     {
@@ -197,26 +197,23 @@ class AdminBookingModel
         }
     }
 
-    /**
-     * Thêm khách mới
-     * [SỬA ĐỔI]: Tương thích với key 'TenNguoiDi' từ Controller
-     */
+   
     public function addGuest($data)
     {
         try {
-            // SỬA: Đổi HoTen -> TenNguoiDi
+          
             $sql = "INSERT INTO chi_tiet_khach 
                          (ID_Booking, TenNguoiDi, GioiTinh, NgaySinh, LienHe, CCCD_Passport, GhiChu)
                       VALUES 
                          (:ID_Booking, :TenNguoiDi, :GioiTinh, :NgaySinh, :LienHe, :CCCD_Passport, :GhiChu)";
             $stmt = $this->conn->prepare($sql);
 
-            // Kiểm tra dữ liệu đầu vào (phòng hờ)
+           
             $ten = isset($data['TenNguoiDi']) ? $data['TenNguoiDi'] : (isset($data['HoTen']) ? $data['HoTen'] : '');
 
             $stmt->execute([
                 ':ID_Booking'    => $data['ID_Booking'],
-                ':TenNguoiDi'    => $ten, // SỬA: Map đúng vào cột TenNguoiDi
+                ':TenNguoiDi'    => $ten, 
                 ':GioiTinh'      => $data['GioiTinh'],
                 ':NgaySinh'      => !empty($data['NgaySinh']) ? $data['NgaySinh'] : null,
                 ':LienHe'        => $data['LienHe'] ?? '',
@@ -225,16 +222,16 @@ class AdminBookingModel
             ]);
             return true;
         } catch (Exception $e) {
-            // Bật debug để xem nếu còn lỗi khác
+            
             echo "<div style='background: red; color: white; padding: 20px;'>Lỗi thêm khách: " . $e->getMessage() . "</div>";
             die();
-            // return false;
+            
         }
     }
     public function updateGuest($guest_id, $data)
     {
         try {
-            // SỬA: Đổi HoTen -> TenNguoiDi
+            
             $sql = "UPDATE chi_tiet_khach SET 
                         TenNguoiDi = :TenNguoiDi,
                         GioiTinh = :GioiTinh,
@@ -322,11 +319,12 @@ class AdminBookingModel
     public function getAllHistory()
     {
         try {
-            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang
+            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang 
                 FROM booking b
                 LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
                 LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
-                WHERE b.TrangThai IN (1, 3) -- 1: Đã xác nhận, 3: Hoàn thành
+                
+                WHERE b.TrangThai IN ( 3) 
                 ORDER BY b.NgayDatTour DESC";
 
             $stmt = $this->conn->prepare($sql);
@@ -492,17 +490,8 @@ class AdminBookingModel
         }
     }
 
-    public function getGuestsByBookingID($id)
-    {
-        try {
-            $sql = "SELECT * FROM chi_tiet_khach WHERE ID_Booking = :id";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':id' => $id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            return [];
-        }
-    }
+    // 2. Hàm lấy danh sách khách
+  
 
     public function getSuppliersByTour($tour_id)
     {

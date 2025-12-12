@@ -19,7 +19,7 @@ require_once $PROJECT_ROOT_PATH . '/commons/function.php';
 // ===================== REQUIRE CONTROLLERS & MODELS =====================
 
 // TOUR
-require_once __DIR__ . '/controllers/AdminTourController.php';
+require_once __DIR__ . '/controllers/AdminThongkeController.php';
 
 require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
 require_once __DIR__ . '/models/AdminQuanLyTour.php';
@@ -28,6 +28,7 @@ require_once __DIR__ . '/models/AdminBookingModel.php';
 // --- BỔ SUNG LỊCH TRÌNH VÀ ĐIỂM DANH ---
 require_once __DIR__ . '/controllers/AdminLichTrinhController.php';
 require_once __DIR__ . '/models/AdminLichTrinhModel.php';
+require_once __DIR__ . '/models/AdminThongKeModel.php';
 require_once __DIR__ . '/controllers/AdminQuanLyNhaCungCapController.php';
 require_once __DIR__ . '/models/AdminNhaCungCap.php';
 require_once __DIR__ . '/models/AdminDichVu.php';
@@ -133,5 +134,5 @@ match ($act) {
     // 'delete-tai-khoan'  => (new AdminTaiKhoanController())->delete(),
     'detail-taikhoan'  => (new AdminTaiKhoanController())->chiTietTaiKhoan(),
 
-    default => (new AdminTourController())->dashboard(),
+    default => (new AdminThongkeController())->dashboard(),
 };
