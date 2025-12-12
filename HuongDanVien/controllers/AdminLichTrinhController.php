@@ -1,5 +1,4 @@
 <?php
-// File: /admin/controllers/AdminLichTrinhController.php
 
 require_once __DIR__ . '/../models/AdminLichTrinhModel.php';
 
@@ -12,13 +11,6 @@ class AdminLichTrinhController
         $this->modelLichTrinh = new AdminLichTrinhModel();
     }
 
-    // =========================================================================
-    // I. ĐIỂM DANH THEO LỊCH TRÌNH
-    // =========================================================================
-
-    /**
-     * Action: Hiển thị danh sách Lịch trình và link Điểm danh
-     */
     public function listCheckinLichTrinh()
     {
         $tour_id = $_GET['tour_id'] ?? null;
@@ -35,9 +27,6 @@ class AdminLichTrinhController
         require_once __DIR__ . '/../views/layout/footer.php';
     }
 
-    /**
-     * Action: Hiển thị form Điểm danh và xử lý POST
-     */
     public function processCheckinLichTrinh()
     {
         $tour_id = $_REQUEST['tour_id'] ?? null;
@@ -46,7 +35,6 @@ class AdminLichTrinhController
         if (!$tour_id || !$lich_trinh_id) {
             $_SESSION['error'] = "Thiếu thông tin Tour hoặc Lịch trình.";
 
-            // LOGIC CHUYỂN HƯỚNG ĐÃ SỬA: Đảm bảo chuyển hướng an toàn.
             $redirect_url = $tour_id
                 ? ('?act=list-checkin-lich-trinh&tour_id=' . $tour_id)
                 : '?act=quan-ly-booking';
@@ -55,7 +43,6 @@ class AdminLichTrinhController
             exit;
         }
 
-        // --- 1. Xử lý POST (LƯU TRẠNG THÁI) ---
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $guest_statuses = $_POST['status'] ?? [];
             $success_count = 0;
@@ -76,15 +63,10 @@ class AdminLichTrinhController
             exit;
         }
 
-        // --- 2. Xử lý GET (HIỂN THỊ FORM) ---
         $listKhachAndStatus = $this->modelLichTrinh->getGuestsAndCheckinStatus($tour_id, $lich_trinh_id);
 
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/checkin-form-lich-trinh.php';
         require_once __DIR__ . '/../views/layout/footer.php';
     }
-
-    // =========================================================================
-    // II. CRUD LỊCH TRÌNH (BỔ SUNG)
-    // =========================================================================
 }

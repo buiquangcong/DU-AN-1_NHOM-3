@@ -6,13 +6,9 @@ if (!class_exists('HdvTaiKhoan')) {
 
         public function __construct()
         {
-            // Giả định connectDB() trả về đối tượng PDO
             $this->db = connectDB();
         }
 
-        // =================================================================
-        // 1. Kiểm tra đăng nhập (Giữ nguyên - Code chuẩn hóa)
-        // =================================================================
         public function checkLogin($email, $password)
         {
             try {
@@ -22,12 +18,9 @@ if (!class_exists('HdvTaiKhoan')) {
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($user) {
-                    // Ưu tiên kiểm tra mật khẩu đã mã hóa (Tốt nhất)
                     if (password_verify($password, $user['MatKhau'])) {
                         return $user;
-                    }
-                    // Hỗ trợ trường hợp mật khẩu chưa mã hóa (Code tạm thời/cũ)
-                    else if ($password == $user['MatKhau']) {
+                    } else if ($password == $user['MatKhau']) {
                         return $user;
                     } else {
                         return "Mật khẩu không đúng";
@@ -40,18 +33,13 @@ if (!class_exists('HdvTaiKhoan')) {
             }
         }
 
-        // =================================================================
-        // 2. Lấy danh sách tài khoản (ĐÃ SỬA: Thêm cột Chức vụ)
-        // =================================================================
         public function getAllTaiKhoan()
         {
             try {
-                // LƯU Ý: Dùng cột 'chuc_vu' từ Controller. Cột 'q.MoTa' được sử dụng 
-                // để lấy Tên quyền hoặc Mô tả (tùy vào cách bạn đặt DB).
                 $sql = "SELECT 
                         tk.ID_TaiKhoan, 
                         tk.ho_ten, 
-                        tk.chuc_vu,                     -- SỬA: Lấy cột chuc_vu từ tk
+                        tk.chuc_vu,                  
                         tk.TenDangNhap, 
                         tk.so_dien_thoai, 
                         tk.dia_chi,
@@ -71,50 +59,10 @@ if (!class_exists('HdvTaiKhoan')) {
             }
         }
 
-    // =================================================================
-    // 3. Thêm tài khoản mới (ĐÃ SỬA: Thêm tham số Chức vụ và Trạng thái)
-    // =================================================================
-        /**
-         * @param string $chuc_vu Chức vụ/Mô tả của nhân sự.
-         * @param int $trang_thai Trạng thái (0=Khóa, 1=Hoạt động).
-         */
-        public function insertTaiKhoan($ho_ten, $email, $passwordHash, $id_quyen, $chuc_vu, $sdt, $dia_chi, $trang_thai)
-        {
-            try {
-                // LƯU Ý: Controller đã hash mật khẩu, nên ta truyền $passwordHash
 
-                $sql = "INSERT INTO dm_tai_khoan 
-                (ho_ten, TenDangNhap, MatKhau, ID_Quyen, chuc_vu, so_dien_thoai, dia_chi, TrangThai) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-                $stmt = $this->db->prepare($sql);
-
-                // SỬA DỮ LIỆU: Bổ sung chuc_vu và TrangThai vào execute
-                $stmt->execute([
-                    $ho_ten,
-                    $email,
-                    $passwordHash, // Mật khẩu đã Hash
-                    $id_quyen,
-                    $chuc_vu,      // Tham số mới
-                    $sdt,
-                    $dia_chi,
-                    $trang_thai    // Tham số mới
-                ]);
-
-                return true;
-            } catch (PDOException $e) {
-                error_log("Lỗi SQL insertTaiKhoan: " . $e->getMessage());
-                return false;
-            }
-        }
-
-        // =================================================================
-        // 4. Lấy chi tiết tài khoản (ĐÃ SỬA: Lấy cột chuc_vu)
-        // =================================================================
         public function getDetailHdv($id)
         {
             try {
-                // Lấy cột chuc_vu từ dm_tai_khoan và TenQuyen từ dm_quyen
                 $sql = "SELECT tk.*, q.TenQuyen
                     FROM dm_tai_khoan tk 
                     JOIN dm_quyen q ON tk.ID_Quyen = q.ID_Quyen
@@ -128,46 +76,6 @@ if (!class_exists('HdvTaiKhoan')) {
             }
         }
 
-        // =================================================================
-        // 5. Cập nhật tài khoản (ĐÃ SỬA: Thêm cột chuc_vu)
-        // =================================================================
-        public function updateTaiKhoan($id, $ho_ten, $email, $id_quyen, $chuc_vu, $sdt, $dia_chi, $trang_thai)
-        {
-            $sql = "UPDATE dm_tai_khoan 
-                SET ho_ten=?, TenDangNhap=?, ID_Quyen=?, chuc_vu=?, so_dien_thoai=?, dia_chi=?, TrangThai=? 
-                WHERE ID_TaiKhoan=?";
-
-            $stmt = $this->db->prepare($sql);
-
-            return $stmt->execute([
-                $ho_ten,
-                $email,
-                $id_quyen,
-                $chuc_vu, // SỬA: Thêm chuc_vu
-                $sdt,
-                $dia_chi,
-                $trang_thai, // SỬA: Thêm TrangThai
-                $id
-            ]);
-        }
-
-        // 6. Đặt lại Mật khẩu (SỬA: Đã bỏ password_hash và để Controller xử lý)
-        public function resetPassword($id, $newPassHash)
-        {
-            $sql = "UPDATE dm_tai_khoan SET MatKhau = ? WHERE ID_TaiKhoan = ?";
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([$newPassHash, $id]);
-        }
-
-        // 7. Xóa tài khoản (Giữ nguyên)
-        public function deleteTaiKhoan($id)
-        {
-            $sql = "DELETE FROM dm_tai_khoan WHERE ID_TaiKhoan = ?";
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([$id]);
-        }
-
-        // 8. Lấy danh sách Quyền (Cần cho Controller)
         public function getAllQuyen()
         {
             try {

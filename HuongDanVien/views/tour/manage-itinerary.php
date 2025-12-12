@@ -1,5 +1,4 @@
 <?php
-// Giả sử $tourDetail, $listItinerary đã có
 ?>
 
 <div class="container mt-4">
@@ -47,10 +46,7 @@
                     <td><?= nl2br(htmlspecialchars($item['MoTaHoatDong'])) ?></td>
                     <td class="text-center">
 
-                        <a href="?act=edit-itinerary-item&id=<?= $item['ID_ChiTietTour'] ?>" class="btn btn-warning btn-sm">Sửa</a>
-                        <a href="?act=delete-itinerary-item&id=<?= $item['ID_ChiTietTour'] ?>&tour_id=<?= $tourDetail['ID_Tour'] ?>"
-                            class="btn btn-danger btn-sm"
-                            onclick="return confirm('Bạn có chắc muốn xóa mục này?');">Xóa</a>
+                        <a href="?act=edit-itinerary-item&id=<?= $item['ID_ChiTietTour'] ?>" class="btn btn-warning btn-sm">Xem</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
