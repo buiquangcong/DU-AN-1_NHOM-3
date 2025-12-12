@@ -60,7 +60,7 @@
                     <?php foreach ($listBookings as $item): ?>
                         <?php
                         // --- LOGIC TÍNH TIỀN ---
-                        // 1. Lấy tiền cọc (Nếu DB chưa có thì mặc định là 0)
+                        // 1. Lấy tiền cọc (Nếu DB null thì = 0)
                         $tien_coc = isset($item['tien_coc']) ? $item['tien_coc'] : 0;
 
                         // 2. Tính còn lại

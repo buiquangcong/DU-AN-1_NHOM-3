@@ -5,6 +5,14 @@
 
     <h2 class="mb-4 text-center">Cập nhật Booking #<?= htmlspecialchars($booking['ID_Booking']) ?></h2>
 
+    <?php
+    $lichSuThanhToan = isset($lichSuThanhToan) ? $lichSuThanhToan : [];
+    $tongDaThu = 0;
+    foreach ($lichSuThanhToan as $pay) {
+        $tongDaThu += $pay['so_tien'];
+    }
+    ?>
+
     <?php if (!empty($errors)): ?>
         <div class="alert alert-danger">
             <ul>
@@ -16,7 +24,7 @@
     <?php endif; ?>
 
     <form method="POST" action="">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm mb-4">
             <div class="card-header bg-warning text-dark fw-bold">
                 Thông tin Booking
             </div>
@@ -90,10 +98,97 @@
                     </select>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label">Tổng tiền hiện tại:</label>
-                    <input type="text" class="form-control bg-light" value="<?= number_format($booking['TongTien']) ?> VNĐ" readonly>
-                    <small class="text-muted">Hệ thống sẽ tự động tính lại tổng tiền sau khi bấm Cập nhật dựa trên số lượng và giá tour.</small>
+                <div class="card bg-light mb-4 border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary border-bottom pb-2">Thông tin thanh toán</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Tổng tiền Tour:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control fw-bold text-primary"
+                                        value="<?= number_format($booking['TongTien']) ?>" readonly>
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <input type="hidden" id="tong_tien_goc" value="<?= $booking['TongTien'] ?>">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold text-success">Đã thanh toán (Tổng):</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control fw-bold text-success"
+                                        value="<?= number_format($tongDaThu) ?>" readonly>
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <input type="hidden" id="tien_coc" name="tien_coc" value="<?= $tongDaThu ?>">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold text-danger">Số tiền còn lại:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control fw-bold text-danger"
+                                        id="con_lai_hien_thi" readonly>
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <small class="text-muted" id="trang_thai_thanh_toan"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-white mb-4 border shadow-sm">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-secondary"><i class="bi bi-clock-history"></i> Lịch sử giao dịch</h5>
+                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalAddPayment">
+                            <i class="bi bi-plus-circle"></i> Thêm giao dịch
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered mb-0 text-center align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Ngày thanh toán</th>
+                                        <th>Số tiền</th>
+                                        <th>Phương thức</th>
+                                        <th>Chứng từ</th>
+                                        <th>Ghi chú</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (!empty($lichSuThanhToan)): ?>
+                                        <?php foreach ($lichSuThanhToan as $key => $pay): ?>
+                                            <tr>
+                                                <td><?= $key + 1 ?></td>
+                                                <td><?= date('d/m/Y H:i', strtotime($pay['ngay_thanh_toan'])) ?></td>
+                                                <td class="fw-bold text-success"><?= number_format($pay['so_tien']) ?> đ</td>
+                                                <td>
+                                                    <span class="badge bg-<?= $pay['phuong_thuc'] == 'Chuyển khoản' ? 'info' : 'secondary' ?>">
+                                                        <?= htmlspecialchars($pay['phuong_thuc']) ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <?php if (!empty($pay['anh_chung_tu'])): ?>
+                                                        <a href="uploads/chung_tu/<?= $pay['anh_chung_tu'] ?>" target="_blank">
+                                                            <img src="uploads/chung_tu/<?= $pay['anh_chung_tu'] ?>" alt="Bill"
+                                                                class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <span class="text-muted small">---</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="text-start small"><?= htmlspecialchars($pay['ghi_chu']) ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="6" class="text-muted py-3">Chưa có lịch sử giao dịch nào.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="text-center">
@@ -106,3 +201,85 @@
         </div>
     </form>
 </div>
+
+<div class="modal fade" id="modalAddPayment" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="?act=them-thanh-toan" method="POST" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Thêm giao dịch mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id_booking" value="<?= $booking['ID_Booking'] ?>">
+
+                    <div class="mb-3">
+                        <label class="form-label">Số tiền thu (VNĐ)</label>
+                        <input type="number" class="form-control" name="so_tien" required min="1000" placeholder="Nhập số tiền...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ngày thanh toán</label>
+                        <input type="datetime-local" class="form-control" name="ngay_thanh_toan"
+                            value="<?= date('Y-m-d\TH:i') ?>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Phương thức</label>
+                        <select class="form-select" name="phuong_thuc">
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Chuyển khoản">Chuyển khoản</option>
+                            <option value="VNPAY">VNPAY</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh chứng từ/Bill (nếu có)</label>
+                        <input type="file" class="form-control" name="anh_chung_tu" accept="image/*">
+                        <div class="form-text text-muted">Chấp nhận ảnh jpg, png, jpeg.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú</label>
+                        <textarea class="form-control" name="ghi_chu" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Xác nhận thu tiền</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN').format(amount);
+    };
+
+    function tinhTienConLai() {
+        const tongTien = parseFloat(document.getElementById('tong_tien_goc').value) || 0;
+        const daThanhToan = parseFloat(document.getElementById('tien_coc').value) || 0;
+        const conLai = tongTien - daThanhToan;
+
+        document.getElementById('con_lai_hien_thi').value = formatCurrency(conLai);
+
+        const labelStatus = document.getElementById('trang_thai_thanh_toan');
+        const inputConLai = document.getElementById('con_lai_hien_thi');
+
+        if (conLai <= 0) {
+            labelStatus.innerHTML = '<span class="text-success fw-bold">✔ Đã thanh toán đủ</span>';
+            inputConLai.classList.remove('text-danger');
+            inputConLai.classList.add('text-success');
+        } else {
+            labelStatus.innerText = 'Khách cần thanh toán thêm.';
+            inputConLai.classList.add('text-danger');
+            inputConLai.classList.remove('text-success');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        tinhTienConLai();
+    });
+</script>

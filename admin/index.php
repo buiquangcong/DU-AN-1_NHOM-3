@@ -114,6 +114,7 @@ match ($act) {
     'add-booking' => (new AdminBookingController())->addBooking(),
     'list-checkin-lich-trinh' => (new AdminLichTrinhController())->listCheckinLichTrinh(),
     'process-checkin-lich-trinh' => (new AdminLichTrinhController())->processCheckinLichTrinh(),
+    'them-thanh-toan' => (new AdminBookingController())->processAddPayment(),
     // ===============================================
 
 

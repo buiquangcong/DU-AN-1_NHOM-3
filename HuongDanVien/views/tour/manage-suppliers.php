@@ -1,7 +1,4 @@
 <?php
-// Giả sử $tourDetail chứa thông tin tour (từ Controller)
-// Giả sử $linkedSuppliers là danh sách NCC đã liên kết với tour này (từ Controller)
-// Giả sử $allSuppliers là *tất cả* NCC có trong hệ thống (để cho vào dropdown)
 ?>
 
 <div class="container mt-4">
@@ -37,13 +34,6 @@
                             <?php endif; ?>
                         </select>
                     </div>
-                    <!-- <div class="col-md-5">
-                        <label for="ghi_chu" class="form-label">Ghi chú (Vai trò)</label>
-                        <input type="text" class="form-control" id="ghi_chu" name="ghi_chu" placeholder="Ví dụ: Cung cấp xe 45 chỗ, Khách sạn tại Đà Nẵng">
-                    </div> -->
-                    <!-- <div class="col-md-2 text-end">
-                        <button type="submit" class="btn btn-primary">+ Liên kết</button>
-                    </div> -->
                 </div>
             </form>
         </div>

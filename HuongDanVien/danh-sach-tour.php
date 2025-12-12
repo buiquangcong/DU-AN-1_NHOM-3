@@ -1,6 +1,4 @@
 <?php
-// Giả định controller đã include file header_admin.php
-// và đã chuẩn bị 1 biến mảng $danhSachTour
 ?>
 
 <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
@@ -74,5 +72,4 @@
 </div>
 
 <?php
-// Giả định controller sẽ include file footer_admin.php
 ?>

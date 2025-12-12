@@ -383,13 +383,13 @@ class AdminBookingModel
         }
     }
 
+
     public function updateBooking($id, $data)
     {
         try {
             $this->conn->beginTransaction();
 
-            // 1. Cập nhật thông tin Khách hàng (Sửa tên/email nếu sai)
-            // Lấy ID_KhachHang từ bảng booking hiện tại để đảm bảo đúng người
+            // 1. Cập nhật thông tin Khách hàng (Giữ nguyên)
             $stmt = $this->conn->prepare("SELECT ID_KhachHang FROM booking WHERE ID_Booking = :id");
             $stmt->execute([':id' => $id]);
             $booking = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -398,20 +398,15 @@ class AdminBookingModel
                 $sqlKhach = "UPDATE dm_khach_hang SET TenKhachHang = :ten, Email = :email WHERE ID_KhachHang = :cid";
                 $stmtKhach = $this->conn->prepare($sqlKhach);
                 $stmtKhach->execute([
-                    ':ten' => $data['TenKhachHang'],
+                    ':ten'   => $data['TenKhachHang'],
                     ':email' => $data['Email'],
-                    ':cid' => $booking['ID_KhachHang']
+                    ':cid'   => $booking['ID_KhachHang']
                 ]);
             }
 
-            // 2. Tính lại tổng tiền (Vì có thể thay đổi số lượng hoặc Tour)
-            $tong_tien = $this->calculateTotal(
-                $data['TourID'],
-                $data['SoLuongNguoiLon'],
-                $data['SoLuongTreEm']
-            );
+            // 2. Cập nhật Booking
+            // Lưu ý: Controller đã tính toán TongTien và gửi sang, ta dùng luôn cho chính xác
 
-            // 3. Cập nhật Booking (Đã thêm cập nhật HDV)
             $sql = "UPDATE booking SET 
                     ID_Tour = :tour_id,
                     NgayDatTour = :ngay_dat,
@@ -419,18 +414,26 @@ class AdminBookingModel
                     SoLuongTreEm = :sl_te,
                     TongTien = :tong_tien,
                     TrangThai = :trang_thai,
-                    id_huong_dan_vien = :id_hdv   -- [MỚI] Cập nhật cột HDV
+                    id_huong_dan_vien = :id_hdv,
+                    tien_coc = :tien_coc            -- [MỚI] Thêm dòng cập nhật tiền cọc
                 WHERE ID_Booking = :id";
 
             $stmt = $this->conn->prepare($sql);
+
             $stmt->execute([
-                ':tour_id'    => $data['TourID'],
+                ':tour_id'    => $data['ID_Tour'],       // Khớp với key bên Controller
                 ':ngay_dat'   => $data['NgayDatTour'],
                 ':sl_nl'      => $data['SoLuongNguoiLon'],
                 ':sl_te'      => $data['SoLuongTreEm'],
-                ':tong_tien'  => $tong_tien,
+
+                // Dùng số tiền Controller gửi sang (đã bao gồm tính toán lại giá mới nhất)
+                ':tong_tien'  => $data['TongTien'],
+
                 ':trang_thai' => $data['TrangThai'],
-                ':id_hdv'     => $data['id_huong_dan_vien'], // [MỚI] Nhận dữ liệu HDV từ Controller
+                ':id_hdv'     => $data['id_huong_dan_vien'],
+
+                ':tien_coc'   => $data['tien_coc'],      // [MỚI] Map dữ liệu tiền cọc
+
                 ':id'         => $id
             ]);
 
@@ -440,7 +443,7 @@ class AdminBookingModel
             if ($this->conn->inTransaction()) {
                 $this->conn->rollBack();
             }
-            // echo $e->getMessage(); die(); // Bật lên nếu muốn debug
+            // error_log($e->getMessage()); // Mở ra nếu cần xem lỗi log
             return false;
         }
     }
@@ -456,7 +459,6 @@ class AdminBookingModel
         }
     }
 
-    // 2. Cập nhật ID HDV vào bảng booking
     public function updateGuide($id_booking, $id_hdv)
     {
         try {
@@ -491,7 +493,6 @@ class AdminBookingModel
     // 2. Hàm lấy danh sách khách
   
 
-    // 3. Hàm lấy Nhà cung cấp theo Tour
     public function getSuppliersByTour($tour_id)
     {
         try {
@@ -520,6 +521,74 @@ class AdminBookingModel
             return $result;
         } catch (Exception $e) {
             return [];
+        }
+    }
+    public function getPaymentHistory($booking_id)
+    {
+        try {
+            // Sắp xếp giảm dần để giao dịch mới nhất hiện lên đầu
+            $sql = "SELECT * FROM lich_su_thanh_toan 
+                    WHERE id_booking = :id 
+                    ORDER BY ngay_thanh_toan DESC";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id' => $booking_id]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    public function addPayment($data)
+    {
+        try {
+            $sql = "INSERT INTO lich_su_thanh_toan 
+                    (id_booking, so_tien, ngay_thanh_toan, phuong_thuc, ghi_chu, anh_chung_tu)
+                    VALUES 
+                    (:id_booking, :so_tien, :ngay_thanh_toan, :phuong_thuc, :ghi_chu, :anh_chung_tu)";
+
+            $stmt = $this->conn->prepare($sql);
+
+            $stmt->execute([
+                ':id_booking'      => $data['id_booking'],
+                ':so_tien'         => $data['so_tien'],
+                ':ngay_thanh_toan' => $data['ngay_thanh_toan'],
+                ':phuong_thuc'     => $data['phuong_thuc'],
+                ':ghi_chu'         => $data['ghi_chu'] ?? '',
+                ':anh_chung_tu'    => $data['anh_chung_tu'] ?? null
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    public function updateBookingDeposit($booking_id)
+    {
+        try {
+            // 1. Tính tổng tiền đã đóng trong bảng lịch sử
+            $sqlSum = "SELECT SUM(so_tien) as tong_da_dong 
+                       FROM lich_su_thanh_toan 
+                       WHERE id_booking = :id";
+            $stmtSum = $this->conn->prepare($sqlSum);
+            $stmtSum->execute([':id' => $booking_id]);
+            $result = $stmtSum->fetch(PDO::FETCH_ASSOC);
+
+            // Nếu không có lịch sử nào thì tổng = 0
+            $tong_tien = $result['tong_da_dong'] ?? 0;
+
+            // 2. Cập nhật số tổng này vào cột tien_coc của bảng booking
+            $sqlUpdate = "UPDATE booking SET tien_coc = :tien_coc WHERE ID_Booking = :id";
+            $stmtUpdate = $this->conn->prepare($sqlUpdate);
+            $stmtUpdate->execute([
+                ':tien_coc' => $tong_tien,
+                ':id'       => $booking_id
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            return false;
         }
     }
 }

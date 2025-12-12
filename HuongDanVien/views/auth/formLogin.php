@@ -14,33 +14,23 @@
         body {
             background-image: url('assets/nenLogin5.jpg');
 
-            /* Các thuộc tính này giúp ảnh nền đẹp hơn */
             background-size: cover;
-            /* Phủ kín toàn bộ trang */
             background-position: center;
-            /* Căn giữa ảnh */
             background-repeat: no-repeat;
-            /* Không lặp lại ảnh */
             background-attachment: fixed;
-            /* Giữ ảnh nền cố định khi cuộn *
-            /* Tạo một nền màu xám nhạt */
             background-color: #f8f9fa;
         }
 
-        /* Lấy màu xanh từ logo của bạn */
         :root {
             --brand-green: #198754;
-            /* Bạn có thể đổi mã màu này nếu muốn */
         }
 
         .login-card {
             border: 0;
-            /* Bo tròn và đổ bóng cho đẹp */
             border-radius: 1rem;
             box-shadow: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.1);
         }
 
-        /* Tùy chỉnh nút đăng nhập */
         .btn-brand-green {
             background-color: var(--brand-green);
             border-color: var(--brand-green);
@@ -50,12 +40,10 @@
 
         .btn-brand-green:hover {
             background-color: #146c43;
-            /* Màu xanh đậm hơn khi hover */
             border-color: #146c43;
             color: #ffffff;
         }
 
-        /* Tùy chỉnh màu khi focus vào input */
         .form-control:focus {
             border-color: var(--brand-green);
             box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
