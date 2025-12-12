@@ -1,7 +1,4 @@
 <?php
-// File: /views/booking/list-itinerary-checkin.php
-
-// Gán Tour ID
 $tourId = $listLichTrinh[0]['ID_Tour'] ?? $_GET['tour_id'] ?? null;
 ?>
 
@@ -40,14 +37,10 @@ $tourId = $listLichTrinh[0]['ID_Tour'] ?? $_GET['tour_id'] ?? null;
             <?php if (!empty($listLichTrinh)): ?>
                 <?php foreach ($listLichTrinh as $lichTrinh):
 
-                    // Tìm ID Lịch Trình (Khóa chính)
-                    // Dựa trên ảnh DB, tên cột chính xác là ID_ChiTietTour
                     $ltId = htmlspecialchars($lichTrinh['ID_ChiTietTour'] ?? '0');
 
-                    // Lấy ID Tour
                     $tId = htmlspecialchars($lichTrinh['ID_Tour'] ?? '0');
 
-                    // Bỏ qua nếu ID bị rỗng
                     if ($ltId === '0' || $tId === '0') continue;
                 ?>
                     <tr>

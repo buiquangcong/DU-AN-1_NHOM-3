@@ -1,14 +1,10 @@
 <?php
-// 1. Lấy thông tin Hoạt động từ phần tử đầu tiên (nếu có)
-// Biến $listKhachAndStatus được truyền từ Controller
 $currentActivity = $listKhachAndStatus[0]['TenHoatDong'] ?? 'Không xác định';
 $totalGuests = count($listKhachAndStatus);
 
-// 2. Lấy ID từ REQUEST (An toàn hơn)
 $tour_id = $_REQUEST['tour_id'] ?? null;
 $lich_trinh_id = $_REQUEST['lt_id'] ?? null;
 
-// Gán giá trị mặc định để tránh lỗi hiển thị nếu thiếu
 if (!$tour_id) $tour_id = 'N/A';
 if (!$lich_trinh_id) $lich_trinh_id = 'N/A';
 ?>
@@ -62,7 +58,6 @@ if (!$lich_trinh_id) $lich_trinh_id = 'N/A';
                     <?php
                     $stt = 1;
                     foreach ($listKhachAndStatus as $khach):
-                        // Lấy trạng thái checkin (0, 1 hoặc NULL)
                         $status = $khach['trang_thai'];
                     ?>
                         <tr>
