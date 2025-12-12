@@ -47,7 +47,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Khách hàng / Admin</div>
-                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($soLuongUser) ? $soLuongUser : 0 ?> Tài khoản</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($soLuongUser) ? $soLuongUser : 0 ?> Tài khoản</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -71,7 +71,7 @@
                             <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
                         </div>
                     </div>
-                    <a href="?act=list-don-hang" class="stretched-link"></a>
+                    <a href="?act=quan-ly-booking" class="stretched-link"></a>
                 </div>
             </div>
         </div>
@@ -122,7 +122,7 @@
                                             <td class="text-center"><?= $tour['ID_Tour']; ?></td>
                                             <td><?= htmlspecialchars($tour['TenTour']); ?></td>
                                             <td><?= number_format($tour['GiaNguoiLon']); ?>₫</td>
-                                            
+
                                             <td class="text-center">
                                                 <?= date('d/m/Y', strtotime($tour['NgayKhoiHanh'])); ?>
                                             </td>

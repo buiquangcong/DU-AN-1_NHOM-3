@@ -45,7 +45,7 @@ $act = $_GET['act'] ?? 'login-admin';
 
 match ($act) {
     // --- TOUR ---
-    '/'     => (new AdminTourController())->dashboard(),
+    '/'     => (new AdminThongkeController())->dashboard(),
     'list-tours'      => (new AdminQuanLyTourController())->danhSachTour(),
     'add-tour'        => (new AdminQuanLyTourController())->formAddTour(),
     'save-add-tour'   => (new AdminQuanLyTourController())->postAddTour(),
