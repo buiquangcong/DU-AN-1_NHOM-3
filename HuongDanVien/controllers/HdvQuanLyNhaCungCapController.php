@@ -14,7 +14,6 @@ class HdvQuanLyNhaCungCapController
         $this->modelDichVu = new HdvDichVu();
     }
 
-    // ====== Danh sách nhà cung cấp ======
     public function index()
     {
         $listNCC = $this->model->getAll();

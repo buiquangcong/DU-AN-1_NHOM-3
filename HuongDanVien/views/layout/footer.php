@@ -1,5 +1,4 @@
 <?php
-// footer.php (Đã sửa lại để Footer lùi 5px, đồng bộ với Header, và CĂN GIỮA nội dung, có LOGO)
 ?>
 </main>
 </div>

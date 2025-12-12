@@ -1,10 +1,9 @@
 <?php
-// File: /admin/models/AdminLichTrinhModel.php
 
 class AdminLichTrinhModel
 {
     public $db;
-    public $tableLichTrinh = "dm_chi_tiet_tour"; // Tên bảng Lịch trình chính xác
+    public $tableLichTrinh = "dm_chi_tiet_tour";
     public $tableDiemDanh = "diem_danh_lich_trinh";
     public $tableChiTietKhach = "chi_tiet_khach";
     public $tableBooking = "booking";
@@ -15,13 +14,6 @@ class AdminLichTrinhModel
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    // =========================================================================
-    // I. CRUD LỊCH TRÌNH
-    // =========================================================================
-
-    /**
-     * Lấy danh sách Lịch trình cho một Tour
-     */
     public function getItineraryByTourId($tourId)
     {
         $stmt = $this->db->prepare("
@@ -29,20 +21,11 @@ class AdminLichTrinhModel
             WHERE ID_Tour = :tour_id 
             ORDER BY ThuTu ASC, KhungGio ASC
         ");
-        // Sửa lỗi PARAM_INT sang PARAM_STR cho ID Tour (T-XXX)
         $stmt->bindParam(':tour_id', $tourId, PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // =========================================================================
-    // II. LẤY TRẠNG THÁI ĐIỂM DANH
-    // =========================================================================
-
-    /**
-     * Lấy danh sách khách hàng thuộc Tour và trạng thái điểm danh hiện tại 
-     * cho một mục lịch trình cụ thể.
-     */
     public function getGuestsAndCheckinStatus($tourId, $lichTrinhId)
     {
         $sql = "
@@ -79,13 +62,6 @@ class AdminLichTrinhModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // =========================================================================
-    // III. CẬP NHẬT TRẠNG THÁI
-    // =========================================================================
-
-    /**
-     * Chèn hoặc cập nhật trạng thái điểm danh của khách hàng cho một mục lịch trình (UPSERT).
-     */
     public function updateCheckinStatusLichTrinh($lichTrinhId, $guestId, $status)
     {
         try {

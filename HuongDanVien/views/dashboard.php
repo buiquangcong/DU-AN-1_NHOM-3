@@ -103,11 +103,6 @@
                 </div>
                 <div class="card-body p-0">
                     <?php
-                    // *********************************************************
-                    // CHÚ THÍCH: BIẾN $listRecentTours PHẢI CHỨA DỮ LIỆU ĐỒNG BỘ
-                    // *********************************************************
-
-                    // GIẢ ĐỊNH DỮ LIỆU MẪU (Sử dụng cấu trúc đồng bộ)
                     $listRecentTours = [
                         ['ID_Tour' => 'T-9876', 'TenTour' => 'Hạ Long - Cát Bà 3N2Đ', 'GiaNguoiLon' => 2500000, 'NgayKhoiHanh' => '2025-12-01', 'TrangThai' => 1],
                         ['ID_Tour' => 'T-9875', 'TenTour' => 'Đà Lạt Mộng Mơ 3N2Đ', 'GiaNguoiLon' => 3800000, 'NgayKhoiHanh' => '2025-11-20', 'TrangThai' => 1],

@@ -9,9 +9,6 @@ class HdvNhaCungCap
         $this->db = connectDB();
     }
 
-    //---
-
-
     public function getAll()
     {
         $stmt = $this->db->prepare("

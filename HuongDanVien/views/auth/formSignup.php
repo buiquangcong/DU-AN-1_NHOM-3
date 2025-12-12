@@ -46,7 +46,6 @@
             box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
         }
 
-        /* Thêm link đăng nhập ở dưới cho đẹp */
         .auth-link {
             color: var(--brand-green);
             text-decoration: none;
