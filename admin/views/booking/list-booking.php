@@ -60,7 +60,7 @@
                     <?php foreach ($listBookings as $item): ?>
                         <?php
                         // --- LOGIC TÍNH TIỀN ---
-                        // 1. Lấy tiền cọc (Nếu DB chưa có thì mặc định là 0)
+                        // 1. Lấy tiền cọc (Nếu DB null thì = 0)
                         $tien_coc = isset($item['tien_coc']) ? $item['tien_coc'] : 0;
 
                         // 2. Tính còn lại
@@ -99,7 +99,7 @@
                                         <?= htmlspecialchars($item['TenHDV']) ?>
                                     </span>
                                 <?php else: ?>
-                                    <?php if ($item['TrangThai'] == 1): ?>
+                                    <?php if ($item['TrangThai'] != 2 && $item['TrangThai'] != 3): ?>
                                         <button type="button"
                                             class="btn btn-outline-primary btn-sm"
                                             data-bs-toggle="modal"
