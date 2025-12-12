@@ -26,8 +26,8 @@
                         <td><?= htmlspecialchars($taikhoan['so_dien_thoai'] ?? '') ?></td>
                         <td><?= htmlspecialchars($taikhoan['dia_chi'] ?? '') ?></td>
                         <td>
-                            <a href="?act=detail-taikhoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-info btn-sm">Chi tiết</a>
-                            <a href="?act=edit-taikhoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-warning btn-sm">Sửa</a>
+                            <a href="?act=detail-taikhoan&ID_Taikhoan=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-info btn-sm">Chi tiết</a>
+                            <a href="?act=edit-tai-khoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-warning btn-sm">Sửa</a>
                             <a href="?act=delete-taikhoan&id=<?= $taikhoan['ID_TaiKhoan'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa tài khoản này?')">Xóa</a>
                         </td>
                     </tr>

@@ -19,15 +19,19 @@ require_once $PROJECT_ROOT_PATH . '/commons/function.php';
 // ===================== REQUIRE CONTROLLERS & MODELS =====================
 
 // TOUR
-require_once __DIR__ . '/controllers/AdminTourController.php';
+require_once __DIR__ . '/controllers/AdminThongkeController.php';
 
 require_once __DIR__ . '/controllers/AdminQuanLyTourController.php';
 require_once __DIR__ . '/models/AdminQuanLyTour.php';
 require_once __DIR__ . '/controllers/AdminBookingController.php';
 require_once __DIR__ . '/models/AdminBookingModel.php';
-
+// --- BỔ SUNG LỊCH TRÌNH VÀ ĐIỂM DANH ---
+require_once __DIR__ . '/controllers/AdminLichTrinhController.php';
+require_once __DIR__ . '/models/AdminLichTrinhModel.php';
+require_once __DIR__ . '/models/AdminThongKeModel.php';
 require_once __DIR__ . '/controllers/AdminQuanLyNhaCungCapController.php';
 require_once __DIR__ . '/models/AdminNhaCungCap.php';
+require_once __DIR__ . '/models/AdminDichVu.php';
 // ================== REQUIRE TÀI KHOẢN ==================
 require_once './models/AdminTaiKhoan.php';
 require_once './controllers/AdminTaiKhoanController.php';
@@ -48,6 +52,9 @@ match ($act) {
     'edit-tour'       => (new AdminQuanLyTourController())->formEditTour($_GET['id'] ?? 0),
     'save-edit-tour'  => (new AdminQuanLyTourController())->postEditTour(),
     'delete-tour'     => (new AdminQuanLyTourController())->deleteTour($_GET['id'] ?? 0),
+    'tour-detail'       => (new AdminQuanLyTourController())->tourDetailOverview(),
+    'history-tours' => (new AdminQuanLyTourController())->historyTours(),
+    'history-detail' => (new AdminQuanLyTourController())->historyDetail(),
 
     // --- DANH MỤC ---
     'list-danhmuc'      => (new AdmindanhmucController())->danhsachDanhMuc(),
@@ -61,9 +68,8 @@ match ($act) {
     // ===== NHÂN SỰ =====
     'list-tai-khoan'     => (new AdminTaiKhoanController())->danhSachTaiKhoan(),
     'add-tai-khoan'      => (new AdminTaiKhoanController())->AddTaiKhoan(),       // Hiển thị form
-    // 'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddTaiKhoan(),       // Xử lý khi submit form
-    // 'edit-tai-khoan'     => (new AdminTaiKhoanController())->formEditTaiKhoan($_GET['id'] ?? 0),
-    // 'post-edit-tai-khoan' => (new AdminTaiKhoanController())->postEditTaiKhoan(),
+    'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddAdmin(),       // Xử lý khi submit form
+    'edit-tai-khoan'     => (new AdminTaiKhoanController())->editTaiKhoan($_GET['id'] ?? 0),
     // 'delete-tai-khoan'   => (new AdminTaiKhoanController())->delete(),
     // 'detail-tai-khoan'   => (new AdminTaiKhoanController())->detail(),
 
@@ -90,9 +96,7 @@ match ($act) {
     // ... (Các route tour của bạn)
     'unlink-supplier' => (new AdminQuanLyTourController())->unlinkSupplier(),
 
-    // ===============================================
-    // THÊM CÁC ROUTE BOOKING MỚI VÀO ĐÂY
-    // ===============================================
+
     'quan-ly-booking' => (new AdminBookingController())->danhSachBooking(),
     'manage-guests'   => (new AdminBookingController())->manageGuests(),
     'add-guest'       => (new AdminBookingController())->addGuest(),
@@ -102,11 +106,15 @@ match ($act) {
     'delete-guest'    => (new AdminBookingController())->deleteGuest(),
     'bulk-update-checkin'  => (new AdminBookingController())->bulkUpdateCheckinStatus(),
     'import-excel-guests' => (new AdminBookingController())->importExcelGuests(),
-
+    'edit-booking' => (new AdminBookingController())->editBooking(),
+    'delete-booking' => (new AdminBookingController())->deleteBooking(),
     //Booking
     'chi-tiet-booking' => (new AdminBookingController())->chiTietBooking(),
+    'cap-nhat-hdv' => (new AdminBookingController())->assignGuide(),
     'add-booking' => (new AdminBookingController())->addBooking(),
-
+    'list-checkin-lich-trinh' => (new AdminLichTrinhController())->listCheckinLichTrinh(),
+    'process-checkin-lich-trinh' => (new AdminLichTrinhController())->processCheckinLichTrinh(),
+    'them-thanh-toan' => (new AdminBookingController())->processAddPayment(),
     // ===============================================
 
 
@@ -121,6 +129,10 @@ match ($act) {
     // 2. Quản lý tài khoản
     'list-tai-khoan'    => (new AdminTaiKhoanController())->danhSachTaiKhoan(),
     'add-tai-khoan'     => (new AdminTaiKhoanController())->postAddAdmin(),
+    'post-add-tai-khoan' => (new AdminTaiKhoanController())->postAddAdmin(),
+    'edit-tai-khoan'    => (new AdminTaiKhoanController())->editTaiKhoan($_GET['id'] ?? 0),
+    // 'delete-tai-khoan'  => (new AdminTaiKhoanController())->delete(),
+    'detail-taikhoan'  => (new AdminTaiKhoanController())->chiTietTaiKhoan(),
 
-    default => (new AdminTourController())->dashboard(),
+    default => (new AdminThongkeController())->dashboard(),
 };

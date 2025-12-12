@@ -17,14 +17,29 @@
             unset($_SESSION['success']); ?>
         </div>
     <?php endif; ?>
-    <?php if (!empty($_SESSION['error']['itinerary'])): ?>
+    <?php if (!empty($_SESSION['error'])): ?>
         <div class="alert alert-danger">
-            <?= $_SESSION['error']['itinerary'];
-            unset($_SESSION['error']['itinerary']); ?>
+            <?= is_array($_SESSION['error']) ? implode('<br>', $_SESSION['error']) : $_SESSION['error']; ?>
+            <?php unset($_SESSION['error']); ?>
         </div>
     <?php endif; ?>
 
-    <div class="card shadow-sm mb-4">
+
+    <div class="card shadow-sm mb-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">📍 Quản lý Điểm danh Lịch trình Tour</h5>
+        </div>
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <p class="mb-0">Bấm vào đây để điểm danh hành khách theo từng hoạt động (ví dụ: điểm danh lên xe, điểm danh ăn trưa).</p>
+
+            <a href="?act=list-checkin-lich-trinh&tour_id=<?= htmlspecialchars($bookingDetail['ID_Tour']) ?>"
+                class="btn btn-primary btn-lg">
+                <i class="bi bi-list-check me-2"></i> Xem Lịch trình & Điểm danh
+            </a>
+        </div>
+    </div>
+    <hr>
+    <!-- <div class="card shadow-sm mb-4">
         <div class="card-header">
             <h5 class="mb-0">Import bằng file Excel (.xlsx, .xls)</h5>
         </div>
@@ -44,12 +59,8 @@
                     <div>
                         <small class="text-muted">
                             * File Excel phải đúng mẫu:<br>
-                            - Cột A: Họ Tên (Bắt buộc)<br>
-                            - Cột B: Giới tính (Nam/Nữ)<br>
-                            - Cột C: Ngày Sinh (YYYY-MM-DD)<br>
-                            - Cột D: Liên Hệ (SĐT)<br>
-                            - Cột E: CCCD/Passport<br>
-                            - Cột F: Ghi Chú
+                            - Cột A: Họ Tên (Bắt buộc) / - Cột B: Giới tính (Nam/Nữ) / - Cột C: Ngày Sinh (YYYY-MM-DD)<br>
+                            - Cột D: Liên Hệ (SĐT) / - Cột E: CCCD/Passport / - Cột F: Ghi Chú
                         </small>
                     </div>
                 </div>
@@ -99,7 +110,7 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
     <h4 class="mt-5">Danh sách khách trong đoàn (Hiện có: <?= count($listGuests) ?> người)</h4>
 
@@ -131,9 +142,9 @@
                             <td><?= htmlspecialchars($guest['CCCD_Passport'] ?? '') ?></td>
 
                             <td class="text-center">
-                                <?php if ($bookingDetail['TrangThai'] == 1): ?>
+                                <?php if (($bookingDetail['TrangThai'] ?? 0) == 1): ?>
                                     <span class="badge bg-success">Đã xác nhận</span>
-                                <?php elseif ($bookingDetail['TrangThai'] == 2): ?>
+                                <?php elseif (($bookingDetail['TrangThai'] ?? 0) == 2): ?>
                                     <span class="badge bg-danger">Đã hủy</span>
                                 <?php else: ?>
                                     <span class="badge bg-warning">Chờ xác nhận</span>
@@ -142,13 +153,13 @@
                             <td class="text-center">
                                 <select class="form-select form-select-sm"
                                     name="guest_status[<?= $guest['ID_ChiTiet'] ?>]">
-                                    <option value="0" <?= ($guest['TrangThaiCheckin'] == 0) ? 'selected' : '' ?>>
+                                    <option value="0" <?= (($guest['TrangThaiCheckin'] ?? 0) == 0) ? 'selected' : '' ?>>
                                         Chưa đến
                                     </option>
-                                    <option value="1" <?= ($guest['TrangThaiCheckin'] == 1) ? 'selected' : '' ?>>
+                                    <option value="1" <?= (($guest['TrangThaiCheckin'] ?? 0) == 1) ? 'selected' : '' ?>>
                                         Đã đến
                                     </option>
-                                    <option value="2" <?= ($guest['TrangThaiCheckin'] == 2) ? 'selected' : '' ?>>
+                                    <option value="2" <?= (($guest['TrangThaiCheckin'] ?? 0) == 2) ? 'selected' : '' ?>>
                                         Vắng mặt
                                     </option>
                                 </select>

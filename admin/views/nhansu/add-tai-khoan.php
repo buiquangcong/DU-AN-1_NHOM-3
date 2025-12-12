@@ -1,6 +1,6 @@
 <div class="container mt-4">
     <div class="mb-3">
-        <a href="?act=quan-ly-tai-khoan" class="btn btn-secondary">&larr; Quay lại</a>
+        <a href="?act=list-tai-khoan" class="btn btn-secondary">&larr; Quay lại</a>
     </div>
 
     <h2 class="mb-4 text-center">Thêm Tài Khoản Mới</h2>
@@ -22,7 +22,7 @@
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="?act=add-tai-khoan">
+    <form method="POST" action="?act=post-add-tai-khoan">
 
         <div class="row">
 
@@ -46,13 +46,6 @@
                 <label for="mat_khau" class="form-label">Mật khẩu *</label>
                 <input type="password" class="form-control" id="mat_khau" name="mat_khau"
                     placeholder="Nhập mật khẩu" required>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="chuc_vu" class="form-label">Chức Vụ *</label>
-                <input type="text" class="form-control" id="chuc_vu" name="chuc_vu"
-                    value="<?= htmlspecialchars($data['chuc_vu'] ?? '') ?>"
-                    placeholder="Nhập chức vụ (VD: Nhân viên Sale)" required>
             </div>
         </div>
 
