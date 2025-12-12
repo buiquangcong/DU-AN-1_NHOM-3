@@ -461,7 +461,6 @@ class AdminBookingModel
         }
     }
 
-    // 2. Cập nhật ID HDV vào bảng booking
     public function updateGuide($id_booking, $id_hdv)
     {
         try {

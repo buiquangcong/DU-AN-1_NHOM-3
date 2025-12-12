@@ -13,9 +13,6 @@ class AdminBookingController
         $this->modelBooking = new AdminBookingModel();
     }
 
-    /**
-     * Action: Hiển thị danh sách Booking (?act=quan-ly-booking)
-     */
     public function danhSachBooking()
     {
         $keyword = $_GET['keyword'] ?? null;
@@ -27,9 +24,6 @@ class AdminBookingController
         require_once __DIR__ . '/../views/layout/footer.php';
     }
 
-    /**
-     * Action: Xử lý phân công HDV (?act=cap-nhat-hdv)
-     */
     public function assignGuide()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

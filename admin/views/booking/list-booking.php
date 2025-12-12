@@ -99,7 +99,7 @@
                                         <?= htmlspecialchars($item['TenHDV']) ?>
                                     </span>
                                 <?php else: ?>
-                                    <?php if ($item['TrangThai'] != 2 && $item['TrangThai'] != 3): ?>
+                                    <?php if ($item['TrangThai'] == 1): ?>
                                         <button type="button"
                                             class="btn btn-outline-primary btn-sm"
                                             data-bs-toggle="modal"
