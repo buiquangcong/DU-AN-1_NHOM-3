@@ -8,7 +8,8 @@ class AdminQuanLyTourController
     public $modelDanhMuc;
     public $modelNhaCungCap; 
     public $modelDichVu;
-    public $model; 
+    public $model;
+    
 
     public function __construct()
     {
@@ -16,7 +17,7 @@ class AdminQuanLyTourController
         $this->modelDanhMuc = new AdminDanhMuc();
         $this->modelNhaCungCap = new AdminNhaCungCap(); 
         $this->modelDichVu = new AdminDichVu();
-         $this->model = new AdminBookingModel();
+        $this->model = new AdminBookingModel();
     }
 
 
@@ -41,48 +42,42 @@ class AdminQuanLyTourController
         require_once __DIR__ . '/../views/layout/footer.php';
     }
 
-  public function tourDetailOverview()
-{
-    // Lấy ID Tour từ URL
-    $tour_id = $_GET['id'] ?? null;
-    
-    // 1. Kiểm tra ID
-    if (!$tour_id) {
-        header('Location: index.php?act=list-tours');
-        exit;
-    }
+    public function tourDetailOverview()
+    {
+        // Lấy ID Tour từ URL
+        $tour_id = $_GET['id'] ?? null;
 
- 
-    
-    // a. Lấy chi tiết Tour (Model: AdminQuanLyTour)
+        // 1. Kiểm tra ID
+        if (!$tour_id) {
+            header('Location: index.php?act=list-tours');
+            exit;
+        }
     $tourDetail = $this->modelTour->getTourById($tour_id);
-
-    // b. Lấy Lịch trình (Model: AdminQuanLyTour - Giả định hàm nằm ở đây)
     $listItinerary = $this->modelTour->getItineraryByTourID($tour_id);
-
-    // c. Lấy Nhà Cung Cấp đã liên kết (Model: AdminNhaCungCap)
     $linkedSuppliers = $this->modelNhaCungCap->getLinkedSuppliersByTour($tour_id);
 
-    // 3. Kiểm tra kết quả Tour
-    if (!$tourDetail) {
-        $_SESSION['error']['tour_not_found'] = "Không tìm thấy chi tiết tour này.";
-        header('Location: index.php?act=list-tours');
-        exit;
-    }
+        
+        if (!$tourDetail) {
+            $_SESSION['error']['tour_not_found'] = "Không tìm thấy chi tiết tour này.";
+            header('Location: index.php?act=list-tours');
+            exit;
+        }
 
     // 4. LOAD VIEW
     require_once __DIR__ . '/../views/layout/header.php';
- 
+    // ✅ GỌI ĐÚNG TÊN FILE VIEW BẠN CUNG CẤP
     require_once __DIR__ . '/../views/tour/detail-tour.php'; 
     require_once __DIR__ . '/../views/layout/footer.php';
 } 
 
 public function historyTours()
 {
-   
+    
     $bookingModel = new AdminBookingModel();
      $historyTours = $bookingModel->getAllHistory();
 
+    
+    
      $historyTours = $bookingModel->getAllHistory();
     require_once __DIR__ . '/../views/layout/header.php';
     require_once __DIR__ . '/../views/tour/history-tours.php';
@@ -93,24 +88,24 @@ public function historyTours()
             echo "Thiếu ID booking!";
             return;
         }
+        $guests = $bookingModel->getGuestsByBookingID($id);
+        $suppliers = [];
+        if (!empty($booking['ID_Tour'])) {
+            $suppliers = $bookingModel->getSuppliersByTour($booking['ID_Tour']);
+        }
 
-        $id = $_GET['id'];
-
-        // Gọi model
-      $details = $this->model->historyDetailModel($id);
-
-        // Render ra view
-          require_once __DIR__ . '/../views/layout/header.php';
+        
+        require_once __DIR__ . '/../views/layout/header.php';
         include_once __DIR__ . '/../views/tour/history-detail.php';
         require_once __DIR__ . '/../views/layout/footer.php';
     }
 
 
 
-    public function postAddTour() // Đổi tên hàm
+    public function postAddTour() 
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Sinh ID_Tour tự động
+          
             $ID_Tour = 'T-' . rand(1000, 9999);
 
             $TenTour        = trim($_POST['TenTour'] ?? '');
@@ -404,7 +399,7 @@ public function historyTours()
     /**
      * Action: Hiển thị trang QL Nhà Cung Cấp ( ?act=manage-suppliers )
      */
-  public function manageSuppliers()
+    public function manageSuppliers()
     {
         $tour_id = $_GET['id'] ?? null;
         if (!$tour_id) {
@@ -415,10 +410,10 @@ public function historyTours()
         $tourDetail = $this->modelTour->getTourById($tour_id);
         $linkedSuppliers = $this->modelNhaCungCap->getLinkedSuppliersByTour($tour_id);
         $allSuppliers = $this->modelNhaCungCap->getAll();
-        $serviceRoles = $this->modelDichVu->getAllDichVu(); 
+        $serviceRoles = $this->modelDichVu->getAllDichVu();
 
         require_once __DIR__ . '/../views/layout/header.php';
-        require_once __DIR__ . '/../views/tour/manage-suppliers.php'; 
+        require_once __DIR__ . '/../views/tour/manage-suppliers.php';
         require_once __DIR__ . '/../views/layout/footer.php';
     }
 
@@ -430,7 +425,7 @@ public function historyTours()
     {
         $tour_id = $_POST['tour_id'] ?? null;
         $supplier_id = $_POST['supplier_id'] ?? null;
-        $id_DichVu = $_POST['id_DichVu'] ?? null; 
+        $id_DichVu = $_POST['id_DichVu'] ?? null;
 
         try {
             // 1. Kiểm tra Validation (Logic Error)
@@ -441,7 +436,6 @@ public function historyTours()
             // 2. GỌI HÀM MODEL NCC ĐỂ THỰC HIỆN LIÊN KẾT
             $this->modelNhaCungCap->linkSupplierToTour($tour_id, $supplier_id, $id_DichVu);
             $_SESSION['success'] = "Liên kết nhà cung cấp thành công!";
-
         } catch (\PDOException $e) {
             // 3. Bắt lỗi Database (Khóa chính, Khóa ngoại)
             if ($e->getCode() == '23000' || $e->getCode() == 1062) {
@@ -454,7 +448,7 @@ public function historyTours()
             $_SESSION['error']['logic'] = $e->getMessage();
         }
 
-        header('Location: index.php?act=manage-suppliers&id=' . ($tour_id ?? '')); 
+        header('Location: index.php?act=manage-suppliers&id=' . ($tour_id ?? ''));
         exit;
     }
 

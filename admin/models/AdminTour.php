@@ -26,18 +26,10 @@ class AdminTour
         $noiDungChiTiet,
         $trangThai
     ) {
-        // (Code SQL INSERT INTO dm_tours... sẽ ở đây)
-        // $sql = "INSERT INTO dm_tours (TenTour, ID_LoaiTour, ...) VALUES (?, ?, ...)";
-        // pdo_execute($sql, $tenTour, $idLoaiTour, ...);
-
-        // (Tạm thời trả về 1 để mô phỏng ID tour mới)
         return 1;
     }
 
-    /**
-     * Hàm này sẽ được gọi để lưu ảnh
-     * (Chúng ta sẽ viết code SQL ở đây sau)
-     */
+  
     public function insertAnhTour($idTourMoi, $image_url_chinh, $is_anh_bia)
     {
         // (Code SQL INSERT INTO dm_anh_tour... sẽ ở đây)        // $sql = "INSERT INTO dm_anh_tour (ID_Tour, DuongDan, LaAnhBia) VALUES (?, ?, ?)";

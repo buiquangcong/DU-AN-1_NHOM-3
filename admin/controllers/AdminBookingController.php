@@ -315,6 +315,10 @@ class AdminBookingController
             $ngay_dat = $_POST['ngay_dat'] ?? '';
             $so_nl = $_POST['so_luong_nl'] ?? 0;
             $so_te = $_POST['so_luong_te'] ?? 0;
+
+            // [MỚI] Lấy tiền cọc (mặc định là 0 nếu không nhập)
+            $tien_coc = $_POST['tien_coc'] ?? 0;
+
             $trang_thai = $_POST['trang_thai'] ?? 0;
 
             // Kiểm tra cơ bản
@@ -342,10 +346,12 @@ class AdminBookingController
                     'NgayDatTour'       => $ngay_dat,
                     'SoLuongNguoiLon'   => (int)$so_nl,
                     'SoLuongTreEm'      => (int)$so_te,
+                    'tien_coc'          => $tien_coc, // [MỚI] Truyền tiền cọc sang Model
                     'TrangThai'         => (int)$trang_thai
                 ];
 
                 // === BẮT ĐẦU: Xử lý thêm Booking và lấy ID ===
+                // Hàm này bên Model đã được sửa để nhận 'tien_coc' rồi nhé
                 $newBookingId = $this->modelBooking->addBookingSimple($data);
 
                 if ($newBookingId) {

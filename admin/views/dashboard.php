@@ -10,8 +10,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Quản lý Tour</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">Danh sách</div>
+                                Tổng số Tour</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($soLuongTour) ? $soLuongTour : 0 ?> Tour</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-suitcase-rolling fa-2x text-gray-300"></i>
@@ -28,8 +28,8 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Danh mục Tour</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">Quản lý</div>
+                                Danh mục</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($soLuongDanhMuc) ? $soLuongDanhMuc : 0 ?> Danh mục</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-list fa-2x text-gray-300"></i>
@@ -47,7 +47,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Khách hàng / Admin</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">Tài khoản</div>
+                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($soLuongUser) ? $soLuongUser : 0 ?> Tài khoản</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -65,12 +65,13 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Đơn đặt Tour</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">Đang cập nhật...</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= isset($soLuongDonHang) ? $soLuongDonHang : 0 ?> Đơn</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
                         </div>
                     </div>
+                    <a href="?act=list-don-hang" class="stretched-link"></a>
                 </div>
             </div>
         </div>
@@ -102,20 +103,7 @@
                     </a>
                 </div>
                 <div class="card-body p-0">
-                    <?php
-                    // *********************************************************
-                    // CHÚ THÍCH: BIẾN $listRecentTours PHẢI CHỨA DỮ LIỆU ĐỒNG BỘ
-                    // *********************************************************
-
-                    // GIẢ ĐỊNH DỮ LIỆU MẪU (Sử dụng cấu trúc đồng bộ)
-                    $listRecentTours = [
-                        ['ID_Tour' => 'T-9876', 'TenTour' => 'Hạ Long - Cát Bà 3N2Đ', 'GiaNguoiLon' => 2500000, 'NgayKhoiHanh' => '2025-12-01', 'TrangThai' => 1],
-                        ['ID_Tour' => 'T-9875', 'TenTour' => 'Đà Lạt Mộng Mơ 3N2Đ', 'GiaNguoiLon' => 3800000, 'NgayKhoiHanh' => '2025-11-20', 'TrangThai' => 1],
-                        ['ID_Tour' => 'T-9011', 'TenTour' => 'Tour Nước Ngoài', 'GiaNguoiLon' => 1, 'NgayKhoiHanh' => '2025-11-14', 'TrangThai' => 0],
-                    ];
-                    ?>
-
-                    <?php if (!empty($listRecentTours)): ?>
+                    <?php if (isset($listRecentTours) && !empty($listRecentTours)): ?>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover align-middle mb-0">
                                 <thead class="table-light text-center">
@@ -134,7 +122,11 @@
                                             <td class="text-center"><?= $tour['ID_Tour']; ?></td>
                                             <td><?= htmlspecialchars($tour['TenTour']); ?></td>
                                             <td><?= number_format($tour['GiaNguoiLon']); ?>₫</td>
-                                            <td><?= htmlspecialchars($tour['NgayKhoiHanh']); ?></td>
+                                            
+                                            <td class="text-center">
+                                                <?= date('d/m/Y', strtotime($tour['NgayKhoiHanh'])); ?>
+                                            </td>
+
                                             <td class="text-center">
                                                 <?php if ($tour['TrangThai'] == 1): ?>
                                                     <span class="badge bg-success">Hoạt động</span>
@@ -143,7 +135,9 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td class="text-center">
-                                                <a href="?act=edit-tour&id=<?= $tour['ID_Tour']; ?>" class="btn btn-info btn-sm">Sửa</a>
+                                                <a href="?act=edit-tour&id=<?= $tour['ID_Tour']; ?>" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-edit"></i> Sửa
+                                                </a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -151,7 +145,7 @@
                             </table>
                         </div>
                     <?php else: ?>
-                        <p class="p-4 text-center text-muted mb-0">Chưa có tour nào được thêm gần đây.</p>
+                        <p class="p-4 text-center text-muted mb-0">Chưa có tour nào trong hệ thống.</p>
                     <?php endif; ?>
                 </div>
             </div>

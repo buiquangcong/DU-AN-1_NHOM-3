@@ -7,21 +7,110 @@
         <a href="?act=quan-ly-booking" class="btn btn-secondary">&larr; Quay lại danh sách Booking</a>
     </div>
 
+    <h2 class="mb-2">Quản lý Đoàn khách</h2>
+    <h4 class="text-primary mb-4">Tour: <?= htmlspecialchars($bookingDetail['TenTour'] ?? 'N/A') ?> (Booking ID: <?= $bookingDetail['ID_Booking'] ?>)</h4>
+    <hr>
+
     <?php if (!empty($_SESSION['success'])): ?>
         <div class="alert alert-success">
             <?= $_SESSION['success'];
             unset($_SESSION['success']); ?>
         </div>
     <?php endif; ?>
-    <?php if (!empty($_SESSION['error']['itinerary'])): ?>
+    <?php if (!empty($_SESSION['error'])): ?>
         <div class="alert alert-danger">
-            <?= $_SESSION['error']['itinerary'];
-            unset($_SESSION['error']['itinerary']); ?>
+            <?= is_array($_SESSION['error']) ? implode('<br>', $_SESSION['error']) : $_SESSION['error']; ?>
+            <?php unset($_SESSION['error']); ?>
         </div>
     <?php endif; ?>
 
 
+    <div class="card shadow-sm mb-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">📍 Quản lý Điểm danh Lịch trình Tour</h5>
+        </div>
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <p class="mb-0">Bấm vào đây để điểm danh hành khách theo từng hoạt động (ví dụ: điểm danh lên xe, điểm danh ăn trưa).</p>
 
+            <a href="?act=list-checkin-lich-trinh&tour_id=<?= htmlspecialchars($bookingDetail['ID_Tour']) ?>"
+                class="btn btn-primary btn-lg">
+                <i class="bi bi-list-check me-2"></i> Xem Lịch trình & Điểm danh
+            </a>
+        </div>
+    </div>
+    <hr>
+    <!-- <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Import bằng file Excel (.xlsx, .xls)</h5>
+        </div>
+        <div class="card-body">
+            <form action="?act=import-excel-guests" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="ID_Booking" value="<?= $bookingDetail['ID_Booking'] ?>">
+                <div class="mb-3">
+                    <label for="excel_file" class="form-label">Chọn file Excel</label>
+                    <input class="form-control" type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls" required>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-upload me-2"></i> Tải lên
+                        </button>
+                    </div>
+                    <div>
+                        <small class="text-muted">
+                            * File Excel phải đúng mẫu:<br>
+                            - Cột A: Họ Tên (Bắt buộc) / - Cột B: Giới tính (Nam/Nữ) / - Cột C: Ngày Sinh (YYYY-MM-DD)<br>
+                            - Cột D: Liên Hệ (SĐT) / - Cột E: CCCD/Passport / - Cột F: Ghi Chú
+                        </small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Thêm khách mới vào đoàn (Thêm tay)</h5>
+        </div>
+        <div class="card-body">
+            <form action="?act=add-guest" method="POST">
+                <input type="hidden" name="ID_Booking" value="<?= $bookingDetail['ID_Booking'] ?>">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="TenNguoiDi" class="form-label">Họ và Tên</label>
+                        <input type="text" class="form-control" id="TenNguoiDi" name="TenNguoiDi" placeholder="Nguyễn Văn A" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="GioiTinh" class="form-label">Giới tính</label>
+                        <select id="GioiTinh" name="GioiTinh" class="form-select">
+                            <option value="Nam" selected>Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="NgaySinh" class="form-label">Ngày Sinh</label>
+                        <input type="date" class="form-control" id="NgaySinh" name="NgaySinh">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="LienHe" class="form-label">Liên hệ (SĐT)</label>
+                        <input type="text" class="form-control" id="LienHe" name="LienHe" placeholder="09xxxxxxx">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="CCCD_Passport" class="form-label">CCCD / Passport</label>
+                        <input type="text" class="form-control" id="CCCD_Passport" name="CCCD_Passport">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="GhiChu" class="form-label">Yêu cầu cá nhân</label>
+                        <input type="text" class="form-control" id="GhiChu" name="GhiChu" placeholder="Ví dụ: Ăn chay, phòng tầng cao...">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary">+ Thêm khách</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div> -->
 
     <h4 class="mt-5">Danh sách khách trong đoàn (Hiện có: <?= count($listGuests) ?> người)</h4>
 
@@ -39,6 +128,7 @@
                     <th>Tình trạng TT</th>
                     <th style="width: 150px;">Check-in</th>
                     <th>Yêu cầu</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,9 +142,9 @@
                             <td><?= htmlspecialchars($guest['CCCD_Passport'] ?? '') ?></td>
 
                             <td class="text-center">
-                                <?php if ($bookingDetail['TrangThai'] == 1): ?>
+                                <?php if (($bookingDetail['TrangThai'] ?? 0) == 1): ?>
                                     <span class="badge bg-success">Đã xác nhận</span>
-                                <?php elseif ($bookingDetail['TrangThai'] == 2): ?>
+                                <?php elseif (($bookingDetail['TrangThai'] ?? 0) == 2): ?>
                                     <span class="badge bg-danger">Đã hủy</span>
                                 <?php else: ?>
                                     <span class="badge bg-warning">Chờ xác nhận</span>
@@ -63,13 +153,13 @@
                             <td class="text-center">
                                 <select class="form-select form-select-sm"
                                     name="guest_status[<?= $guest['ID_ChiTiet'] ?>]">
-                                    <option value="0" <?= ($guest['TrangThaiCheckin'] == 0) ? 'selected' : '' ?>>
+                                    <option value="0" <?= (($guest['TrangThaiCheckin'] ?? 0) == 0) ? 'selected' : '' ?>>
                                         Chưa đến
                                     </option>
-                                    <option value="1" <?= ($guest['TrangThaiCheckin'] == 1) ? 'selected' : '' ?>>
+                                    <option value="1" <?= (($guest['TrangThaiCheckin'] ?? 0) == 1) ? 'selected' : '' ?>>
                                         Đã đến
                                     </option>
-                                    <option value="2" <?= ($guest['TrangThaiCheckin'] == 2) ? 'selected' : '' ?>>
+                                    <option value="2" <?= (($guest['TrangThaiCheckin'] ?? 0) == 2) ? 'selected' : '' ?>>
                                         Vắng mặt
                                     </option>
                                 </select>
@@ -77,7 +167,9 @@
 
                             <td><?= htmlspecialchars($guest['GhiChu'] ?? '') ?></td>
                             <td class="text-center">
-                                <a href="?act=delete-guest&guest_id=<?= $guest['ID_ChiTiet'] ?>&booking_id=<?= $guest['ID_Booking'] ?>"></a>
+                                <a href="?act=delete-guest&guest_id=<?= $guest['ID_ChiTiet'] ?>&booking_id=<?= $guest['ID_Booking'] ?>"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Bạn có chắc muốn xóa khách này khỏi đoàn?');">Xóa</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -88,6 +180,12 @@
                 <?php endif; ?>
             </tbody>
         </table>
+
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="bi bi-check-all me-2"></i> Lưu trạng thái Check-in
+            </button>
+        </div>
 
     </form>
 </div>

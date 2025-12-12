@@ -100,17 +100,14 @@ class AdminBookingModel
         $this->conn->beginTransaction();
 
         try {
-            // --- BƯỚC 1: TÌM KHÁCH HÀNG (SỬA LOGIC: TÌM THEO EMAIL) ---
-            // Tìm xem email này đã có trong hệ thống chưa (Email là duy nhất)
+            // --- BƯỚC 1: TÌM KHÁCH HÀNG (GIỮ NGUYÊN) ---
             $stmt = $this->conn->prepare("SELECT ID_KhachHang FROM dm_khach_hang WHERE Email = :email");
             $stmt->execute([':email' => $data['Email']]);
             $customer = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($customer) {
-                // Nếu tìm thấy Email -> Lấy ID cũ
                 $customerID = (int)$customer['ID_KhachHang'];
             } else {
-                // Nếu chưa có Email -> Thêm khách hàng mới
                 $stmt = $this->conn->prepare("INSERT INTO dm_khach_hang (TenKhachHang, Email, MatKhau) VALUES (:name, :email, :matkhau)");
                 $stmt->execute([
                     ':name' => $data['TenKhachHang'],
@@ -124,17 +121,22 @@ class AdminBookingModel
                 throw new Exception("ID Khách hàng không xác định.");
             }
 
-            // --- BƯỚC 2: TÍNH TỔNG TIỀN ---
+            // --- BƯỚC 2: TÍNH TỔNG TIỀN (GIỮ NGUYÊN) ---
             $tong_tien = $this->calculateTotal(
                 $data['TourID'],
                 $data['SoLuongNguoiLon'],
                 $data['SoLuongTreEm']
             );
 
-            // --- BƯỚC 3: THÊM BOOKING ---
+            // --- BƯỚC 3: THÊM BOOKING (CẬP NHẬT CÓ TIỀN CỌC) ---
+
+            // Lấy tiền cọc từ dữ liệu gửi sang (nếu ko có thì = 0)
+            $tien_coc = isset($data['tien_coc']) ? $data['tien_coc'] : 0;
+
+            // Thêm cột tien_coc vào SQL
             $sql_insert = "INSERT INTO booking (ID_Tour, ID_KhachHang, NgayDatTour, 
-                                     SoLuongNguoiLon, SoLuongTreEm, TongTien, TrangThai)
-                           VALUES (:TourID, :CID, :NgayDat, :NL, :TE, :Total, :Status)";
+                                          SoLuongNguoiLon, SoLuongTreEm, TongTien, tien_coc, TrangThai)
+                       VALUES (:TourID, :CID, :NgayDat, :NL, :TE, :Total, :TienCoc, :Status)";
 
             $params = [
                 ':TourID'  => $data['TourID'],
@@ -143,6 +145,7 @@ class AdminBookingModel
                 ':NL'      => (int)$data['SoLuongNguoiLon'],
                 ':TE'      => (int)$data['SoLuongTreEm'],
                 ':Total'   => $tong_tien,
+                ':TienCoc' => $tien_coc, // Tham số mới
                 ':Status'  => (int)$data['TrangThai'],
             ];
 
@@ -154,18 +157,16 @@ class AdminBookingModel
 
             $this->conn->commit();
 
-            // Trả về ID để Controller sử dụng
             return $newBookingId;
         } catch (Exception $e) {
             if ($this->conn->inTransaction()) {
                 $this->conn->rollBack();
             }
-            // Đã bỏ phần hiện lỗi màu hồng để code chạy bình thường, 
-            // nếu lỗi sẽ trả về false cho Controller xử lý.
+            // Ghi log lỗi nếu cần thiết
+            // error_log($e->getMessage());
             return false;
         }
     }
-
 
     // =========================================================================
     // II. QUẢN LÝ KHÁCH HÀNG CHI TIẾT (Guest CRUD)
@@ -174,7 +175,7 @@ class AdminBookingModel
     public function getGuestsByBookingID($booking_id)
     {
         try {
-           
+            // Lưu ý: Tên bảng là chi_tiet_khach (như code bạn gửi)
             $sql = "SELECT * FROM chi_tiet_khach WHERE ID_Booking = :id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':id' => $booking_id]);
@@ -468,6 +469,57 @@ class AdminBookingModel
             return true;
         } catch (Exception $e) {
             return false;
+        }
+    }
+    public function getHistoryBookingDetail($id)
+    {
+        try {
+            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang, kh.Email
+                FROM booking b
+                LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
+                LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
+                WHERE b.ID_Booking = :id";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC); // Trả về 1 dòng
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    // 2. Hàm lấy danh sách khách
+  
+
+    // 3. Hàm lấy Nhà cung cấp theo Tour
+    public function getSuppliersByTour($tour_id)
+    {
+        try {
+            // Cách 1: Thử tìm trực tiếp (Nếu tour_id trong booking khớp với bảng liên kết)
+            $sql = "SELECT ncc.* FROM dm_nha_cung_cap ncc
+                INNER JOIN tour_nha_cung_cap link ON ncc.id_nha_cc = link.nha_cc_id
+                WHERE link.tour_id = :id1";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':id1' => $tour_id]);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Nếu Cách 1 không ra kết quả -> Thử Cách 2: JOIN qua bảng dm_tours
+            // (Dành cho trường hợp Booking lưu số (5), nhưng Link lưu chữ (T-002))
+            if (empty($result)) {
+                $sql2 = "SELECT ncc.* FROM nha_cung_cap ncc
+                     INNER JOIN tour_nha_cung_cap link ON ncc.id_nha_cc = link.nha_cc_id
+                     INNER JOIN dm_tours t ON link.tour_id = t.MaTour -- Giả sử cột mã là MaTour
+                     WHERE t.ID_Tour = :id2";
+
+                $stmt2 = $this->conn->prepare($sql2);
+                $stmt2->execute([':id2' => $tour_id]);
+                $result = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            return [];
         }
     }
 }

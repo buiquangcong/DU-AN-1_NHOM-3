@@ -1,41 +1,40 @@
 <div class="container-fluid mt-4">
-    <h2 class="mb-3">Chi tiết nhân sự</h2>
+    <h2 class="mb-3">Chi tiết tài khoản</h2>
 
-    <?php if (!empty($nhansu)): ?>
+    <?php if (isset($taikhoan) && is_array($taikhoan)): ?>
         <table class="table table-bordered">
             <tr>
-                <th>ID nhân sự</th>
-                <td><?= htmlspecialchars($nhansu['id_nhan_su']) ?></td>
+                <th>ID Tài khoản</th>
+                <td><?= $taikhoan['ID_TaiKhoan'] ?></td>
             </tr>
             <tr>
                 <th>Họ tên</th>
-                <td><?= htmlspecialchars($nhansu['ho_ten']) ?></td>
+                <td><?= $taikhoan['ho_ten'] ?></td>
             </tr>
             <tr>
-                <th>Chức vụ</th>
-                <td><?= htmlspecialchars($nhansu['chuc_vu']) ?></td>
+                <th>Tên đăng nhập (Email)</th>
+                <td><?= $taikhoan['TenDangNhap'] ?></td>
             </tr>
             <tr>
-                <th>Email</th>
-                <td><?= htmlspecialchars($nhansu['email']) ?></td>
+                <th>Mật khẩu</th>
+                <td><?= $taikhoan['MatKhau'] ?></td>
             </tr>
             <tr>
                 <th>Số điện thoại</th>
-                <td><?= htmlspecialchars($nhansu['so_dien_thoai']) ?></td>
+                <td><?= $taikhoan['so_dien_thoai'] ?></td>
             </tr>
             <tr>
-                <th>Ngày tạo</th>
-                <td><?= htmlspecialchars($nhansu['ngay_tao']) ?></td>
+                <th>Địa chỉ</th>
+                <td><?= $taikhoan['dia_chi'] ?></td>
             </tr>
             <tr>
-                <th>Ngày cập nhật</th>
-                <td><?= htmlspecialchars($nhansu['ngay_cap_nhat']) ?></td>
+                <th>Chức vụ</th>
+                <td><span class="badge bg-primary"><?= $taikhoan['ten_chuc_vu'] ?></span></td>
             </tr>
         </table>
 
-        <a href="?act=edit-nhansu&id_nhan_su=<?= $nhansu['id_nhan_su'] ?>" class="btn btn-warning">Sửa</a>
-        <a href="?act=list-nhansu" class="btn btn-secondary">⬅Quay lại danh sách</a>
+        <a href="?act=list-tai-khoan" class="btn btn-secondary">Quay lại danh sách</a>
     <?php else: ?>
-        <p class="text-danger">Không tìm thấy thông tin nhân sự.</p>
+        <p class="alert alert-danger">Không có dữ liệu hiển thị.</p>
     <?php endif; ?>
 </div>

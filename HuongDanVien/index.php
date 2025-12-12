@@ -22,7 +22,8 @@ require_once './controllers/HdvQuanLyTourController.php';
 require_once './models/HdvQuanLyTour.php';
 require_once './controllers/HdvBookingController.php';
 require_once './models/HdvBookingModel.php';
-
+require_once './models/AdminLichTrinhModel.php';
+require_once './controllers/AdminLichTrinhController.php';
 // --- NHÀ CUNG CẤP ---
 require_once './controllers/HdvQuanLyNhaCungCapController.php';
 require_once './models/HdvNhaCungCap.php';
@@ -50,8 +51,8 @@ match ($act) {
     // ===================================================
     'check-login-hdv'   => (new HdvTaiKhoanController())->login(),
     'logout-hdv'        => (new HdvTaiKhoanController())->logout(),
-    'signup-hdv'        => (new HdvTaiKhoanController())->formSignup(),
-    'post-signup-hdv'   => (new HdvTaiKhoanController())->postSignup(),
+    // 'signup-hdv'        => (new HdvTaiKhoanController())->formSignup(),
+    // 'post-signup-hdv'   => (new HdvTaiKhoanController())->postSignup(),
 
     // ===================================================
     // QUẢN LÝ TOUR
@@ -103,6 +104,8 @@ match ($act) {
     'quan-ly-booking'   => (new HdvBookingController())->danhSachBooking(),
     'add-booking'       => (new HdvBookingController())->addBooking(),
     'chi-tiet-booking'  => (new HdvBookingController())->chiTietBooking(),
+    'list-checkin-lich-trinh' => (new AdminLichTrinhController())->listCheckinLichTrinh(),
+    'process-checkin-lich-trinh' => (new AdminLichTrinhController())->processCheckinLichTrinh(),
 
     // Khách hàng trong Booking
     'manage-guests'     => (new HdvBookingController())->manageGuests(),

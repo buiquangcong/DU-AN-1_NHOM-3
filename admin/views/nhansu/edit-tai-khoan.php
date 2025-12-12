@@ -88,7 +88,7 @@
             </div>
 
             <button type="submit" class="btn btn-success">💾 Cập nhật</button>
-            <a href="?act=quan-ly-tai-khoan" class="btn btn-secondary">⬅ Quay lại</a>
+            <a href="?act=list  -tai-khoan" class="btn btn-secondary">⬅ Quay lại</a>
         </form>
     <?php else: ?>
         <p class="text-danger">Không tìm thấy dữ liệu tài khoản.</p>
