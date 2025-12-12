@@ -4,18 +4,18 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 class AdminQuanLyTourController
 {
-    public $modelTour;      
+    public $modelTour;
     public $modelDanhMuc;
-    public $modelNhaCungCap; 
+    public $modelNhaCungCap;
     public $modelDichVu;
     public $model;
-    
+
 
     public function __construct()
     {
-        $this->modelTour = new AdminQuanLyTour(); 
+        $this->modelTour = new AdminQuanLyTour();
         $this->modelDanhMuc = new AdminDanhMuc();
-        $this->modelNhaCungCap = new AdminNhaCungCap(); 
+        $this->modelNhaCungCap = new AdminNhaCungCap();
         $this->modelDichVu = new AdminDichVu();
         $this->model = new AdminBookingModel();
     }
@@ -34,7 +34,7 @@ class AdminQuanLyTourController
     }
 
 
-    public function formAddTour() 
+    public function formAddTour()
     {
         $listDanhmuc = $this->modelDanhMuc->getAllDanhMuc();
         require_once __DIR__ . '/../views/layout/header.php';
@@ -52,60 +52,77 @@ class AdminQuanLyTourController
             header('Location: index.php?act=list-tours');
             exit;
         }
-    $tourDetail = $this->modelTour->getTourById($tour_id);
-    $listItinerary = $this->modelTour->getItineraryByTourID($tour_id);
-    $linkedSuppliers = $this->modelNhaCungCap->getLinkedSuppliersByTour($tour_id);
+        $tourDetail = $this->modelTour->getTourById($tour_id);
+        $listItinerary = $this->modelTour->getItineraryByTourID($tour_id);
+        $linkedSuppliers = $this->modelNhaCungCap->getLinkedSuppliersByTour($tour_id);
 
-        
+
         if (!$tourDetail) {
             $_SESSION['error']['tour_not_found'] = "Không tìm thấy chi tiết tour này.";
             header('Location: index.php?act=list-tours');
             exit;
         }
 
-    // 4. LOAD VIEW
-    require_once __DIR__ . '/../views/layout/header.php';
-    // ✅ GỌI ĐÚNG TÊN FILE VIEW BẠN CUNG CẤP
-    require_once __DIR__ . '/../views/tour/detail-tour.php'; 
-    require_once __DIR__ . '/../views/layout/footer.php';
-} 
+        // 4. LOAD VIEW
+        require_once __DIR__ . '/../views/layout/header.php';
+        // ✅ GỌI ĐÚNG TÊN FILE VIEW BẠN CUNG CẤP
+        require_once __DIR__ . '/../views/tour/detail-tour.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
 
-public function historyTours()
-{
-    
-    $bookingModel = new AdminBookingModel();
-     $historyTours = $bookingModel->getAllHistory();
+    public function historyTours()
+    {
 
-    
-    
-     $historyTours = $bookingModel->getAllHistory();
-    require_once __DIR__ . '/../views/layout/header.php';
-    require_once __DIR__ . '/../views/tour/history-tours.php';
-    require_once __DIR__ . '/../views/layout/footer.php';
-}
- public function historyDetail() {
-        if (!isset($_GET['id'])) {
+        $bookingModel = new AdminBookingModel();
+        $historyTours = $bookingModel->getAllHistory();
+
+
+
+        $historyTours = $bookingModel->getAllHistory();
+        require_once __DIR__ . '/../views/layout/header.php';
+        require_once __DIR__ . '/../views/tour/history-tours.php';
+        require_once __DIR__ . '/../views/layout/footer.php';
+    }
+    public function historyDetail()
+    {
+        // 1. Lấy ID từ URL (Sửa lỗi biến $id chưa định nghĩa)
+        $id = $_GET['id'] ?? null;
+
+        if (!$id) {
             echo "Thiếu ID booking!";
+            return; // Hoặc chuyển hướng header('Location: ...');
+        }
+
+        // 2. Lấy thông tin chi tiết Booking trước (Sửa lỗi biến $booking chưa có dữ liệu)
+        // Sử dụng $this->model thay vì $bookingModel
+        $booking = $this->model->getHistoryBookingDetail($id);
+
+        if (!$booking) {
+            echo "Không tìm thấy thông tin booking!";
             return;
         }
-        $guests = $bookingModel->getGuestsByBookingID($id);
+
+        // 3. Lấy danh sách khách hàng
+        // Sửa lỗi: Dùng $this->model thay vì $bookingModel
+        $guests = $this->model->getGuestsByBookingID($id);
+
+        // 4. Lấy danh sách nhà cung cấp
         $suppliers = [];
         if (!empty($booking['ID_Tour'])) {
-            $suppliers = $bookingModel->getSuppliersByTour($booking['ID_Tour']);
+            $suppliers = $this->model->getSuppliersByTour($booking['ID_Tour']);
         }
 
-        
+        // 5. Load View
         require_once __DIR__ . '/../views/layout/header.php';
         include_once __DIR__ . '/../views/tour/history-detail.php';
         require_once __DIR__ . '/../views/layout/footer.php';
     }
 
 
-
-    public function postAddTour() 
+    public function postAddTour()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-          
+
             $ID_Tour = 'T-' . rand(1000, 9999);
 
             $TenTour        = trim($_POST['TenTour'] ?? '');
@@ -144,16 +161,16 @@ public function historyTours()
 
             if (empty($error)) {
 
-    
+
                 $upload_dir_fs = __DIR__ . '/../assets/uploads/';
                 $upload_dir_web = BASE_URL_ADMIN . '/assets/uploads/';
 
-                
+
                 $file_name = time() . '_' . basename($fileAnhBia['name']);
                 $target_file_fs = $upload_dir_fs . $file_name;
 
                 if (move_uploaded_file($fileAnhBia['tmp_name'], $target_file_fs)) {
-                    $anh_bia_url = $upload_dir_web . $file_name; 
+                    $anh_bia_url = $upload_dir_web . $file_name;
                 } else {
                     $error['Upload'] = "Lỗi khi di chuyển file.";
                     $_SESSION['error'] = $error;
@@ -171,7 +188,7 @@ public function historyTours()
                     $SoDem,
                     $NoiDungTomTat,
                     $NoiDungChiTiet,
-                    $NgayKhoiHanh, 
+                    $NgayKhoiHanh,
                     $SoCho,
                     $TrangThai,
                     $policy_id
@@ -203,10 +220,10 @@ public function historyTours()
         }
     }
 
-   
+
     public function formEditTour($id) // Đổi tên hàm
     {
-        
+
         $sanpham = $this->modelTour->getTourById($id);
         $listDanhmuc = $this->modelDanhMuc->getAllDanhMuc();
 
