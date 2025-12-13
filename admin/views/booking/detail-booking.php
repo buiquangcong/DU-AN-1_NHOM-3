@@ -1,16 +1,25 @@
 <?php
+// Mảng map ID dịch vụ sang tên hiển thị (Khớp với quy ước của bạn)
+$dsDichVu = [
+    1 => 'Khách sạn / Lưu trú',
+    2 => 'Nhà hàng / Ăn uống',
+    3 => 'Vận chuyển / Xe',
+    4 => 'Vé tham quan',
+    5 => 'Khác'
+];
+
 if (!$booking) {
     echo "<div class='alert alert-danger'>Không tìm thấy booking.</div>";
     return;
 }
 
-// --- 1. LOGIC TÍNH TOÁN ---
-// Lấy tiền cọc (Nếu database chưa có cột này thì mặc định là 0)
+// --- LOGIC TÍNH TOÁN ---
 $tien_coc = isset($booking['tien_coc']) ? $booking['tien_coc'] : 0;
 $tong_tien = isset($booking['TongTien']) ? $booking['TongTien'] : 0;
-
-// Tính tiền còn lại
 $con_lai = $tong_tien - $tien_coc;
+
+// Đảm bảo biến listNhaCungCap tồn tại (tránh lỗi nếu controller chưa gửi sang)
+$listNhaCungCap = isset($listNhaCungCap) ? $listNhaCungCap : [];
 ?>
 
 <div class="container mt-4">
@@ -59,12 +68,54 @@ $con_lai = $tong_tien - $tien_coc;
         </div>
     </div>
 
-    <h5 class="mt-4 text-secondary"><i class="bi bi-people-fill"></i> Danh sách khách trong đoàn</h5>
-    <div class="table-responsive shadow-sm">
-        <table class="table table-bordered table-hover">
+    <h5 class="mt-4 text-info"><i class="bi bi-building"></i> Danh sách Nhà Cung Cấp (Theo Tour)</h5>
+    <div class="table-responsive shadow-sm mb-4">
+        <table class="table table-bordered table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>STT</th>
+                    <th class="text-center" width="5%">STT</th>
+                    <th>Tên Nhà Cung Cấp</th>
+                    <th>Loại Dịch Vụ</th>
+                    <th>Liên hệ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($listNhaCungCap)): ?>
+                    <?php foreach ($listNhaCungCap as $key => $ncc): ?>
+                        <tr>
+                            <td class="text-center"><?= $key + 1 ?></td>
+                            <td class="fw-bold"><?= htmlspecialchars($ncc['ten_nha_cc']) ?></td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    <?php
+                                    $idDV = isset($ncc['ID_DichVu']) ? $ncc['ID_DichVu'] : 0;
+                                    echo isset($dsDichVu[$idDV]) ? $dsDichVu[$idDV] : 'Khác';
+                                    ?>
+                                </span>
+                            </td>
+                            <td>
+                                <div><i class="bi bi-telephone-fill text-muted"></i> <?= htmlspecialchars($ncc['so_dien_thoai']) ?></div>
+                                <div class="small text-muted"><?= htmlspecialchars($ncc['email']) ?></div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">
+                            <i class="bi bi-info-circle"></i> Tour này chưa liên kết với Nhà cung cấp nào.
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <h5 class="mt-4 text-secondary"><i class="bi bi-people-fill"></i> Danh sách khách trong đoàn</h5>
+    <div class="table-responsive shadow-sm mb-5">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-center" width="5%">STT</th>
                     <th>Họ Tên</th>
                     <th>Ngày sinh</th>
                     <th>Tuổi</th>
@@ -76,10 +127,12 @@ $con_lai = $tong_tien - $tien_coc;
                 <?php if (!empty($guests)): ?>
                     <?php foreach ($guests as $index => $g): ?>
                         <tr>
-                            <td><?= $index + 1 ?></td>
+                            <td class="text-center"><?= $index + 1 ?></td>
                             <td><?= htmlspecialchars($g['TenNguoiDi'] ?? '-') ?></td>
                             <td><?= $g['NgaySinh'] ? date('d/m/Y', strtotime($g['NgaySinh'])) : '-' ?></td>
-                            <td><?= $g['NgaySinh'] ? (new DateTime($g['NgaySinh']))->diff(new DateTime('today'))->y : '-' ?></td>
+                            <td>
+                                <?= $g['NgaySinh'] ? (new DateTime($g['NgaySinh']))->diff(new DateTime('today'))->y : '-' ?>
+                            </td>
                             <td><?= htmlspecialchars($g['GioiTinh'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($g['CCCD_Passport'] ?? '-') ?></td>
                         </tr>

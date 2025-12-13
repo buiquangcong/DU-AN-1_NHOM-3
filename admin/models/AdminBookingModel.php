@@ -1,37 +1,33 @@
 <?php
-// File: /admin/models/AdminBookingModel.php
-
 class AdminBookingModel
 {
     public $conn;
     public $modelBooking;
     public function __construct()
     {
-        $this->conn = connectDB(); // Giả định hàm connectDB()
-        // Đặt PDO error mode để dễ debug
+        $this->conn = connectDB();
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     // =========================================================================
-    // I. QUẢN LÝ BOOKING (CRUD & Helpers)
+    // I. BOOKING MANAGEMENT (CRUD & Helpers)
     // =========================================================================
 
     public function getAllBookings($keyword = null)
     {
         try {
-            // [CẬP NHẬT] Thêm hdv.ho_ten as TenHDV
             $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang, kh.Email,
-                       hdv.ho_ten as TenHDV 
-                  FROM booking b
-                  LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
-                  LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
-                  -- [MỚI] Join để lấy tên HDV dựa trên id_huong_dan_vien vừa thêm
-                  LEFT JOIN dm_tai_khoan hdv ON b.id_huong_dan_vien = hdv.ID_TaiKhoan";
+                           hdv.ho_ten as TenHDV 
+                      FROM booking b
+                      LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
+                      LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
+                      -- [NEW] Join to get guide name based on id_huong_dan_vien
+                      LEFT JOIN dm_tai_khoan hdv ON b.id_huong_dan_vien = hdv.ID_TaiKhoan";
 
             if ($keyword) {
                 $sql .= " WHERE kh.Email LIKE :keyword 
-                      OR b.ID_Booking LIKE :keyword 
-                      OR kh.TenKhachHang LIKE :keyword";
+                          OR b.ID_Booking LIKE :keyword 
+                          OR kh.TenKhachHang LIKE :keyword";
             }
 
             $sql .= " ORDER BY b.NgayDatTour DESC";
@@ -49,6 +45,7 @@ class AdminBookingModel
             return [];
         }
     }
+
     public function getBookingById($booking_id)
     {
         try {
@@ -86,10 +83,6 @@ class AdminBookingModel
         }
     }
 
-    /**
-     * Thêm booking mới (có Transaction)
-     * QUAN TRỌNG: Hàm này đã được sửa để trả về ID Booking
-     */
     public function addBookingSimple($data)
     {
         $customerID = null;
@@ -100,7 +93,6 @@ class AdminBookingModel
         $this->conn->beginTransaction();
 
         try {
-            // --- BƯỚC 1: TÌM KHÁCH HÀNG (GIỮ NGUYÊN) ---
             $stmt = $this->conn->prepare("SELECT ID_KhachHang FROM dm_khach_hang WHERE Email = :email");
             $stmt->execute([':email' => $data['Email']]);
             $customer = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -118,25 +110,23 @@ class AdminBookingModel
             }
 
             if (!$customerID || $customerID <= 0) {
-                throw new Exception("ID Khách hàng không xác định.");
+                throw new Exception("Customer ID could not be determined.");
             }
 
-            // --- BƯỚC 2: TÍNH TỔNG TIỀN (GIỮ NGUYÊN) ---
+            // --- STEP 2: CALCULATE TOTAL ---
             $tong_tien = $this->calculateTotal(
                 $data['TourID'],
                 $data['SoLuongNguoiLon'],
                 $data['SoLuongTreEm']
             );
 
-            // --- BƯỚC 3: THÊM BOOKING (CẬP NHẬT CÓ TIỀN CỌC) ---
-
-            // Lấy tiền cọc từ dữ liệu gửi sang (nếu ko có thì = 0)
+            // Get deposit amount (default to 0 if not provided)
             $tien_coc = isset($data['tien_coc']) ? $data['tien_coc'] : 0;
 
-            // Thêm cột tien_coc vào SQL
+            // --- STEP 3: INSERT BOOKING ---
             $sql_insert = "INSERT INTO booking (ID_Tour, ID_KhachHang, NgayDatTour, 
-                                          SoLuongNguoiLon, SoLuongTreEm, TongTien, tien_coc, TrangThai)
-                       VALUES (:TourID, :CID, :NgayDat, :NL, :TE, :Total, :TienCoc, :Status)";
+                                               SoLuongNguoiLon, SoLuongTreEm, TongTien, tien_coc, TrangThai)
+                           VALUES (:TourID, :CID, :NgayDat, :NL, :TE, :Total, :TienCoc, :Status)";
 
             $params = [
                 ':TourID'  => $data['TourID'],
@@ -145,14 +135,13 @@ class AdminBookingModel
                 ':NL'      => (int)$data['SoLuongNguoiLon'],
                 ':TE'      => (int)$data['SoLuongTreEm'],
                 ':Total'   => $tong_tien,
-                ':TienCoc' => $tien_coc, // Tham số mới
+                ':TienCoc' => $tien_coc,
                 ':Status'  => (int)$data['TrangThai'],
             ];
 
             $stmt = $this->conn->prepare($sql_insert);
             $stmt->execute($params);
 
-            // Lấy ID booking vừa tạo
             $newBookingId = $this->conn->lastInsertId();
 
             $this->conn->commit();
@@ -162,20 +151,12 @@ class AdminBookingModel
             if ($this->conn->inTransaction()) {
                 $this->conn->rollBack();
             }
-            // Ghi log lỗi nếu cần thiết
-            // error_log($e->getMessage());
             return false;
         }
     }
-
-    // =========================================================================
-    // II. QUẢN LÝ KHÁCH HÀNG CHI TIẾT (Guest CRUD)
-    // =========================================================================
-
     public function getGuestsByBookingID($booking_id)
     {
         try {
-            // Lưu ý: Tên bảng là chi_tiet_khach (như code bạn gửi)
             $sql = "SELECT * FROM chi_tiet_khach WHERE ID_Booking = :id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':id' => $booking_id]);
@@ -197,23 +178,20 @@ class AdminBookingModel
         }
     }
 
-   
     public function addGuest($data)
     {
         try {
-          
             $sql = "INSERT INTO chi_tiet_khach 
-                         (ID_Booking, TenNguoiDi, GioiTinh, NgaySinh, LienHe, CCCD_Passport, GhiChu)
-                      VALUES 
-                         (:ID_Booking, :TenNguoiDi, :GioiTinh, :NgaySinh, :LienHe, :CCCD_Passport, :GhiChu)";
+                          (ID_Booking, TenNguoiDi, GioiTinh, NgaySinh, LienHe, CCCD_Passport, GhiChu)
+                       VALUES 
+                          (:ID_Booking, :TenNguoiDi, :GioiTinh, :NgaySinh, :LienHe, :CCCD_Passport, :GhiChu)";
             $stmt = $this->conn->prepare($sql);
 
-           
             $ten = isset($data['TenNguoiDi']) ? $data['TenNguoiDi'] : (isset($data['HoTen']) ? $data['HoTen'] : '');
 
             $stmt->execute([
                 ':ID_Booking'    => $data['ID_Booking'],
-                ':TenNguoiDi'    => $ten, 
+                ':TenNguoiDi'    => $ten,
                 ':GioiTinh'      => $data['GioiTinh'],
                 ':NgaySinh'      => !empty($data['NgaySinh']) ? $data['NgaySinh'] : null,
                 ':LienHe'        => $data['LienHe'] ?? '',
@@ -222,16 +200,14 @@ class AdminBookingModel
             ]);
             return true;
         } catch (Exception $e) {
-            
-            echo "<div style='background: red; color: white; padding: 20px;'>Lỗi thêm khách: " . $e->getMessage() . "</div>";
+            echo "<div style='background: red; color: white; padding: 20px;'>Error adding guest: " . $e->getMessage() . "</div>";
             die();
-            
         }
     }
+
     public function updateGuest($guest_id, $data)
     {
         try {
-            
             $sql = "UPDATE chi_tiet_khach SET 
                         TenNguoiDi = :TenNguoiDi,
                         GioiTinh = :GioiTinh,
@@ -245,7 +221,7 @@ class AdminBookingModel
             $ten = isset($data['TenNguoiDi']) ? $data['TenNguoiDi'] : (isset($data['HoTen']) ? $data['HoTen'] : '');
 
             $stmt->execute([
-                ':TenNguoiDi'    => $ten, // SỬA: Map đúng vào cột TenNguoiDi
+                ':TenNguoiDi'    => $ten,
                 ':GioiTinh'      => $data['GioiTinh'],
                 ':NgaySinh'      => !empty($data['NgaySinh']) ? $data['NgaySinh'] : null,
                 ':LienHe'        => $data['LienHe'],
@@ -274,10 +250,9 @@ class AdminBookingModel
     public function updateCheckinStatus($guest_id, $status)
     {
         try {
-            // Lưu ý: Kiểm tra lại tên cột 'TrangThaiCheckin' trong bảng chi_tiet_khach của bạn có đúng không
             $sql = "UPDATE chi_tiet_khach 
-                         SET TrangThaiCheckin = :status 
-                         WHERE ID_ChiTiet = :guest_id";
+                          SET TrangThaiCheckin = :status 
+                          WHERE ID_ChiTiet = :guest_id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
                 ':status' => $status,
@@ -288,10 +263,6 @@ class AdminBookingModel
             return false;
         }
     }
-
-    // =========================================================================
-    // III. KHÁCH HÀNG & TOUR (Helpers cho Dropdown)
-    // =========================================================================
 
     public function getAllTours()
     {
@@ -316,6 +287,7 @@ class AdminBookingModel
             return [];
         }
     }
+
     public function getAllHistory()
     {
         try {
@@ -324,7 +296,7 @@ class AdminBookingModel
                 LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
                 LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
                 
-                WHERE b.TrangThai IN ( 3) 
+                WHERE b.TrangThai IN (1, 3) 
                 ORDER BY b.NgayDatTour DESC";
 
             $stmt = $this->conn->prepare($sql);
@@ -334,6 +306,7 @@ class AdminBookingModel
             return [];
         }
     }
+
     public function historyDetailModel($booking_id)
     {
         try {
@@ -352,7 +325,7 @@ class AdminBookingModel
             FROM booking b
             INNER JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
             LEFT JOIN ncc_tour_link ncc_link ON ncc_link.ID_Tour = t.ID_Tour
-            LEFT JOIN dm_nha_cung_cap ncc ON ncc.ID_Nha_CC = ncc_link.ID_Nha_CC
+            LEFT JOIN nha_cung_cap ncc ON ncc.ID_Nha_CC = ncc_link.ID_Nha_CC
             WHERE b.ID_Booking = :id
         ";
             $stmt = $this->conn->prepare($sql);
@@ -363,16 +336,14 @@ class AdminBookingModel
         }
     }
 
-
     public function deleteBooking($id)
     {
         try {
-            // 1. Xóa chi tiết khách trước
             $sqlDetail = "DELETE FROM chi_tiet_khach WHERE ID_Booking = :id";
             $stmtDetail = $this->conn->prepare($sqlDetail);
             $stmtDetail->execute([':id' => $id]);
 
-            // 2. Xóa Booking
+            // 2. Delete Booking
             $sql = "DELETE FROM booking WHERE ID_Booking = :id";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':id' => $id]);
@@ -383,13 +354,12 @@ class AdminBookingModel
         }
     }
 
-
     public function updateBooking($id, $data)
     {
         try {
             $this->conn->beginTransaction();
 
-            // 1. Cập nhật thông tin Khách hàng (Giữ nguyên)
+            // 1. Update Customer Info
             $stmt = $this->conn->prepare("SELECT ID_KhachHang FROM booking WHERE ID_Booking = :id");
             $stmt->execute([':id' => $id]);
             $booking = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -404,9 +374,7 @@ class AdminBookingModel
                 ]);
             }
 
-            // 2. Cập nhật Booking
-            // Lưu ý: Controller đã tính toán TongTien và gửi sang, ta dùng luôn cho chính xác
-
+            // 2. Update Booking
             $sql = "UPDATE booking SET 
                     ID_Tour = :tour_id,
                     NgayDatTour = :ngay_dat,
@@ -415,25 +383,20 @@ class AdminBookingModel
                     TongTien = :tong_tien,
                     TrangThai = :trang_thai,
                     id_huong_dan_vien = :id_hdv,
-                    tien_coc = :tien_coc            -- [MỚI] Thêm dòng cập nhật tiền cọc
+                    tien_coc = :tien_coc
                 WHERE ID_Booking = :id";
 
             $stmt = $this->conn->prepare($sql);
 
             $stmt->execute([
-                ':tour_id'    => $data['ID_Tour'],       // Khớp với key bên Controller
+                ':tour_id'    => $data['ID_Tour'],
                 ':ngay_dat'   => $data['NgayDatTour'],
                 ':sl_nl'      => $data['SoLuongNguoiLon'],
                 ':sl_te'      => $data['SoLuongTreEm'],
-
-                // Dùng số tiền Controller gửi sang (đã bao gồm tính toán lại giá mới nhất)
                 ':tong_tien'  => $data['TongTien'],
-
                 ':trang_thai' => $data['TrangThai'],
                 ':id_hdv'     => $data['id_huong_dan_vien'],
-
-                ':tien_coc'   => $data['tien_coc'],      // [MỚI] Map dữ liệu tiền cọc
-
+                ':tien_coc'   => $data['tien_coc'],
                 ':id'         => $id
             ]);
 
@@ -443,10 +406,10 @@ class AdminBookingModel
             if ($this->conn->inTransaction()) {
                 $this->conn->rollBack();
             }
-            // error_log($e->getMessage()); // Mở ra nếu cần xem lỗi log
             return false;
         }
     }
+
     public function load_all_hdv()
     {
         try {
@@ -473,60 +436,69 @@ class AdminBookingModel
             return false;
         }
     }
-    public function getHistoryBookingDetail($id)
+
+
+    public function getSuppliersByTour($tour_id)
     {
         try {
-            $sql = "SELECT b.*, t.TenTour, kh.TenKhachHang, kh.Email
-                FROM booking b
-                LEFT JOIN dm_tours t ON b.ID_Tour = t.ID_Tour
-                LEFT JOIN dm_khach_hang kh ON b.ID_KhachHang = kh.ID_KhachHang
-                WHERE b.ID_Booking = :id";
+            $sql = "SELECT ncc.*, link.ID_DichVu 
+                FROM nha_cung_cap ncc
+                INNER JOIN tour_nha_cung_cap link ON ncc.id_nha_cc = link.nha_cc_id 
+                WHERE link.tour_id = :id1";
 
             $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':id' => $id]);
-            return $stmt->fetch(PDO::FETCH_ASSOC); // Trả về 1 dòng
+            $stmt->execute([':id1' => $tour_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    public function getAllSuppliers()
+    {
+        try {
+            $sql = "SELECT * FROM nha_cung_cap ORDER BY ten_nha_cc ASC";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    public function addTourSupplier($tour_id, $ncc_id, $dich_vu_id)
+    {
+        try {
+            // Check for duplicates
+            $checkSql = "SELECT COUNT(*) FROM tour_nha_cung_cap 
+                         WHERE tour_id = :tour_id AND nha_cc_id = :ncc_id";
+
+            $stmtCheck = $this->conn->prepare($checkSql);
+            $stmtCheck->execute([':tour_id' => $tour_id, ':ncc_id' => $ncc_id]);
+
+            if ($stmtCheck->fetchColumn() > 0) {
+                return true;
+            }
+
+            $sql = "INSERT INTO tour_nha_cung_cap (tour_id, nha_cc_id, ID_DichVu) 
+                    VALUES (:tour_id, :ncc_id, :dich_vu)";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([
+                ':tour_id' => $tour_id,
+                ':ncc_id'  => $ncc_id,
+                ':dich_vu' => $dich_vu_id // Insert the ID (integer)
+            ]);
+            return true;
         } catch (Exception $e) {
             return false;
         }
     }
 
-    // 2. Hàm lấy danh sách khách
-  
 
-    public function getSuppliersByTour($tour_id)
-    {
-        try {
-            // Cách 1: Thử tìm trực tiếp (Nếu tour_id trong booking khớp với bảng liên kết)
-            $sql = "SELECT ncc.* FROM dm_nha_cung_cap ncc
-                INNER JOIN tour_nha_cung_cap link ON ncc.id_nha_cc = link.nha_cc_id
-                WHERE link.tour_id = :id1";
-
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':id1' => $tour_id]);
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // Nếu Cách 1 không ra kết quả -> Thử Cách 2: JOIN qua bảng dm_tours
-            // (Dành cho trường hợp Booking lưu số (5), nhưng Link lưu chữ (T-002))
-            if (empty($result)) {
-                $sql2 = "SELECT ncc.* FROM nha_cung_cap ncc
-                     INNER JOIN tour_nha_cung_cap link ON ncc.id_nha_cc = link.nha_cc_id
-                     INNER JOIN dm_tours t ON link.tour_id = t.MaTour -- Giả sử cột mã là MaTour
-                     WHERE t.ID_Tour = :id2";
-
-                $stmt2 = $this->conn->prepare($sql2);
-                $stmt2->execute([':id2' => $tour_id]);
-                $result = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-            }
-
-            return $result;
-        } catch (Exception $e) {
-            return [];
-        }
-    }
     public function getPaymentHistory($booking_id)
     {
         try {
-            // Sắp xếp giảm dần để giao dịch mới nhất hiện lên đầu
             $sql = "SELECT * FROM lich_su_thanh_toan 
                     WHERE id_booking = :id 
                     ORDER BY ngay_thanh_toan DESC";
@@ -564,10 +536,11 @@ class AdminBookingModel
             return false;
         }
     }
+
     public function updateBookingDeposit($booking_id)
     {
         try {
-            // 1. Tính tổng tiền đã đóng trong bảng lịch sử
+            // 1. Calculate total paid amount
             $sqlSum = "SELECT SUM(so_tien) as tong_da_dong 
                        FROM lich_su_thanh_toan 
                        WHERE id_booking = :id";
@@ -575,10 +548,10 @@ class AdminBookingModel
             $stmtSum->execute([':id' => $booking_id]);
             $result = $stmtSum->fetch(PDO::FETCH_ASSOC);
 
-            // Nếu không có lịch sử nào thì tổng = 0
+            // If no history, total is 0
             $tong_tien = $result['tong_da_dong'] ?? 0;
 
-            // 2. Cập nhật số tổng này vào cột tien_coc của bảng booking
+            // 2. Update this total into the tien_coc column of the booking table
             $sqlUpdate = "UPDATE booking SET tien_coc = :tien_coc WHERE ID_Booking = :id";
             $stmtUpdate = $this->conn->prepare($sqlUpdate);
             $stmtUpdate->execute([

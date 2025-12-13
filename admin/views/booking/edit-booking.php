@@ -1,9 +1,35 @@
+<?php
+$dsDichVu = [
+    1 => 'Khách sạn / Lưu trú',
+    2 => 'Nhà hàng / Ăn uống',
+    3 => 'Vận chuyển / Xe',
+    4 => 'Vé tham quan',
+    5 => 'Khác'
+];
+?>
+
 <div class="container mt-4">
     <div class="mb-3">
         <a href="?act=quan-ly-booking" class="btn btn-secondary">&larr; Quay lại danh sách</a>
     </div>
 
     <h2 class="mb-4 text-center">Cập nhật Booking #<?= htmlspecialchars($booking['ID_Booking']) ?></h2>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= $_SESSION['success'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= $_SESSION['error'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
 
     <?php
     $lichSuThanhToan = isset($lichSuThanhToan) ? $lichSuThanhToan : [];
@@ -169,10 +195,11 @@
                                                 </td>
                                                 <td>
                                                     <?php if (!empty($pay['anh_chung_tu'])): ?>
-                                                        <a href="uploads/chung_tu/<?= $pay['anh_chung_tu'] ?>" target="_blank">
-                                                            <img src="uploads/chung_tu/<?= $pay['anh_chung_tu'] ?>" alt="Bill"
-                                                                class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
-                                                        </a>
+                                                        <img src="uploads/chung_tu/<?= $pay['anh_chung_tu'] ?>"
+                                                            alt="Bill"
+                                                            class="img-thumbnail"
+                                                            style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
+                                                            onclick="xemAnhLon('uploads/chung_tu/<?= $pay['anh_chung_tu'] ?>')">
                                                     <?php else: ?>
                                                         <span class="text-muted small">---</span>
                                                     <?php endif; ?>
@@ -183,6 +210,58 @@
                                     <?php else: ?>
                                         <tr>
                                             <td colspan="6" class="text-muted py-3">Chưa có lịch sử giao dịch nào.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-white mb-4 border shadow-sm">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-building"></i> Nhà Cung Cấp Dịch Vụ (Theo Tour)</h5>
+
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalLinkNCC">
+                            <i class="bi bi-link-45deg"></i> Liên kết NCC mới
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered mb-0 text-center align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Tên Nhà Cung Cấp</th>
+                                        <th>Loại Dịch Vụ</th>
+                                        <th>Liên hệ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (!empty($listNhaCungCap)): ?>
+                                        <?php foreach ($listNhaCungCap as $key => $ncc): ?>
+                                            <tr>
+                                                <td><?= $key + 1 ?></td>
+                                                <td class="text-start fw-bold"><?= htmlspecialchars($ncc['ten_nha_cc']) ?></td>
+                                                <td>
+                                                    <span class="badge bg-secondary">
+                                                        <?php
+                                                        $idDV = isset($ncc['ID_DichVu']) ? $ncc['ID_DichVu'] : 0;
+                                                        echo isset($dsDichVu[$idDV]) ? $dsDichVu[$idDV] : 'Chưa rõ (' . $idDV . ')';
+                                                        ?>
+                                                    </span>
+                                                </td>
+                                                <td class="text-start small">
+                                                    <div><i class="bi bi-telephone"></i> <?= htmlspecialchars($ncc['so_dien_thoai']) ?></div>
+                                                    <div><i class="bi bi-envelope"></i> <?= htmlspecialchars($ncc['email']) ?></div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="4" class="text-muted py-3">
+                                                <i class="bi bi-info-circle"></i> Tour này chưa liên kết với Nhà cung cấp nào.
+                                            </td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -253,11 +332,72 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalLinkNCC" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="?act=them-ncc-tour" method="POST">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Liên kết Nhà Cung Cấp vào Tour</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id_booking" value="<?= $booking['ID_Booking'] ?>">
+                    <input type="hidden" name="id_tour" value="<?= $booking['ID_Tour'] ?>">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Chọn Nhà Cung Cấp <span class="text-danger">*</span></label>
+                        <select class="form-select" name="id_ncc" required>
+                            <option value="">-- Chọn danh sách --</option>
+                            <?php if (isset($allNhaCungCap) && is_array($allNhaCungCap)): ?>
+                                <?php foreach ($allNhaCungCap as $ncc): ?>
+                                    <option value="<?= $ncc['id_nha_cc'] ?>">
+                                        <?= htmlspecialchars($ncc['ten_nha_cc']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Loại dịch vụ cung cấp</label>
+                        <select class="form-select" name="loai_dich_vu">
+                            <option value="1">Khách sạn / Lưu trú</option>
+                            <option value="2">Nhà hàng / Ăn uống</option>
+                            <option value="3">Vận chuyển / Xe</option>
+                            <option value="4">Vé tham quan</option>
+                            <option value="5">Khác</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-info text-white">Xác nhận liên kết</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalXemAnh" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img src="" id="anh_phong_to" class="img-fluid rounded shadow-lg">
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    // 1. Hàm định dạng tiền tệ
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN').format(amount);
     };
 
+    // 2. Hàm tính tiền còn lại
     function tinhTienConLai() {
         const tongTien = parseFloat(document.getElementById('tong_tien_goc').value) || 0;
         const daThanhToan = parseFloat(document.getElementById('tien_coc').value) || 0;
@@ -277,6 +417,13 @@
             inputConLai.classList.add('text-danger');
             inputConLai.classList.remove('text-success');
         }
+    }
+
+    // 3. Hàm xem ảnh lớn
+    function xemAnhLon(duongDanAnh) {
+        document.getElementById('anh_phong_to').src = duongDanAnh;
+        var myModal = new bootstrap.Modal(document.getElementById('modalXemAnh'));
+        myModal.show();
     }
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -95,7 +95,7 @@ match ($act) {
 
     // ... (Các route tour của bạn)
     'unlink-supplier' => (new AdminQuanLyTourController())->unlinkSupplier(),
-
+    'them-ncc-tour'   => (new AdminBookingController())->processLinkSupplier(),
 
     'quan-ly-booking' => (new AdminBookingController())->danhSachBooking(),
     'manage-guests'   => (new AdminBookingController())->manageGuests(),

@@ -1,5 +1,5 @@
 <?php
-// File: /admin/controllers/AdminBookingController.php
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
@@ -53,10 +53,6 @@ class AdminBookingController
         header('Location: ?act=quan-ly-booking');
         exit;
     }
-
-    // =========================================================================
-    // [CẬP NHẬT] Hàm Edit Booking: Thêm lấy lịch sử thanh toán
-    // =========================================================================
     public function editBooking()
     {
         $id = $_GET['id'] ?? null;
@@ -64,36 +60,28 @@ class AdminBookingController
             header('Location: ?act=quan-ly-booking');
             exit;
         }
-
-        // 1. Lấy dữ liệu cũ để hiển thị
         $booking = $this->modelBooking->getBookingById($id);
         $tours = $this->modelBooking->getAllTours();
         $listHDV = $this->modelBooking->load_all_hdv();
 
-        // [MỚI] Lấy danh sách lịch sử thanh toán để hiển thị ra bảng
-        // Hàm này đã được thêm vào Model ở bước trước
         $lichSuThanhToan = $this->modelBooking->getPaymentHistory($id);
+        $listNhaCungCap = $this->modelBooking->getSuppliersByTour($booking['ID_Tour']);
+        $allNhaCungCap = $this->modelBooking->getAllSuppliers();
 
         if (!$booking) {
             $_SESSION['error'] = "Không tìm thấy Booking này.";
             header('Location: ?act=quan-ly-booking');
             exit;
         }
-
-        // 2. Xử lý khi bấm nút "Cập nhật" (Form chính)
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // [LOGIC CŨ GIỮ NGUYÊN]
 
-            // Lấy tiền cọc (lúc này ô input là readonly nhưng vẫn gửi value đi)
             $tien_coc = isset($_POST['tien_coc']) ? $_POST['tien_coc'] : 0;
-            // Xóa dấu phẩy nếu có (vì format number view hiển thị 1,000,000)
             $tien_coc = str_replace([',', '.'], '', $tien_coc);
 
             $tourID = $_POST['tour_id'];
             $slNL = (int)$_POST['so_luong_nl'];
             $slTE = (int)$_POST['so_luong_te'];
 
-            // Tính lại tổng tiền
             $giaNL = 0;
             $giaTE = 0;
             foreach ($tours as $t) {
@@ -120,7 +108,8 @@ class AdminBookingController
 
             if ($this->modelBooking->updateBooking($id, $data)) {
                 $_SESSION['success'] = "Cập nhật Booking #$id thành công!";
-                header("Location: ?act=quan-ly-booking"); // Quay về danh sách hoặc ở lại trang edit tùy bạn
+                // Chuyển hướng ra danh sách
+                header("Location: ?act=quan-ly-booking");
                 exit;
             } else {
                 $errors[] = "Lỗi khi cập nhật.";
@@ -132,10 +121,27 @@ class AdminBookingController
         require_once __DIR__ . '/../views/booking/edit-booking.php';
         require_once __DIR__ . '/../views/layout/footer.php';
     }
+    public function processLinkSupplier()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id_booking = $_POST['id_booking'];
+            $id_tour = $_POST['id_tour'];
+            $id_ncc = $_POST['id_ncc'];
+            $dich_vu_id = $_POST['loai_dich_vu'];
 
-    // =========================================================================
-    // [MỚI HOÀN TOÀN] Xử lý thêm thanh toán từ Modal (?act=them-thanh-toan)
-    // =========================================================================
+            // Gọi Model với tham số chuẩn (tour, ncc, id_dich_vu)
+            if ($this->modelBooking->addTourSupplier($id_tour, $id_ncc, $dich_vu_id)) {
+                $_SESSION['success'] = "Đã liên kết nhà cung cấp thành công!";
+            } else {
+                $_SESSION['error'] = "Liên kết thất bại hoặc Nhà cung cấp này đã có trong danh sách.";
+            }
+
+            // Quay lại trang Edit Booking
+            header("Location: ?act=edit-booking&id=" . $id_booking);
+            exit;
+        }
+    }
+
     public function processAddPayment()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -143,19 +149,14 @@ class AdminBookingController
 
             $anh_chung_tu = null;
             if (isset($_FILES['anh_chung_tu']) && $_FILES['anh_chung_tu']['error'] == 0) {
-
                 $target_dir = "uploads/chung_tu/";
-
-
                 if (!file_exists($target_dir)) {
                     mkdir($target_dir, 0777, true);
                 }
-
                 $file_extension = pathinfo($_FILES["anh_chung_tu"]["name"], PATHINFO_EXTENSION);
                 $file_name = time() . '_' . uniqid() . '.' . $file_extension;
                 $target_file = $target_dir . $file_name;
 
-                // Di chuyển file
                 if (move_uploaded_file($_FILES["anh_chung_tu"]["tmp_name"], $target_file)) {
                     $anh_chung_tu = $file_name;
                 }
@@ -170,9 +171,7 @@ class AdminBookingController
             ];
 
             if ($this->modelBooking->addPayment($data)) {
-
                 $this->modelBooking->updateBookingDeposit($id_booking);
-
                 $_SESSION['success'] = "Đã thêm giao dịch thanh toán thành công!";
             } else {
                 $_SESSION['error'] = "Lỗi khi thêm giao dịch.";
@@ -328,7 +327,9 @@ class AdminBookingController
     {
         $id = $_GET['id'] ?? 0;
         $booking = $this->modelBooking->getBookingById($id);
-        $guests  = $this->modelBooking->getGuestsByBookingId($id);
+        $guests  = $this->modelBooking->getGuestsByBookingID($id);
+
+        $listNhaCungCap = $this->modelBooking->getSuppliersByTour($booking['ID_Tour']);
 
         require_once __DIR__ . '/../views/layout/header.php';
         require_once __DIR__ . '/../views/booking/detail-booking.php';
@@ -396,8 +397,7 @@ class AdminBookingController
 
                     // Xử lý Excel nếu có
                     if (isset($_FILES['guest_file']) && $_FILES['guest_file']['error'] == 0) {
-                        // (Giữ nguyên logic import excel của bạn)
-                        // ... Code import excel ...
+                        // (Import Excel logic nếu cần)
                     }
 
                     // Xử lý nhập tay mảng guests
